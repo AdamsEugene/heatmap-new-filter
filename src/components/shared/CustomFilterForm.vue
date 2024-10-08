@@ -22,7 +22,7 @@ import { _data } from "../../data";
 type DEF = "main" | "value" | "action" | "condition";
 type SELECTED_ITEMS = { item: DataItem | string; kind: DEF; index: number };
 
-const copyOfInitialNewFilter: CustomValues = { ...initialNewFilter };
+const copyOfInitialNewFilter: FilterItem = { ...initialNewFilter };
 
 const newFilter = ref({ ...copyOfInitialNewFilter });
 
@@ -43,6 +43,7 @@ const customData = ref<FilterItem>();
 const filterName = ref<string>("");
 
 const nameIs = (name: string) => name === props.selectedItem.name;
+const isString = (item: any) => typeof item === "string";
 
 const dataWithConvertedOptions = convertOptionToArray(
   addOptionsToData() as DataItem[]
@@ -98,47 +99,72 @@ const loadInitialData = async (filter?: CustomValues) => {
     else filter.options = undefined;
   }
 
-  filter.conditions = (options as any)[option || ""] || [];
+  filter.conditions = Object.values((options as any)[option || ""]) || [];
   emit("on-loading", false);
 };
 
 const onSelected = async (item: SELECTED_ITEMS) => {
   console.log("onSelected: ", item.item);
   if (item.kind === "action" && typeof item.item !== "string") {
-    newFilter.value.action = item.item.name;
-    newFilter.value.segment = item.item.segment || "";
-    newFilter.value.name = item.item.name;
+    let _options: string[] | undefined = undefined;
 
-    // props.selectedItem.data = [];
-    console.log(props.selectedItem.data?.find((filter) => filter));
-    console.log(item.index);
+    if (newFilter.value.data) {
+      newFilter.value.data[item.index].action = item.item.name;
+      newFilter.value.data[item.index].segment = item.item.segment || "";
+      newFilter.value.data[item.index].name = item.item.name;
+    }
+
+    // console.log(props.selectedItem.data[item.index]);
+    setValues(item.index, item.item.conditions, item.item.options);
 
     if (!item.item.options || item.item.options?.length === 0) {
       emit("on-loading", true);
-      console.log("called");
-
       const res = await dynamicallyFetchOptions(
         (item.item as DataItem).segment!
       );
-      if (res && res.length) item.item.options = getUniqueArray(res);
-      else item.item.options = undefined;
+      if (res && res.length) _options = getUniqueArray(res);
+      else _options = undefined;
+
+      setValues(item.index, item.item.conditions, _options);
       emit("on-loading", false);
     }
   }
 
-  if (item.kind === "condition" && typeof item.item === "string")
-    newFilter.value.default = item.item;
+  if (
+    item.kind === "condition" &&
+    isString(item.item) &&
+    props.selectedItem.data
+  ) {
+    props.selectedItem.data[item.index].default = item.item;
+    if (newFilter.value.data) {
+      newFilter.value.data[item.index].default = item.item;
+    }
+  }
 
-  if (item.kind === "value" && typeof item.item === "string")
-    newFilter.value.value = item.item;
+  if (item.kind === "value" && isString(item.item) && props.selectedItem.data) {
+    props.selectedItem.data[item.index].value = item.item;
+    if (newFilter.value.data) {
+      newFilter.value.data[item.index].value = item.item;
+    }
+  }
 
-  emit("on-custom-filter-change", {
-    title: filterName.value,
-    ...newFilter.value,
-  });
-  console.log("onSelected: ", item.item);
+  emit("on-custom-filter-change", { ...newFilter.value });
 
-  // console.log(newFilter);
+  console.log(newFilter.value);
+  // console.log(props.selectedItem.data);
+};
+
+const setValues = (
+  index: number,
+  conditions?: string[],
+  options?: string[]
+) => {
+  if (typeof index === "number" && props.selectedItem.data) {
+    props.selectedItem.data[index].conditions = conditions;
+    props.selectedItem.data[index].options = options;
+    props.selectedItem.data[index].default = "";
+    props.selectedItem.data[index].value = "";
+  }
 };
 
 onMounted(() => {
@@ -151,6 +177,8 @@ onMounted(() => {
 watch(
   () => props.selectedItem,
   () => {
+    // console.log(props.selectedItem);
+
     setCustomData();
     filterName.value = customData.value?.title || "";
     filterName.value = nameIs("Create Custom Filter")
@@ -177,7 +205,7 @@ watch(filterName, async (newName) => {
   await nextTick();
   props.selectedItem.name !== newName &&
     newName &&
-    emit("on-custom-filter-change", { title: newName, ...newFilter.value });
+    emit("on-custom-filter-change", { ...newFilter.value, title: newName });
 });
 </script>
 
@@ -195,7 +223,7 @@ watch(filterName, async (newName) => {
       />
     </div>
     <div
-      v-for="filter in selectedItem?.data"
+      v-for="(filter, index) in selectedItem?.data"
       :key="filter.name"
       class="custom_filter"
     >
@@ -209,7 +237,7 @@ watch(filterName, async (newName) => {
         :for-custom="true"
         :initial-value="filter?.action"
         :clear-fields="clearFields"
-        @on-selected="onSelected"
+        @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
         :items="filter?.conditions"
@@ -220,7 +248,7 @@ watch(filterName, async (newName) => {
         :input-type="'text'"
         :initial-value="filter?.default"
         :clear-fields="clearFields"
-        @on-selected="onSelected"
+        @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
         :items="filter?.options"
@@ -230,7 +258,7 @@ watch(filterName, async (newName) => {
         :definition="'value'"
         :initial-value="filter?.value"
         :clear-fields="clearFields"
-        @on-selected="onSelected"
+        @on-selected="(item) => onSelected({ ...item, index })"
       />
     </div>
   </div>

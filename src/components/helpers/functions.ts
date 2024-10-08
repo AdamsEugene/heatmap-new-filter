@@ -1,6 +1,7 @@
 import {
   CustomValues,
   DataItem,
+  FilterItem,
   GroupedData,
   SessionDataItem,
 } from "../../@types";
@@ -171,10 +172,9 @@ export const getUniqueArray = (browsers: string[]): string[] =>
 
 export const isArrayValid = (arr: string[]) => !arr.some((item) => item === "");
 
-export const initialNewFilter: CustomValues = {
-  action: "",
-  default: "",
-  name: "",
-  segment: "",
-  value: "",
+export const initialNewFilter: FilterItem = {
+  id: "",
+  title: "",
+  definition: "",
+  data: [{ action: "", default: "", name: "", segment: "", value: "" }],
 };
