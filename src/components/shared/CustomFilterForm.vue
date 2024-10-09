@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch, computed } from "vue";
+import AddFilterButton from "./AddFilterButton.vue";
 
 import Dropdown from "./Dropdown.vue";
 import {
@@ -11,6 +12,7 @@ import {
 import {
   addOptionsToData,
   convertOptionToArray,
+  generateSegmentString,
   getUniqueArray,
   groupDataByCategory,
   initialNewFilter,
@@ -99,7 +101,7 @@ const loadInitialData = async (filter?: CustomValues) => {
     else filter.options = undefined;
   }
 
-  filter.conditions = Object.values((options as any)[option || ""]) || [];
+  filter.conditions = Object.values((options as any)[option || ""] || {}) || [];
   emit("on-loading", false);
 };
 
@@ -138,6 +140,8 @@ const onSelected = async (item: SELECTED_ITEMS) => {
     props.selectedItem.data[item.index].default = item.item;
     if (newFilter.value.data) {
       newFilter.value.data[item.index].default = item.item;
+      props.selectedItem.data[item.index].value = "";
+      newFilter.value.definition = generateSegmentString(newFilter.value.data);
     }
   }
 
@@ -145,6 +149,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
     props.selectedItem.data[item.index].value = item.item;
     if (newFilter.value.data) {
       newFilter.value.data[item.index].value = item.item;
+      newFilter.value.definition = generateSegmentString(newFilter.value.data);
     }
   }
 
@@ -169,6 +174,7 @@ const setValues = (
 
 onMounted(() => {
   setCustomData();
+  newFilter.value = props.selectedItem;
   props.selectedItem.data?.forEach((data) => {
     loadInitialData(data);
   });
@@ -177,15 +183,13 @@ onMounted(() => {
 watch(
   () => props.selectedItem,
   () => {
-    // console.log(props.selectedItem);
-
     setCustomData();
     filterName.value = customData.value?.title || "";
     filterName.value = nameIs("Create Custom Filter")
       ? ""
       : customData.value?.title || "";
     newFilter.value = copyOfInitialNewFilter;
-
+    newFilter.value = props.selectedItem;
     props.selectedItem.data?.forEach((data) => {
       loadInitialData(data);
     });
@@ -261,6 +265,14 @@ watch(filterName, async (newName) => {
         @on-selected="(item) => onSelected({ ...item, index })"
       />
     </div>
+  </div>
+  <div class="center_me">
+    <add-filter-button
+      v-show="nameIs('Create Custom Filter')"
+      :label="'Add Additional Filter'"
+      :with-border="true"
+      :onclick="() => {}"
+    />
   </div>
   <!-- <div class="flex_sb">
     <div

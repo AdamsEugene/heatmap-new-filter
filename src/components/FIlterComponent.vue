@@ -12,9 +12,12 @@ import { CombinedFilter, FilterList, SessionDataItem } from "../@types";
 import { loadCustomFilters } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
+import { initialNewFilter } from "./helpers/functions";
 
 const loading = ref<boolean>(false);
 const reset = ref<boolean>(false);
+
+const data = { ...initialNewFilter };
 
 const selectedItem = ref<SessionDataItem>(sessionData[0]);
 // const updatedSelectedItem = ref<SessionDataItem>();
@@ -27,6 +30,7 @@ const customData = ref<SessionDataItem>({
   idsegment: 1,
   name: "Create Custom Filter",
   title: "Create Custom Filter",
+  data: data.data,
 });
 
 const readyToCompare = computed(() => pendingList.value.length);

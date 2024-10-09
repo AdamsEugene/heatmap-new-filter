@@ -25,7 +25,7 @@ import {
   conditions,
   replaceAfterSymbols,
   isArrayValid,
-  initialNewFilter,
+  // initialNewFilter,
 } from "./helpers/functions";
 
 const props = defineProps<{
@@ -34,7 +34,7 @@ const props = defineProps<{
   reset: boolean;
 }>();
 
-const copyOfInitialNewFilter: CustomValues = { ...initialNewFilter };
+// const copyOfInitialNewFilter: FilterItem = { ...initialNewFilter };
 
 const emit = defineEmits([
   "on-loading",
@@ -56,7 +56,6 @@ const canAdd = ref(false);
 const selectionError = ref(false);
 
 const listForValues = ref<string[]>();
-const activeCustomFilter = ref<CustomValues>();
 const listOfSelectedItems = ref<string[]>([]);
 
 let selected: SessionDataItem = { ...props.selectedItem };
@@ -217,14 +216,10 @@ const handleAddNewFilter = () => {
   }
 
   if (!nameIs("Create Custom Filter")) {
-    activeCustomFilter.value = copyOfInitialNewFilter;
   }
 };
 
-const onClearCurrentCustomFilter = () => {
-  if (nameIs("Create Custom Filter")) activeCustomFilter.value = undefined;
-  else activeCustomFilter.value = copyOfInitialNewFilter;
-};
+const onClearCurrentCustomFilter = () => {};
 
 const onOnCustomFilterChange = (
   newFilter: CustomValues & { title: string }
@@ -270,10 +265,7 @@ watch(
     if (props.selectedItem.data) {
       awaitedFilters.value.data =
         props.selectedItem.data?.map((item) => item) || [];
-
-      activeCustomFilter.value = awaitedFilters.value?.data?.[0];
     } else {
-      activeCustomFilter.value = undefined;
       awaitedFilters.value.data = [];
     }
     if (nameIs("Average Order Value"))
@@ -300,9 +292,10 @@ watch(
         </p>
       </div>
       <add-filter-button
-        v-show="nameIs('Create Custom Filter') || selectedItem.data"
-        :label="'Add Additional Filter'"
+        v-show="!nameIs('Create Custom Filter') && selectedItem.data"
+        :label="'Edit'"
         :onclick="handleAddNewFilter"
+        :no-icon="true"
       />
     </div>
     <!-- <div v-if="(awaitedFilters?.data?.length || 0) >= 1" class="flex_8">
@@ -324,12 +317,11 @@ watch(
       </div>
     </div> -->
     <div
-      v-if="nameIs('Create Custom Filter') || activeCustomFilter"
+      v-if="nameIs('Create Custom Filter') || selectedItem.data"
       class="filter-body_right"
     >
       <Custom-filter-form
         :selectedItem="selectedItem"
-        :active-custom-filter="activeCustomFilter"
         :save-custom-filter="saveCustomFilter"
         :clear-fields="clearFields"
         @on-loading="onLoading"

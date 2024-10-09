@@ -178,3 +178,12 @@ export const initialNewFilter: FilterItem = {
   definition: "",
   data: [{ action: "", default: "", name: "", segment: "", value: "" }],
 };
+
+export const generateSegmentString = (data: CustomValues[]): string => {
+  return data
+    .map(
+      (item) =>
+        `${item.segment}${(conditions as any)[item.default]}${item.value}`
+    )
+    .join(";");
+};
