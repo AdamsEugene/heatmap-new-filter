@@ -172,32 +172,34 @@ watch(selectedItem, () => {
         <loading-spinner v-if="loading" />
       </div>
       <div class="filter-body">
-        <div v-if="!canEdit" class="filter-body_left">
-          <sidebar-items
-            :data="sessionData"
-            :selected-item="selectedItem"
-            :handle-sidebar-item-click="handleSidebarItemClick"
-            :disabled="pendingList.length === 2"
-            :active-classes="activeClasses"
-          />
-          <sidebar-items
-            :data="eCommerceData"
-            :title="'Ecommerce Data'"
-            :selected-item="selectedItem"
-            :handle-sidebar-item-click="handleSidebarItemClick"
-            :disabled="pendingList.length === 2"
-            :active-classes="activeClasses"
-          />
-          <sidebar-items
-            :data="customFilters"
-            :title="'Custom Filters'"
-            :selected-item="selectedItem"
-            :handle-sidebar-item-click="handleSidebarItemClick"
-            :disabled="pendingList.length === 2"
-            :active-classes="activeClasses"
-          />
-          <add-filter-button :onclick="createCustomFilter" />
-        </div>
+        <transition name="slide-left-right">
+          <div v-show="!canEdit" class="filter-body_left">
+            <sidebar-items
+              :data="sessionData"
+              :selected-item="selectedItem"
+              :handle-sidebar-item-click="handleSidebarItemClick"
+              :disabled="pendingList.length === 2"
+              :active-classes="activeClasses"
+            />
+            <sidebar-items
+              :data="eCommerceData"
+              :title="'Ecommerce Data'"
+              :selected-item="selectedItem"
+              :handle-sidebar-item-click="handleSidebarItemClick"
+              :disabled="pendingList.length === 2"
+              :active-classes="activeClasses"
+            />
+            <sidebar-items
+              :data="customFilters"
+              :title="'Custom Filters'"
+              :selected-item="selectedItem"
+              :handle-sidebar-item-click="handleSidebarItemClick"
+              :disabled="pendingList.length === 2"
+              :active-classes="activeClasses"
+            />
+            <add-filter-button :onclick="createCustomFilter" />
+          </div>
+        </transition>
         <filter-details
           :selected-item="selectedItem"
           :items-in-pending="pendingList.length"
@@ -272,5 +274,20 @@ watch(selectedItem, () => {
   background-color: #f1f2f3;
   border: 1px solid #f1f2f3;
   transition: all 0.3s ease-in-out;
+}
+
+.slide-left-right-enter-active,
+.slide-left-right-leave-active {
+  transition: transform 0s ease-in-out;
+}
+
+.slide-left-right-enter {
+  transform: translateX(100%);
+  opacity: 1;
+}
+
+.slide-left-right-leave-to {
+  transform: translateX(-100%);
+  opacity: 0.3;
 }
 </style>

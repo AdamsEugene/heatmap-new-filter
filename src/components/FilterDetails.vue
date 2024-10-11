@@ -63,7 +63,6 @@ const fetchSegment = async () => {
   } else {
     res = await fetchSegmentData(segmentName);
   }
-  console.log(res);
 
   keyValueResponse.value = res;
   if (nameIs("Session Tag") || nameIs("Ads Platform")) {
@@ -75,7 +74,7 @@ const fetchSegment = async () => {
       res.partners
     );
   } else simpleListResponse.value = res;
-  console.log(res);
+  // console.log(res);
   emit("on-loading", false);
 };
 
