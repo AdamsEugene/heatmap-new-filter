@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
-import {
-  CustomValues,
-  Experiment,
-  FilterItem,
-  SessionDataItem,
-} from "../@types";
+import { CustomValues, Experiment, SessionDataItem } from "../@types";
 import Dropdown from "./shared/Dropdown.vue";
 import AddFilterButton from "./shared/AddFilterButton.vue";
 import CustomFilterForm from "./shared/CustomFilterForm.vue";
 import SaveButton from "./shared/SaveButton.vue";
-import { fetchSegmentData } from "./helpers/makeAPIcalls";
+import { adsPlatformData, fetchSegmentData } from "./helpers/makeAPIcalls";
 import {
   alreadyHaveDisplayName,
   formatUrl,
@@ -25,26 +20,26 @@ import {
   conditions,
   replaceAfterSymbols,
   isArrayValid,
-  // initialNewFilter,
 } from "./helpers/functions";
 
 const props = defineProps<{
   selectedItem: SessionDataItem;
   itemsInPending: number;
   reset: boolean;
+  canEdit: boolean;
+  canAdd: boolean;
 }>();
-
-// const copyOfInitialNewFilter: FilterItem = { ...initialNewFilter };
 
 const emit = defineEmits([
   "on-loading",
   "on-selected",
   "on-add-to-waiting-room",
+  "editing-mode",
+  "on-save",
 ]);
 
-const initialFilters = { definition: "", title: "", data: [] };
+const nameIs = (name: string) => name === props.selectedItem.name;
 
-const awaitedFilters = ref<FilterItem>(initialFilters);
 const initiallySavedCustomFilters = ref<CustomValues>();
 
 const simpleListResponse = ref<string[]>([]);
@@ -52,7 +47,6 @@ const keyValueResponse = ref<Map<string, unknown>>();
 const experiments = ref<Experiment[]>();
 const shouldEncode = ref(true);
 const clearFields = ref(false);
-const canAdd = ref(false);
 const selectionError = ref(false);
 
 const listForValues = ref<string[]>();
@@ -60,36 +54,34 @@ const listOfSelectedItems = ref<string[]>([]);
 
 let selected: SessionDataItem = { ...props.selectedItem };
 
-const nameIs = (name: string) => name === props.selectedItem.name;
-
 const fetchSegment = async () => {
   emit("on-loading", true);
   const [segmentName] = props.selectedItem?.definition?.split("==") || "";
-  const res = await fetchSegmentData(segmentName);
+  let res: any;
+  if (nameIs("Ads Platform")) {
+    res = await adsPlatformData("status", "adamseugene292gmail", [12]);
+  } else {
+    res = await fetchSegmentData(segmentName);
+  }
+  console.log(res);
+
   keyValueResponse.value = res;
   if (nameIs("Session Tag") || nameIs("Ads Platform")) {
     simpleListResponse.value = Object.keys(res || {});
+    // console.log(simpleListResponse.value);
   } else if (nameIs("A/B Tests")) {
     simpleListResponse.value = getPartnerValues(
       res.partners_friendly,
       res.partners
     );
   } else simpleListResponse.value = res;
-  // console.log(res);
+  console.log(res);
   emit("on-loading", false);
 };
-
-// const removeItem = (id?: string) => {
-//   if (!awaitedFilters.value?.data) return;
-//   awaitedFilters.value.data = awaitedFilters.value?.data?.filter(
-//     (filter) => filter.name !== id
-//   );
-// };
 
 const freeUpSpace = () => {
   keyValueResponse.value = undefined;
   simpleListResponse.value = [];
-  awaitedFilters.value = initialFilters;
   initiallySavedCustomFilters.value = undefined;
   listOfSelectedItems.value = [];
 };
@@ -97,7 +89,7 @@ const freeUpSpace = () => {
 const onProceed = () => {
   emit("on-selected", { item: selected });
   selected = { ...props.selectedItem };
-  canAdd.value = false;
+  emit("on-save", false);
   clearFields.value = true;
 };
 
@@ -105,17 +97,8 @@ const saveCustomFilter = (filter: CustomValues & { title: string }) => {
   const { title, options, conditions, ...other } = filter;
   if (isArrayValid(Object.values(other))) {
     initiallySavedCustomFilters.value = other;
-    awaitedFilters.value.title = title;
   }
 };
-
-// const setAsCurrentEditableFilter = (name: string) => {
-//   activeCustomFilter.value = awaitedFilters.value?.data?.find(
-//     (item) => item.name + ":" + item.value === name
-//   );
-
-//   // console.log(activeCustomFilter.value);
-// };
 
 const onSelected = (item: { item: string; kind: "main" | "value" }) => {
   const KV = keyValueResponse.value as any;
@@ -172,7 +155,7 @@ const onSelected = (item: { item: string; kind: "main" | "value" }) => {
       rest: rest,
     };
     listOfSelectedItems.value = [...listOfSelectedItems.value, item.item];
-    canAdd.value = true;
+    emit("on-save", true);
   }
   // console.log(selected);
 
@@ -203,20 +186,8 @@ const getABTestingData = (item: string, definition: string, rest: any) => {
   return definition;
 };
 
-const handleAddNewFilter = () => {
-  if (
-    initiallySavedCustomFilters.value &&
-    isArrayValid(Object.values(initiallySavedCustomFilters.value)) &&
-    awaitedFilters.value.title
-  ) {
-    awaitedFilters.value?.data?.push(initiallySavedCustomFilters.value);
-    initiallySavedCustomFilters.value = undefined;
-    clearFields.value = true;
-    onClearCurrentCustomFilter();
-  }
-
-  if (!nameIs("Create Custom Filter")) {
-  }
+const handleCanEdit = () => {
+  emit("editing-mode");
 };
 
 const onClearCurrentCustomFilter = () => {};
@@ -227,7 +198,6 @@ const onOnCustomFilterChange = (
   clearFields.value = false;
   const { title, ...others } = newFilter;
   initiallySavedCustomFilters.value = others;
-  awaitedFilters.value.title = title;
 };
 
 const onLoading = (state: boolean) => {
@@ -257,17 +227,23 @@ watch(
 );
 
 watch(
+  () => props.canAdd,
+  (newValue) => {
+    console.log({ newValue });
+
+    if (!newValue) {
+      selected = { ...props.selectedItem };
+      clearFields.value = true;
+    }
+  }
+);
+
+watch(
   () => props.selectedItem,
   () => {
     freeUpSpace();
     makeRequestFor(props.selectedItem.name) && fetchSegment();
     selected = { ...props.selectedItem };
-    if (props.selectedItem.data) {
-      awaitedFilters.value.data =
-        props.selectedItem.data?.map((item) => item) || [];
-    } else {
-      awaitedFilters.value.data = [];
-    }
     if (nameIs("Average Order Value"))
       simpleListResponse.value = ["Equal To", "Less Than", "Greater Than"];
     listForValues.value = undefined;
@@ -277,7 +253,7 @@ watch(
 
 <template>
   <div class="filter-body_right padding_32">
-    <div class="filter_right_title">
+    <div v-if="!canEdit" class="filter_right_title">
       <div class="head">
         <div class="flex_8">
           <img
@@ -294,8 +270,9 @@ watch(
       <add-filter-button
         v-show="!nameIs('Create Custom Filter') && selectedItem.data"
         :label="'Edit'"
-        :onclick="handleAddNewFilter"
+        :onclick="handleCanEdit"
         :no-icon="true"
+        :with-bg="canEdit"
       />
     </div>
     <!-- <div v-if="(awaitedFilters?.data?.length || 0) >= 1" class="flex_8">
@@ -324,6 +301,7 @@ watch(
         :selectedItem="selectedItem"
         :save-custom-filter="saveCustomFilter"
         :clear-fields="clearFields"
+        :can-edit="canEdit"
         @on-loading="onLoading"
         @on-clear-current-custom-filter="onClearCurrentCustomFilter"
         @on-custom-filter-change="onOnCustomFilterChange"
@@ -358,7 +336,11 @@ watch(
           @on-selection-error="onSelectionError"
         />
       </transition>
-      <save-button :items-in-pending="canAdd" :on-proceed="onProceed" />
+      <save-button
+        v-if="itemsInPending >= 1"
+        :items-in-pending="canAdd"
+        :on-proceed="onProceed"
+      />
     </template>
     <template v-else>
       <save-button

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{ msg: string }>();
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import SidebarItems from "./SidebarItems.vue";
 import FilterDetails from "./FilterDetails.vue";
@@ -12,14 +12,15 @@ import { CombinedFilter, FilterList, SessionDataItem } from "../@types";
 import { loadCustomFilters } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
-import { initialNewFilter } from "./helpers/functions";
+
+const selectedItem = ref<SessionDataItem>(sessionData[0]);
+const nameIs = (name: string) => name === selectedItem.value?.name;
 
 const loading = ref<boolean>(false);
 const reset = ref<boolean>(false);
+const canEdit = ref(nameIs("Create Custom Filter"));
+const canAdd = ref(false);
 
-const data = { ...initialNewFilter };
-
-const selectedItem = ref<SessionDataItem>(sessionData[0]);
 // const updatedSelectedItem = ref<SessionDataItem>();
 const pendingList = ref<CombinedFilter[]>([]);
 const waitingRoom = ref<CombinedFilter>();
@@ -30,7 +31,7 @@ const customData = ref<SessionDataItem>({
   idsegment: 1,
   name: "Create Custom Filter",
   title: "Create Custom Filter",
-  data: data.data,
+  data: [{ action: "", default: "", name: "", segment: "", value: "" }],
 });
 
 const readyToCompare = computed(() => pendingList.value.length);
@@ -90,12 +91,26 @@ const handleCompareFilters = () => {
   if (waitingRoom.value) pendingList.value.push(waitingRoom.value);
   else pendingList.value.push(selectedItem.value);
   waitingRoom.value = undefined;
+  canAdd.value = false;
 };
 
 const removeItemFromPendingList = (filter: CombinedFilter) => {
   pendingList.value = pendingList.value.filter(
     (item) => item.name !== filter.name
   );
+};
+
+const onEditingMode = () => {
+  canEdit.value = !canEdit.value;
+};
+
+const onExitEditMode = () => {
+  canEdit.value = false;
+  if (nameIs("Create Custom Filter")) selectedItem.value = sessionData[0];
+};
+
+const onSave = (state: boolean) => {
+  canAdd.value = state;
 };
 
 const resetFilters = () => {
@@ -117,13 +132,18 @@ const applyFilters = () => {
     }))
   );
 };
+
+watch(selectedItem, () => {
+  canEdit.value = nameIs("Create Custom Filter");
+});
 </script>
 
 <template>
   <div class="main-filter-wrapper">
     <div class="filter-wrapper">
       <div class="filter-header">
-        <p class="big_text">
+        <p v-if="canEdit" class="big_text">{{ selectedItem.name }}</p>
+        <p v-else class="big_text">
           {{ readyToCompare ? "Compare" : "All Filters" }}
         </p>
         <template
@@ -152,7 +172,7 @@ const applyFilters = () => {
         <loading-spinner v-if="loading" />
       </div>
       <div class="filter-body">
-        <div class="filter-body_left">
+        <div v-if="!canEdit" class="filter-body_left">
           <sidebar-items
             :data="sessionData"
             :selected-item="selectedItem"
@@ -182,29 +202,44 @@ const applyFilters = () => {
           :selected-item="selectedItem"
           :items-in-pending="pendingList.length"
           :reset="reset"
+          :can-edit="canEdit"
+          :can-add="canAdd"
           @on-add-to-waiting-room="handleAddToWaitingRoom"
           @on-loading="onLoading"
           @on-selected="onFilterSelect"
+          @editing-mode="onEditingMode"
+          @on-save="onSave"
         />
       </div>
       <div class="filter-footer">
-        <div class="btn" @click="resetFilters">
+        <div v-show="!canEdit" class="btn" @click="resetFilters">
           <p class="btn_text">Reset</p>
         </div>
+        <div v-show="canEdit" class="btn" @click="onExitEditMode">
+          <p class="btn_text">Back to Filters</p>
+        </div>
         <div class="right_btns">
-          <transition name="fade">
-            <div
-              v-show="!readyToCompare"
-              class="btn border"
-              @click="handleCompareFilters"
-            >
-              <p class="btn_text">Compare to...</p>
-            </div>
-          </transition>
-          <div class="btn primary" @click="applyFilters">
+          <div
+            v-show="!readyToCompare && !canEdit"
+            class="btn border"
+            @click="handleCompareFilters"
+          >
+            <p class="btn_text">Compare to...</p>
+          </div>
+          <div
+            v-show="canEdit"
+            class="btn border"
+            @click="handleCompareFilters"
+          >
+            <p class="btn_text">Save</p>
+          </div>
+          <div v-show="!canEdit" class="btn primary" @click="applyFilters">
             <p class="btn_text">
               {{ pendingList.length === 2 ? "Compare" : "Apply" }}
             </p>
+          </div>
+          <div v-show="canEdit" class="btn primary" @click="applyFilters">
+            <p class="btn_text">Save and Apply</p>
           </div>
         </div>
       </div>

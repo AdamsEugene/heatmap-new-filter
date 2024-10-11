@@ -9,6 +9,7 @@ const props = defineProps<{
   label?: string;
   noIcon?: boolean;
   withBorder?: boolean;
+  withBg?: boolean;
 }>();
 
 const url = ref(addIcon);
@@ -28,7 +29,7 @@ watch(
 <template>
   <div
     class="sidebar_filter_button change_color"
-    :class="{ borderClass: withBorder }"
+    :class="{ borderClass: withBorder, withBg, edit_mode: label === 'Edit' }"
     @click="onclick"
   >
     <img v-if="!noIcon" class="button_icon" :src="url" alt="add icon" />
@@ -49,6 +50,25 @@ watch(
 
   .normal_text {
     color: #00936f;
+  }
+}
+
+.edit_mode {
+  background-color: var(--Grey-50, #f1f2f3);
+
+   .normal_text {
+    color: #2E3338;
+  }
+}
+
+.withBg {
+  background-color: #00936f;
+  .normal_text {
+    color: #ffffff;
+  }
+
+  &:hover {
+    background-color: #003f2f;
   }
 }
 </style>

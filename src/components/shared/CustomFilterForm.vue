@@ -33,6 +33,7 @@ const props = defineProps<{
   saveCustomFilter: (filter: CustomValues & { title: string }) => void;
   clearFields: boolean;
   activeCustomFilter?: CustomValues;
+  canEdit: boolean;
 }>();
 
 const emit = defineEmits([
@@ -116,7 +117,6 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       newFilter.value.data[item.index].name = item.item.name;
     }
 
-    // console.log(props.selectedItem.data[item.index]);
     setValues(item.index, item.item.conditions, item.item.options);
 
     if (!item.item.options || item.item.options?.length === 0) {
@@ -156,7 +156,6 @@ const onSelected = async (item: SELECTED_ITEMS) => {
   emit("on-custom-filter-change", { ...newFilter.value });
 
   console.log(newFilter.value);
-  // console.log(props.selectedItem.data);
 };
 
 const setValues = (
@@ -170,6 +169,18 @@ const setValues = (
     props.selectedItem.data[index].default = "";
     props.selectedItem.data[index].value = "";
   }
+};
+
+const removeFilter = (index: number) => {
+  const newData = props.selectedItem.data?.filter((_, pos) => pos !== index);
+  props.selectedItem.data = newData;
+  newFilter.value.definition = generateSegmentString(newData || []);
+};
+
+const addNewFilter = () => {
+  const copy = ref({ ...copyOfInitialNewFilter });
+  if (!props.selectedItem.data) props.selectedItem.data = copy.value.data;
+  else props.selectedItem.data?.push(...copy.value.data!);
 };
 
 onMounted(() => {
@@ -215,7 +226,7 @@ watch(filterName, async (newName) => {
 
 <template>
   <div class="filter-body_right">
-    <div class="dropdown">
+    <div class="dropdown with_border_bottom">
       <label for="this_dropdown" class="medium_text">{{ "Filter Name" }}</label>
       <input
         id="this_dropdown"
@@ -224,6 +235,7 @@ watch(filterName, async (newName) => {
         class="dropdown-input"
         v-model="filterName"
         autocomplete="off"
+        :disabled="!canEdit"
       />
     </div>
     <div
@@ -241,6 +253,7 @@ watch(filterName, async (newName) => {
         :for-custom="true"
         :initial-value="filter?.action"
         :clear-fields="clearFields"
+        :disabled="!canEdit"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -252,6 +265,7 @@ watch(filterName, async (newName) => {
         :input-type="'text'"
         :initial-value="filter?.default"
         :clear-fields="clearFields"
+        :disabled="!canEdit"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -262,16 +276,45 @@ watch(filterName, async (newName) => {
         :definition="'value'"
         :initial-value="filter?.value"
         :clear-fields="clearFields"
+        :disabled="!canEdit"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
+      <div class="flex_sb">
+        <div></div>
+        <div
+          v-if="(selectedItem?.data?.length || 0) > 1 && canEdit"
+          class="remove"
+          @click="removeFilter(index)"
+        >
+          <img
+            class=""
+            src="../../assets/images/remove.svg"
+            alt="remove icon"
+          />
+          <p class="remove_test normal_text">Remove Filter</p>
+        </div>
+      </div>
+      <div
+        v-if="
+          (selectedItem?.data?.length || 0) !== 1 &&
+          (selectedItem?.data?.length || 0) !== index + 1
+        "
+        class="horizontal_wrapper"
+      >
+        <div class="horizontal" />
+        <div class="condition">
+          <p class="condition_text medium_text">AND</p>
+        </div>
+      </div>
     </div>
   </div>
+
   <div class="center_me">
     <add-filter-button
       v-show="nameIs('Create Custom Filter')"
       :label="'Add Additional Filter'"
       :with-border="true"
-      :onclick="() => {}"
+      :onclick="addNewFilter"
     />
   </div>
   <!-- <div class="flex_sb">
@@ -285,13 +328,61 @@ watch(filterName, async (newName) => {
 </template>
 
 <style>
+.condition {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  padding: 4px var(--corner-med, 8px);
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  background: var(--Grey-White, #fff);
+}
+
+.condition_text {
+  color: var(--Grey-800, #34404b);
+}
+
+.horizontal_wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.horizontal {
+  width: 100%;
+  height: 1px;
+  background: var(--Grey-200, #e6e7e8);
+}
+
+.with_border_bottom {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e6e7e8;
+}
+
+.remove {
+  display: flex;
+  padding: 4px var(--corner-med, 8px);
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  /* align-self: stretch; */
+  background: var(--Grey-White, #fff);
+  cursor: pointer;
+
+  .remove_test {
+    color: var(--Error-05-Darker, #7a0b28);
+  }
+}
+
 .custom_filter {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 4px;
 }
 
 .arrow_button_wrapper {

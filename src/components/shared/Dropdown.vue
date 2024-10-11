@@ -8,6 +8,13 @@ import {
 } from "../helpers/lookUps";
 import { DataItem, GroupedData } from "../../@types";
 
+import fb from "../../assets/images/facebook.svg";
+import x from "../../assets/images/twitter.svg";
+import go from "../../assets/images/google.svg";
+import ti from "../../assets/images/tiktok.svg";
+import ji from "../../assets/images/ji.svg";
+import ig from "../../assets/images/ig.svg";
+
 const props = defineProps<{
   label?: string;
   placeholder?: string;
@@ -21,7 +28,20 @@ const props = defineProps<{
   initialValue?: string;
   clearFields?: boolean;
   disabledItem?: string[];
+  disabled?: boolean;
 }>();
+
+const returnImg = (name: string) => {
+  const obj = {
+    facebook: fb,
+    x: x,
+    google: go,
+    tiktok: ti,
+    instagram: ig,
+    jira: ji,
+  };
+  return (obj as any)[name] || go;
+};
 
 const emit = defineEmits(["on-selected", "on-selection-error"]);
 
@@ -64,7 +84,7 @@ const disabledItems = computed(
   () => (item: string) => props.disabledItem?.find((name) => name === item)
 );
 
-const disabled = (item: string) =>
+const _disabled = (item: string) =>
   props.disabledItem?.find((name) => name === item);
 
 const closeDropdown = () => {
@@ -85,7 +105,7 @@ const handleItemSelection = (item: string | DataItem) => {
 };
 
 const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
-  if (!disabled(check)) handleItemSelection(item);
+  if (!_disabled(check)) handleItemSelection(item);
   else emit("on-selection-error");
 };
 
@@ -152,6 +172,7 @@ watch(searchQuery, (newQuery) => {
         :type="inputType"
         :placeholder="inputPlaceholder || 'Select items...'"
         :class="{ no_padding: inputType === 'number' }"
+        :disabled="disabled"
         @focus="isDropdownOpen = true"
         @blur="closeDropdown"
       />
@@ -205,11 +226,7 @@ watch(searchQuery, (newQuery) => {
         @click="itemSelectWithDisabled(item, item)"
       >
         <div class="ads_left">
-          <img
-            class="button_icon"
-            src="../../assets/images/twitter.svg"
-            alt="add icon"
-          />
+          <img class="button_icon" :src="returnImg(item)" alt="add icon" />
           <p class="medium_text">{{ item }}</p>
         </div>
         <div class="ads_right">
