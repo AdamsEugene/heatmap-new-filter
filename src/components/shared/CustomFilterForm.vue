@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch, computed } from "vue";
+import { nextTick, onMounted, ref, watch, computed, onUnmounted } from "vue";
 import AddFilterButton from "./AddFilterButton.vue";
 
 import Dropdown from "./Dropdown.vue";
@@ -35,6 +35,9 @@ const props = defineProps<{
   activeCustomFilter?: CustomValues;
   canEdit: boolean;
 }>();
+
+const initialSelectedItem = { ...props.selectedItem };
+const selectedItemCopy = JSON.parse(JSON.stringify(initialSelectedItem));
 
 const emit = defineEmits([
   "on-loading",
@@ -155,7 +158,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
 
   emit("on-custom-filter-change", { ...newFilter.value });
 
-  console.log(newFilter.value);
+  // console.log(newFilter.value);
 };
 
 const setValues = (
@@ -191,17 +194,24 @@ onMounted(() => {
   });
 });
 
+onUnmounted(() => {
+  console.log("Component has been unmounted from the DOM");
+  props.selectedItem.data = selectedItemCopy.data;
+});
+
 watch(
   () => props.selectedItem,
-  () => {
+  (newSelectedItem) => {
     setCustomData();
+    selectedItemCopy.value = { ...newSelectedItem };
+
     filterName.value = customData.value?.title || "";
     filterName.value = nameIs("Create Custom Filter")
       ? ""
       : customData.value?.title || "";
     newFilter.value = copyOfInitialNewFilter;
-    newFilter.value = props.selectedItem;
-    props.selectedItem.data?.forEach((data) => {
+    // newFilter.value = props.selectedItem;
+    newSelectedItem.data?.forEach((data) => {
       loadInitialData(data);
     });
   }
@@ -213,6 +223,17 @@ watch(
     if (props.clearFields) {
       emit("on-clear-current-custom-filter");
     }
+  }
+);
+
+watch(
+  () => props.canEdit,
+  (newValue) => {
+    if (!newValue) props.selectedItem.data = selectedItemCopy.data;
+    else
+      props.selectedItem.data?.forEach((data) => {
+        loadInitialData(data);
+      });
   }
 );
 

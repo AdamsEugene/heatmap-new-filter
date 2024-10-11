@@ -116,13 +116,13 @@ watch(isDropdownOpen, async (newValue) => {
     if (dropdownListRef.value) {
       dropdownListRef.value.scrollIntoView({
         behavior: "smooth",
-        block: "start",
+        block: "center",
       });
     }
     if (dropdownListSecondRef.value) {
       dropdownListSecondRef.value.scrollIntoView({
         behavior: "smooth",
-        block: "start",
+        block: "center",
       });
     }
   }

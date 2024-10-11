@@ -14,6 +14,7 @@ import { loadCustomFilters } from "./helpers/makeAPIcalls";
 import task from "../assets/images/ads_click.svg";
 
 const selectedItem = ref<SessionDataItem>(sessionData[0]);
+const prevSelectedItem = ref<SessionDataItem>(sessionData[0]);
 const nameIs = (name: string) => name === selectedItem.value?.name;
 
 const loading = ref<boolean>(false);
@@ -82,9 +83,7 @@ const handleAddToWaitingRoom = (item: { item: CombinedFilter }) => {
 
 const handleSidebarItemClick = (item: SessionDataItem) => {
   selectedItem.value = item;
-  // if (item.isDefinitionValueSet && pendingList.value.length === 1)
-  //   pendingList.value.push(selectedItem.value);
-  // console.log({ item });
+  if (item.name !== "Create Custom Filter") prevSelectedItem.value = item;
 };
 
 const handleCompareFilters = () => {
@@ -106,7 +105,8 @@ const onEditingMode = () => {
 
 const onExitEditMode = () => {
   canEdit.value = false;
-  if (nameIs("Create Custom Filter")) selectedItem.value = sessionData[0];
+  if (nameIs("Create Custom Filter"))
+    selectedItem.value = prevSelectedItem.value;
 };
 
 const onSave = (state: boolean) => {
