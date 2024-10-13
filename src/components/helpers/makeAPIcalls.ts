@@ -1,3 +1,4 @@
+import { AuthorizationRequest } from "../../@types";
 import { getThis, useEntryPage } from "./functions";
 
 const BASE_URL = "https://stage14.heatmapcore.com/";
@@ -59,19 +60,49 @@ export const dynamicallyFetchOptions = async (segment?: string) => {
   }
 };
 
-export async function adsPlatformData(
-  action: string,
-  userId: string,
-  websiteIds: number[]
-): Promise<string | void> {
+// export async function adsPlatformData(
+//   action: string,
+//   userId: string,
+//   websiteIds: number[]
+// ): Promise<string | void> {
+//   const myHeaders = new Headers();
+//   myHeaders.append("Content-Type", "application/json");
+
+//   const raw = JSON.stringify({
+//     action,
+//     userId,
+//     websiteIds,
+//   });
+
+//   const requestOptions = {
+//     method: "POST",
+//     headers: myHeaders,
+//     body: raw,
+//     redirect: "follow",
+//   };
+
+//   try {
+//     const response = await fetch(
+//       "https://00ujjwhaed.execute-api.us-west-2.amazonaws.com/Prod/oauth",
+//       requestOptions as any
+//     );
+
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+
+//     const result = await response.json();
+//     return result;
+//   } catch (error) {
+//     console.error("Error fetching data:", error);
+//   }
+// }
+
+export async function manageAdsConnection(params: AuthorizationRequest) {
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
 
-  const raw = JSON.stringify({
-    action,
-    userId,
-    websiteIds,
-  });
+  const raw = JSON.stringify({ ...params });
 
   const requestOptions = {
     method: "POST",

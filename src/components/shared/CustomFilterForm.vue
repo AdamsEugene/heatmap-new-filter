@@ -34,6 +34,7 @@ const props = defineProps<{
   clearFields: boolean;
   activeCustomFilter?: CustomValues;
   canEdit: boolean;
+  cancelEdit: boolean;
 }>();
 
 const initialSelectedItem = { ...props.selectedItem };
@@ -114,11 +115,24 @@ const onSelected = async (item: SELECTED_ITEMS) => {
   if (item.kind === "action" && typeof item.item !== "string") {
     let _options: string[] | undefined = undefined;
 
-    if (newFilter.value.data) {
-      newFilter.value.data[item.index].action = item.item.name;
-      newFilter.value.data[item.index].segment = item.item.segment || "";
-      newFilter.value.data[item.index].name = item.item.name;
+    if (!newFilter.value.data) {
+      newFilter.value.data = [];
     }
+
+    if (!newFilter.value.data[item.index] && item.index) {
+      newFilter.value.data[item.index] = {
+        action: "",
+        segment: "",
+        name: "",
+        default: "",
+        value: "",
+      };
+    }
+
+    // Now go ahead and update the properties as needed
+    newFilter.value.data[item.index].action = item.item.name;
+    newFilter.value.data[item.index].segment = item.item.segment || "";
+    newFilter.value.data[item.index].name = item.item.name;
 
     setValues(item.index, item.item.conditions, item.item.options);
 
@@ -195,8 +209,9 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  console.log("Component has been unmounted from the DOM");
   props.selectedItem.data = selectedItemCopy.data;
+  props.selectedItem.title = selectedItemCopy.title;
+  props.selectedItem.definition = selectedItemCopy.definition;
 });
 
 watch(
@@ -204,6 +219,7 @@ watch(
   (newSelectedItem) => {
     setCustomData();
     selectedItemCopy.value = { ...newSelectedItem };
+    console.log(selectedItemCopy.value);
 
     filterName.value = customData.value?.title || "";
     filterName.value = nameIs("Create Custom Filter")
@@ -227,21 +243,27 @@ watch(
 );
 
 watch(
-  () => props.canEdit,
+  () => props.cancelEdit,
   (newValue) => {
-    if (!newValue) props.selectedItem.data = selectedItemCopy.data;
-    else
+    if (newValue) {
+      props.selectedItem.data = selectedItemCopy.data;
+      props.selectedItem.title = selectedItemCopy.title;
+      props.selectedItem.definition = selectedItemCopy.definition;
+      filterName.value = selectedItemCopy.title;
+    } else {
       props.selectedItem.data?.forEach((data) => {
         loadInitialData(data);
       });
+    }
   }
 );
 
 watch(filterName, async (newName) => {
   await nextTick();
-  props.selectedItem.name !== newName &&
-    newName &&
+  if (props.selectedItem.title !== newName && newName) {
     emit("on-custom-filter-change", { ...newFilter.value, title: newName });
+    props.selectedItem.title = newName;
+  }
 });
 </script>
 
@@ -268,7 +290,7 @@ watch(filterName, async (newName) => {
         :action-items="actionItems"
         :label="'Action'"
         :position="'up'"
-        :as-input="false"
+        :as-input="!canEdit"
         :definition="'action'"
         :input-type="'text'"
         :for-custom="true"
@@ -281,7 +303,7 @@ watch(filterName, async (newName) => {
         :items="filter?.conditions"
         :label="'Condition'"
         :position="'up'"
-        :as-input="false"
+        :as-input="!canEdit"
         :definition="'condition'"
         :input-type="'text'"
         :initial-value="filter?.default"
@@ -293,7 +315,7 @@ watch(filterName, async (newName) => {
         :items="filter?.options"
         :label="'Value'"
         :position="'up'"
-        :as-input="!filter?.options"
+        :as-input="!canEdit ? !canEdit : !filter?.options"
         :definition="'value'"
         :initial-value="filter?.value"
         :clear-fields="clearFields"
@@ -332,7 +354,7 @@ watch(filterName, async (newName) => {
 
   <div class="center_me">
     <add-filter-button
-      v-show="nameIs('Create Custom Filter')"
+      v-show="canEdit"
       :label="'Add Additional Filter'"
       :with-border="true"
       :onclick="addNewFilter"

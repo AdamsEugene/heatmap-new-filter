@@ -1,5 +1,4 @@
 <script setup lang="ts">
-defineProps<{ msg: string }>();
 import { computed, onMounted, ref, watch } from "vue";
 
 import SidebarItems from "./SidebarItems.vue";
@@ -8,10 +7,25 @@ import AddFilterButton from "./shared/AddFilterButton.vue";
 import LoadingSpinner from "./shared/LoadingSpinner.vue";
 
 import { sessionData, eCommerceData } from "../data";
-import { CombinedFilter, FilterList, SessionDataItem } from "../@types";
+import {
+  CombinedFilter,
+  FilterList,
+  ReturnData,
+  SessionDataItem,
+} from "../@types";
 import { loadCustomFilters } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
+
+const props = defineProps<{
+  onToggleShowFilterMenu: () => void;
+  defaultValues?: ReturnData[];
+}>();
+
+const emit = defineEmits<{
+  (e: "filter-values", returnData: ReturnData[]): void;
+  (e: "reset-all-filters"): void;
+}>();
 
 const selectedItem = ref<SessionDataItem>(sessionData[0]);
 const prevSelectedItem = ref<SessionDataItem>(sessionData[0]);
@@ -21,6 +35,8 @@ const loading = ref<boolean>(false);
 const reset = ref<boolean>(false);
 const canEdit = ref(nameIs("Create Custom Filter"));
 const canAdd = ref(false);
+const cancelEdit = ref(false);
+const disabledComparison = ref(false);
 
 // const updatedSelectedItem = ref<SessionDataItem>();
 const pendingList = ref<CombinedFilter[]>([]);
@@ -59,6 +75,15 @@ const runOnCreated = async () => {
 
 onMounted(() => {
   runOnCreated();
+
+  // resetAllFilters();
+  document.addEventListener("reset-all-filters-event", () => {
+    // resetAllFilters(true);
+  });
+  document.addEventListener("disable-comparison-event", (event: any) => {
+    // console.log(event.detail.disabled);
+    disabledComparison.value = event.detail.disabled;
+  });
 });
 
 const onLoading = (status: boolean) => {
@@ -101,10 +126,12 @@ const removeItemFromPendingList = (filter: CombinedFilter) => {
 
 const onEditingMode = () => {
   canEdit.value = !canEdit.value;
+  cancelEdit.value = false;
 };
 
 const onExitEditMode = () => {
   canEdit.value = false;
+  cancelEdit.value = true;
   if (nameIs("Create Custom Filter"))
     selectedItem.value = prevSelectedItem.value;
 };
@@ -122,15 +149,37 @@ const resetFilters = () => {
   }, 10);
 };
 
+const saveCustomFilter = async () => {
+  // console.log(selectedItem.value);
+  pendingList.value.push(selectedItem.value);
+  // make a request to save the filters
+  canEdit.value = false;
+  if (nameIs("Create Custom Filter"))
+    selectedItem.value = prevSelectedItem.value;
+};
+
 const applyFilters = () => {
-  console.log(
-    "apply this filters",
-    pendingList.value.map((filter) => ({
-      name: filter.name,
-      definition: filter.definition,
-      rest: filter.rest,
-    }))
-  );
+  if (!pendingList.value.length) {
+    const { definition, name, rest } = selectedItem.value;
+    console.log({ definition, name, rest });
+  } else {
+    console.log(
+      "apply this filters",
+      pendingList.value.map((filter) => ({
+        name: filter.name,
+        definition: filter.definition,
+        rest: filter.rest,
+      }))
+    );
+  }
+
+  emit("filter-values", []);
+  props.onToggleShowFilterMenu();
+};
+
+const saveApplyFilters = async () => {
+  await saveCustomFilter();
+  applyFilters();
 };
 
 watch(selectedItem, () => {
@@ -147,6 +196,7 @@ watch(selectedItem, () => {
           {{ readyToCompare ? "Compare" : "All Filters" }}
         </p>
         <template
+          v-if="!canEdit"
           v-for="(filter, index) in pendingList.slice(0, 2)"
           :key="filter.nameForCompare || filter.name"
         >
@@ -206,6 +256,7 @@ watch(selectedItem, () => {
           :reset="reset"
           :can-edit="canEdit"
           :can-add="canAdd"
+          :cancel-edit="cancelEdit"
           @on-add-to-waiting-room="handleAddToWaitingRoom"
           @on-loading="onLoading"
           @on-selected="onFilterSelect"
@@ -222,17 +273,13 @@ watch(selectedItem, () => {
         </div>
         <div class="right_btns">
           <div
-            v-show="!readyToCompare && !canEdit"
+            v-show="!readyToCompare && !canEdit && !disabledComparison"
             class="btn border"
             @click="handleCompareFilters"
           >
             <p class="btn_text">Compare to...</p>
           </div>
-          <div
-            v-show="canEdit"
-            class="btn border"
-            @click="handleCompareFilters"
-          >
+          <div v-show="canEdit" class="btn border" @click="saveCustomFilter">
             <p class="btn_text">Save</p>
           </div>
           <div v-show="!canEdit" class="btn primary" @click="applyFilters">
@@ -240,7 +287,7 @@ watch(selectedItem, () => {
               {{ pendingList.length === 2 ? "Compare" : "Apply" }}
             </p>
           </div>
-          <div v-show="canEdit" class="btn primary" @click="applyFilters">
+          <div v-show="canEdit" class="btn primary" @click="saveApplyFilters">
             <p class="btn_text">Save and Apply</p>
           </div>
         </div>

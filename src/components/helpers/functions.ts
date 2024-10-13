@@ -187,3 +187,43 @@ export const generateSegmentString = (data: CustomValues[]): string => {
     )
     .join(";");
 };
+
+function getCodeFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get("code");
+}
+
+export function detectUrlChange() {
+  const handleUrlChange = () => {
+    console.log("popstate");
+
+    const code = getCodeFromUrl();
+    if (code) {
+      console.log("Code parameter changed:", code);
+    }
+  };
+
+  window.addEventListener("popstate", handleUrlChange);
+  window.addEventListener("hashchange", handleUrlChange);
+
+  return () => {
+    window.removeEventListener("popstate", handleUrlChange);
+    window.removeEventListener("hashchange", handleUrlChange);
+  };
+}
+
+export const checkForTokens = (data: any): string[] => {
+  const keysWithTokens: string[] = [];
+
+  for (const key in data) {
+    const partnerData = data[key];
+    for (const siteId in partnerData) {
+      if (partnerData[siteId].tokens && partnerData[siteId].tokens.length > 0) {
+        keysWithTokens.push(key);
+        break; // Stop checking this partner since it already has tokens
+      }
+    }
+  }
+
+  return keysWithTokens;
+};

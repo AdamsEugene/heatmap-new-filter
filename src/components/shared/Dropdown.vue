@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, InputTypeHTMLAttribute } from "vue";
+import {
+  ref,
+  computed,
+  watch,
+  nextTick,
+  InputTypeHTMLAttribute,
+  onMounted,
+  onUnmounted,
+} from "vue";
 import {
   labelMap,
   placeholderMap,
@@ -14,6 +22,8 @@ import go from "../../assets/images/google.svg";
 import ti from "../../assets/images/tiktok.svg";
 import ji from "../../assets/images/ji.svg";
 import ig from "../../assets/images/ig.svg";
+import { manageAdsConnection } from "../helpers/makeAPIcalls";
+import { detectUrlChange } from "../helpers/functions";
 
 const props = defineProps<{
   label?: string;
@@ -29,6 +39,7 @@ const props = defineProps<{
   clearFields?: boolean;
   disabledItem?: string[];
   disabled?: boolean;
+  hasTokens?: string[];
 }>();
 
 const returnImg = (name: string) => {
@@ -49,6 +60,7 @@ const searchQuery = ref<string>(props.initialValue || "");
 const isDropdownOpen = ref<boolean>(false);
 const dropdownListRef = ref<HTMLElement | null>(null);
 const dropdownListSecondRef = ref<HTMLElement | null>(null);
+const loading = ref<string>("");
 
 const inputLabel = computed(() => {
   if (props.position === "up") {
@@ -63,8 +75,6 @@ const inputPlaceholder = computed(() => {
   }
   return SecondPlaceholderMap(props.label);
 });
-
-// console.log(props.actionItems);
 
 const filteredItems = computed(() => {
   return Array.isArray(props?.items)
@@ -88,7 +98,9 @@ const _disabled = (item: string) =>
   props.disabledItem?.find((name) => name === item);
 
 const closeDropdown = () => {
-  if (props.forCustom) return;
+  const i = props.items;
+  const h = props.hasTokens;
+  if (props.forCustom || (h && i && h?.length < i?.length)) return;
   else
     setTimeout(() => {
       isDropdownOpen.value = false;
@@ -109,6 +121,38 @@ const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
   else emit("on-selection-error");
 };
 
+const manageConnection = async (partner: string) => {
+  loading.value = partner;
+  const res = await manageAdsConnection({
+    action: "authorize",
+    userId: "adamseugene292gmail",
+    partner,
+    websiteIds: [12],
+  });
+
+  if (res.url) window.open(res.url, "_blank");
+  console.log(res);
+  // loading.value = "";
+};
+
+onMounted(() => {
+  const cleanup = detectUrlChange();
+  onUnmounted(cleanup);
+});
+
+// const makeExchangeRequest = async () => {
+//   const res = await manageAdsConnection({
+//     action: "exchange",
+//     userId: "adamseugene292gmail",
+//     partner: "google",
+//     websiteIds: [12],
+//     code: getThis("code"),
+//   });
+
+//   if (res.url) window.open(res.url, "_blank");
+//   console.log(res);
+// };
+
 // Watch for dropdown open state and scroll it into view when opened
 watch(isDropdownOpen, async (newValue) => {
   if (newValue) {
@@ -127,6 +171,8 @@ watch(isDropdownOpen, async (newValue) => {
     }
   }
 });
+
+// makeExchangeRequest();
 
 watch(
   () => props.items,
@@ -229,8 +275,20 @@ watch(searchQuery, (newQuery) => {
           <img class="button_icon" :src="returnImg(item)" alt="add icon" />
           <p class="medium_text">{{ item }}</p>
         </div>
-        <div class="ads_right">
-          <p class="medium_text">Connect</p>
+        <div
+          v-if="!hasTokens?.includes(item)"
+          class="ads_right"
+          @click.stop="manageConnection(item)"
+        >
+          <p
+            class="medium_text"
+            :class="{
+              change_color:
+                searchQuery === item || disabledItem?.includes(item),
+            }"
+          >
+            {{ loading === item ? "Connecting..." : "Connect" }}
+          </p>
           <img
             class="button_icon"
             src="../../assets/images/link.svg"
@@ -380,6 +438,10 @@ watch(searchQuery, (newQuery) => {
   outline: none; /* Removes default outline */
 }
 
+.change_color {
+  color: #00936f !important;
+}
+
 .dropdown-list,
 .dropdown-list_ads {
   position: absolute;
@@ -435,7 +497,7 @@ watch(searchQuery, (newQuery) => {
 
 .ads_right {
   display: flex;
-  width: 94px;
+  min-width: 94px;
   height: 30px;
   padding: 0px var(--corner-med, 8px);
   justify-content: center;

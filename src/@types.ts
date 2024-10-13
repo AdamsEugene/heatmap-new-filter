@@ -126,3 +126,13 @@ export type FilterList = FilterItem[];
 export type GroupedData = {
   [category: string]: DataItem[];
 };
+
+export type AuthorizationRequest = {
+  action: "authorize" | "exchange" | "disconnect" | "status" | "refresh";
+  userId: string;
+  websiteIds: number[];
+  partner?: string;
+  code?: string;
+};
+
+export type ReturnData = { definition: string; name: string; rest?: any };

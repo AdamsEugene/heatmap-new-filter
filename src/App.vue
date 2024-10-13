@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import FIlterComponent from "./components/FIlterComponent.vue";
+import HeatmapFilter from "./components/HeatmapFilter.vue";
 </script>
 
 <template>
   <div class="wrapper">
-    <fIlter-component msg="Vite + Vue" />
+    <heatmap-filter />
   </div>
 </template>
 

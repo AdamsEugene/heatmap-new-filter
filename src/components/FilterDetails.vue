@@ -5,7 +5,7 @@ import Dropdown from "./shared/Dropdown.vue";
 import AddFilterButton from "./shared/AddFilterButton.vue";
 import CustomFilterForm from "./shared/CustomFilterForm.vue";
 import SaveButton from "./shared/SaveButton.vue";
-import { adsPlatformData, fetchSegmentData } from "./helpers/makeAPIcalls";
+import { manageAdsConnection, fetchSegmentData } from "./helpers/makeAPIcalls";
 import {
   alreadyHaveDisplayName,
   formatUrl,
@@ -20,6 +20,7 @@ import {
   conditions,
   replaceAfterSymbols,
   isArrayValid,
+  checkForTokens,
 } from "./helpers/functions";
 
 const props = defineProps<{
@@ -28,6 +29,7 @@ const props = defineProps<{
   reset: boolean;
   canEdit: boolean;
   canAdd: boolean;
+  cancelEdit: boolean;
 }>();
 
 const emit = defineEmits([
@@ -51,6 +53,7 @@ const selectionError = ref(false);
 
 const listForValues = ref<string[]>();
 const listOfSelectedItems = ref<string[]>([]);
+const hasTokens = ref<string[]>();
 
 let selected: SessionDataItem = { ...props.selectedItem };
 
@@ -59,7 +62,11 @@ const fetchSegment = async () => {
   const [segmentName] = props.selectedItem?.definition?.split("==") || "";
   let res: any;
   if (nameIs("Ads Platform")) {
-    res = await adsPlatformData("status", "adamseugene292gmail", [12]);
+    res = await manageAdsConnection({
+      action: "status",
+      userId: "adamseugene292gmail",
+      websiteIds: [12],
+    });
   } else {
     res = await fetchSegmentData(segmentName);
   }
@@ -67,13 +74,18 @@ const fetchSegment = async () => {
   keyValueResponse.value = res;
   if (nameIs("Session Tag") || nameIs("Ads Platform")) {
     simpleListResponse.value = Object.keys(res || {});
-    // console.log(simpleListResponse.value);
+    hasTokens.value = checkForTokens(res);
+    // console.log(hasTokens.value);
   } else if (nameIs("A/B Tests")) {
     simpleListResponse.value = getPartnerValues(
       res.partners_friendly,
       res.partners
     );
-  } else simpleListResponse.value = res;
+    hasTokens.value = undefined;
+  } else {
+    simpleListResponse.value = res;
+    hasTokens.value = undefined;
+  }
   // console.log(res);
   emit("on-loading", false);
 };
@@ -301,6 +313,7 @@ watch(
         :save-custom-filter="saveCustomFilter"
         :clear-fields="clearFields"
         :can-edit="canEdit"
+        :cancel-edit="cancelEdit"
         @on-loading="onLoading"
         @on-clear-current-custom-filter="onClearCurrentCustomFilter"
         @on-custom-filter-change="onOnCustomFilterChange"
@@ -317,6 +330,7 @@ watch(
         :as-input="hasNoDropdown(props.selectedItem.name)"
         :disabled-item="listOfSelectedItems"
         :clear-fields="clearFields"
+        :has-tokens="hasTokens"
         @on-selected="onSelected"
         @on-selection-error="onSelectionError"
       />

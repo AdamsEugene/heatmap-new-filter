@@ -22,7 +22,7 @@ body {
 }
 
 input:disabled {
-  background-color: #f0f0f0;
+  /* background-color: #f0f0f0; */
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -52,6 +52,7 @@ input {
   align-items: flex-start;
   /* gap: var(--vertical-padding-lg, 24px); */
   align-self: stretch;
+  max-height: 620px;
 }
 
 .filter-header {
@@ -88,7 +89,8 @@ input {
   display: flex;
   flex-direction: column;
   min-width: 208px;
-  height: 446px;
+  max-height: calc(620px - 174px);
+  height: 100%;
   border-right: 1px solid var(--Grey-200, #e6e7e8);
   padding: 0 24px 24px 24px;
   overflow-y: auto;
@@ -117,7 +119,8 @@ input {
 }
 
 .padding_32 {
-  height: 446px;
+  max-height: calc(620px - 174px);
+  height: 100%;
   width: 80%;
   padding: var(--vertical-padding-lg, 32px);
   transition: all 0.3s ease-in-out;
