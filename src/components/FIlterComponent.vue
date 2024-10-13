@@ -76,12 +76,11 @@ const runOnCreated = async () => {
 onMounted(() => {
   runOnCreated();
 
-  // resetAllFilters();
+  resetFilters();
   document.addEventListener("reset-all-filters-event", () => {
-    // resetAllFilters(true);
+    resetFilters(true);
   });
   document.addEventListener("disable-comparison-event", (event: any) => {
-    // console.log(event.detail.disabled);
     disabledComparison.value = event.detail.disabled;
   });
 });
@@ -140,9 +139,15 @@ const onSave = (state: boolean) => {
   canAdd.value = state;
 };
 
-const resetFilters = () => {
+const resetFilters = (click?: boolean, enable?: boolean) => {
   pendingList.value = [];
   reset.value = true;
+
+  if (enable) {
+    emit("filter-values", []);
+    props.onToggleShowFilterMenu();
+  }
+  if (click) emit("reset-all-filters");
 
   setTimeout(() => {
     reset.value = false;
@@ -265,7 +270,7 @@ watch(selectedItem, () => {
         />
       </div>
       <div class="filter-footer">
-        <div v-show="!canEdit" class="btn" @click="resetFilters">
+        <div v-show="!canEdit" class="btn" @click="resetFilters(false, true)">
           <p class="btn_text">Reset</p>
         </div>
         <div v-show="canEdit" class="btn" @click="onExitEditMode">
