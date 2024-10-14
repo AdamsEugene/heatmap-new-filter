@@ -481,4 +481,101 @@ watch(
 .fade-leave-to /* .fade-leave-active in versions before 2.1.8 */ {
   opacity: 0;
 }
+
+.filter-body_right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  font-family: "IBM Plex Sans";
+
+  p,
+  ul,
+  li,
+  h3 {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.padding_32 {
+  max-height: calc(620px - 174px);
+  /* height: 100%; */
+  width: 80%;
+  padding: var(--vertical-padding-lg, 32px);
+  transition: all 0.3s ease-in-out;
+
+  overflow-y: auto;
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For IE and Edge */
+}
+
+.sidebar_filter_button,
+.filter_right_title {
+  display: flex;
+  padding: var(--corner-med, 8px) 6px;
+  align-items: center;
+  gap: var(--corner-med, 8px);
+  align-self: stretch;
+  border-radius: 4px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.filter_right_title {
+  position: sticky;
+  top: -34px;
+  justify-content: space-between;
+  background: #ffffff;
+  z-index: 2;
+}
+
+.flex_8 {
+  display: flex;
+  gap: var(--corner-med, 8px);
+  align-items: center;
+}
+
+.title_icon {
+  width: 19.2px;
+  height: 19.2px;
+  flex-shrink: 0;
+}
+
+.big_text {
+  color: #4b5563;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 28px;
+}
+
+.deep_color {
+  color: var(--Grey-800, #2e3338);
+}
+
+.in_cap {
+  text-transform: capitalize;
+}
+
+.medium_text {
+  color: #4b5563;
+  font-family: "Source Sans 3";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  text-transform: capitalize;
+  transition: color 0.3s ease-in-out;
+  width: 100%;
+
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
 </style>

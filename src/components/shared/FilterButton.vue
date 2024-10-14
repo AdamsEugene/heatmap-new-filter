@@ -1,3 +1,10 @@
+<script setup lang="ts">
+import { ReturnData } from "../../@types";
+
+// Define the props using defineProps
+defineProps<{ filteredValues?: ReturnData[]; onShowFilterMenu: () => void }>();
+</script>
+
 <template>
   <div class="main_filter_button" @click="onShowFilterMenu()">
     <svg
@@ -31,14 +38,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ReturnData } from "../../@types";
-
-// Define the props using defineProps
-defineProps<{ filteredValues?: ReturnData[]; onShowFilterMenu: () => void }>();
-</script>
-
-<style scoped>
+<style>
 .main_filter_button {
   display: flex;
   width: max-content;
@@ -51,10 +51,16 @@ defineProps<{ filteredValues?: ReturnData[]; onShowFilterMenu: () => void }>();
   background: var(--Grey-White, #fff);
   box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09);
   cursor: pointer;
+  font-family: "IBM Plex Sans";
 
+  * {
+    box-sizing: border-box;
+  }
+  
   p,
   ul,
-  li {
+  li,
+  h3 {
     margin: 0;
     padding: 0;
   }

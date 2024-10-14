@@ -34,7 +34,6 @@ function handleClickOutside(event: MouseEvent) {
     !filterWrapper.value.contains(event.target as Node)
   ) {
     // console.log(event.target);
-
     // showFilterMenu.value = false;
   }
 }
@@ -69,5 +68,19 @@ onBeforeUnmount(() => {
 .main_filter_wrapper {
   position: relative;
   width: max-content;
+
+  font-family: "IBM Plex Sans";
+
+  * {
+    box-sizing: border-box;
+  }
+
+  p,
+  ul,
+  li,
+  h3 {
+    margin: 0;
+    padding: 0;
+  }
 }
 </style>

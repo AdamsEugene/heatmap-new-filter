@@ -6,7 +6,7 @@
   </div>
 </template>
 
-<style scoped>
+<style>
 .loader_wrapper {
   position: absolute;
   display: flex;
@@ -17,6 +17,11 @@
   transform: translate(-50%, -50%);
   z-index: 999;
   pointer-events: none;
+  font-family: "IBM Plex Sans";
+
+  * {
+    box-sizing: border-box;
+  }
 }
 
 .loader {

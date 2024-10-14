@@ -611,4 +611,121 @@ watch(filterName, async (newName) => {
 #inner_arrow {
   margin-right: 2px;
 }
+
+.filter-body_right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  font-family: "IBM Plex Sans";
+  
+  p,
+  ul,
+  li,
+  h3 {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.dropdown {
+  display: flex;
+  position: relative;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.medium_text {
+  color: #4b5563;
+  font-family: "Source Sans 3";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  text-transform: capitalize;
+  transition: color 0.3s ease-in-out;
+  width: 100%;
+
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+.dropdown-input {
+  display: flex;
+  height: 44px;
+  width: 100%;
+  padding: 12px;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 8px;
+  border: 1px solid #cccfd2;
+  background: #fff;
+  padding-right: 34px;
+
+  color: #4b5563;
+  font-family: "Source Sans 3";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 142.857% */
+  text-transform: capitalize;
+
+  &.no_padding {
+    padding-right: 12px;
+  }
+
+  /* Shadows/XS */
+  box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09);
+}
+
+.dropdown-input::placeholder {
+  color: #4b5563;
+  font-family: "Source Sans 3";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 142.857% */
+  text-transform: capitalize;
+}
+
+.dropdown-input:focus {
+  border-color: #00936f;
+  outline: none; /* Removes default outline */
+}
+
+.flex_sb {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--corner-med, 8px);
+  align-items: center;
+}
+
+.normal_text {
+  color: var(--Grey-800, #34404b);
+  font-family: "Source Sans 3";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 12px;
+  transition: all 0.3s ease-in-out;
+}
+
+.center_me {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
 </style>

@@ -132,14 +132,12 @@ const manageConnection = async (partner: string) => {
     userId: "adamseugene292gmail",
     partner,
     websiteIds: [12],
+    redirectType: "locala",
   });
 
   localStorage.setItem("twitterCodeVerifier", JSON.stringify(res));
-  if (res.url) {
-    console.log(res);
-    modalUrl.value = res.url;
-    showModal.value = true;
-  }
+  if (res.url) window.open(res.url, "_blank");
+
   // loading.value = "";
 };
 
@@ -150,7 +148,7 @@ onMounted(() => {
 
 const makeExchangeRequest = async (partner: string) => {
   let payload: AuthorizationRequest = {
-    action: "exchange" as const,
+    action: "disconnect" as const,
     userId: "adamseugene292gmail",
     partner,
     websiteIds: [12],
@@ -269,7 +267,7 @@ watch(searchQuery, (newQuery) => {
         class="dropdown-item"
         :class="{
           selected: searchQuery === item || disabledItem?.includes(item),
-          disabled: disabledItems(item),
+          disabled_item: disabledItems(item),
         }"
         @click="itemSelectWithDisabled(item, item)"
       >
@@ -290,7 +288,7 @@ watch(searchQuery, (newQuery) => {
         class="dropdown-item_ads"
         :class="{
           selected: searchQuery === item || disabledItem?.includes(item),
-          disabled: disabledItems(item),
+          disabled_item: disabledItems(item),
         }"
         @click="itemSelectWithDisabled(item, item)"
       >
@@ -382,6 +380,18 @@ watch(searchQuery, (newQuery) => {
 .dropdown-container {
   position: relative;
   width: 100%;
+
+  * {
+    box-sizing: border-box;
+  }
+  font-family: "IBM Plex Sans";
+  p,
+  ul,
+  li,
+  h3 {
+    margin: 0;
+    padding: 0;
+  }
 }
 
 .dropdown {
@@ -413,7 +423,7 @@ watch(searchQuery, (newQuery) => {
 .arrow_down {
   position: absolute;
   right: 12px;
-  top: 32px;
+  top: 36px;
   cursor: pointer;
 }
 
@@ -504,7 +514,7 @@ watch(searchQuery, (newQuery) => {
     } */
   }
   &.selected {
-    background-color: var(--Primary-500-base, #00c291);
+    background-color: var(--Primary-500-base, #08916f) !important;
 
     .medium_text {
       color: var(--Grey-White, #fff);
@@ -552,7 +562,7 @@ watch(searchQuery, (newQuery) => {
   border-bottom: 1px solid var(--Grey-200, #e6e7e8);
 }
 
-.disabled {
+.disabled_item {
   cursor: not-allowed;
 }
 </style>

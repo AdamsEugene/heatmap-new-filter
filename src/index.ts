@@ -1,5 +1,5 @@
 import { defineComponent, h } from "vue";
-import HeatmapFilterComponent from "./components/FIlterComponent.vue";
+import HeatmapFilterComponent from "./components/HeatmapFilter.vue";
 
 export const HeatmapFilterNew = defineComponent({
   name: "HeatmapFilterNew",

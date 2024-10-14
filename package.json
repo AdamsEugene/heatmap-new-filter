@@ -1,7 +1,7 @@
 {
   "name": "heatmap-filter-new",
-  "version": "1.0.3",
-  "main": "./dist/heatmap-filter-new.umd.js",
+  "version": "1.1.4",
+  "main": "./dist/heatmap-filter-new.umd.cjs",
   "module": "./dist/heatmap-filter-new.es.js",
   "types": "./dist/index.d.ts",
   "repository": {
@@ -22,7 +22,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/heatmap-filter-new.js",
+      "import": "./dist/heatmap-filter-new.es.js",
       "require": "./dist/heatmap-filter-new.umd.cjs"
     },
     "./dist/style.css": {

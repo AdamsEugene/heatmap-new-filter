@@ -38,13 +38,13 @@ defineProps<{
   </div>
 </template>
 
-<style scoped>
+<style>
 .selected {
   background: var(--Grey-50, #f1f2f3);
 }
 
 .active {
-  background: var(--Grey-50, #08916f);
+  background: var(--Grey-50, #08916f) !important;
 
   .normal_text {
     color: #ffffff;
@@ -52,6 +52,14 @@ defineProps<{
 
   .button_icon {
     filter: invert(100%);
+  }
+}
+
+.sidebar_filter_button {
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--Grey-50, #f1f2f3);
   }
 }
 
@@ -79,5 +87,67 @@ defineProps<{
 .disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.sidebar_dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--corner-med, 8px);
+  align-self: stretch;
+  padding-top: 16px;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  font-family: "IBM Plex Sans";
+  p,
+  ul,
+  li,
+  h3 {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.lg_text {
+  flex: 1 0 0;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 18px; /* 128.571% */
+}
+
+.with_green {
+  color: var(--Primary-04-Dark, #016f52);
+  position: sticky;
+  top: 0px;
+  background: #ffffff;
+  width: 100%;
+  z-index: 3;
+}
+
+.sidebar_filter_buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+.button_icon {
+  width: var(--horizontal-padding-lg, 18px);
+  height: var(--horizontal-padding-lg, 18px);
+  transition: all 0.3s ease-in-out;
+}
+
+.normal_text {
+  color: var(--Grey-800, #34404b);
+  font-family: "Source Sans 3";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 12px;
+  transition: all 0.3s ease-in-out;
 }
 </style>
