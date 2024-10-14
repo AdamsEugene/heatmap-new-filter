@@ -39,13 +39,6 @@ defineProps<{ filteredValues?: ReturnData[]; onShowFilterMenu: () => void }>();
 </script>
 
 <style scoped>
-* {
-  font-family: Montserrat;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 .main_filter_button {
   display: flex;
   width: max-content;

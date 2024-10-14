@@ -33,7 +33,9 @@ function handleClickOutside(event: MouseEvent) {
     filterWrapper.value &&
     !filterWrapper.value.contains(event.target as Node)
   ) {
-    showFilterMenu.value = false;
+    // console.log(event.target);
+
+    // showFilterMenu.value = false;
   }
 }
 

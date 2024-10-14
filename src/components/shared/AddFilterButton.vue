@@ -54,10 +54,14 @@ watch(
 }
 
 .edit_mode {
-  background-color: var(--Grey-50, #f1f2f3);
+  background-color: var(--Grey-50, #f1f2f3) !important;
 
-   .normal_text {
-    color: #2E3338;
+  .normal_text {
+    color: #2e3338;
+  }
+
+  &:hover {
+    background-color: var(--Grey-200, #c7ccd1) !important;
   }
 }
 

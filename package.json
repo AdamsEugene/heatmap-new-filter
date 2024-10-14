@@ -1,20 +1,52 @@
 {
-  "name": "heatmap-new-filter",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "heatmap-filter-new",
+  "version": "1.0.3",
+  "main": "./dist/heatmap-filter-new.umd.js",
+  "module": "./dist/heatmap-filter-new.es.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdamsEugene/heatmap-new-filter.git"
+  },
+  "files": [
+    "dist",
+    "src/components/"
+  ],
+  "keywords": [
+    "filter",
+    "heatmap-filter",
+    "vue3",
+    "vue",
+    "vuejs"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/heatmap-filter-new.js",
+      "require": "./dist/heatmap-filter-new.umd.cjs"
+    },
+    "./dist/style.css": {
+      "import": "./dist/style.css",
+      "require": "./dist/style.css"
+    }
+  },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "vite-plugin-css-injected-by-js": "^3.5.2",
+    "vite-plugin-dts": "^4.2.4",
     "vue": "^3.4.37"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.1.2",
-    "typescript": "^5.5.3",
-    "vite": "^5.4.1",
-    "vue-tsc": "^2.0.29"
+    "@vitejs/plugin-vue": "^5.1.4",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.7",
+    "vue-tsc": "^2.1.6"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
   }
 }

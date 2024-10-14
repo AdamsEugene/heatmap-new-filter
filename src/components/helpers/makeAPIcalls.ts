@@ -1,4 +1,4 @@
-import { AuthorizationRequest } from "../../@types";
+import { AuthorizationRequest, SessionDataItem } from "../../@types";
 import { getThis, useEntryPage } from "./functions";
 
 const BASE_URL = "https://stage14.heatmapcore.com/";
@@ -127,3 +127,40 @@ export async function manageAdsConnection(params: AuthorizationRequest) {
     console.error("Error fetching data:", error);
   }
 }
+
+export const saveEditCustomFilter = async (filterData: SessionDataItem) => {
+  const restData = filterData.data?.map((data) => ({
+    action: data.action,
+    default: data.default,
+    name: data.name,
+    segment: data.segment,
+    value: data.value,
+  }));
+
+  const dataToDb = JSON.stringify({
+    data: restData,
+    title: filterData.title,
+    definition: filterData.definition,
+    idSite: getThis("idSite"),
+    deviceType: getThis("deviceType"),
+    idSiteHsr: getThis("subcategory"),
+    filterId: filterData.id,
+  });
+
+  const requestOptions = { method: "POST", body: dataToDb };
+
+  try {
+    const url = `${BASE_URL}/index.php?module=API&format=json&method=API.processCustomFilters`;
+
+    const response = await fetch(url, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};

@@ -133,6 +133,7 @@ export type AuthorizationRequest = {
   websiteIds: number[];
   partner?: string;
   code?: string;
+  twitterCodeVerifier?: string;
 };
 
 export type ReturnData = { definition: string; name: string; rest?: any };

@@ -111,7 +111,7 @@ const loadInitialData = async (filter?: CustomValues) => {
 };
 
 const onSelected = async (item: SELECTED_ITEMS) => {
-  console.log("onSelected: ", item.item);
+  // console.log("onSelected: ", item.item);
   if (item.kind === "action" && typeof item.item !== "string") {
     let _options: string[] | undefined = undefined;
 
@@ -172,7 +172,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
 
   emit("on-custom-filter-change", { ...newFilter.value });
 
-  // console.log(newFilter.value);
+  console.log(newFilter.value);
 };
 
 const setValues = (

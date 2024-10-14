@@ -8,13 +8,15 @@ import {
   onMounted,
   onUnmounted,
 } from "vue";
+
+import AdsIntegrationModal from "./AdsIntegrationModal.vue";
 import {
   labelMap,
   placeholderMap,
   SecondLabelMap,
   SecondPlaceholderMap,
 } from "../helpers/lookUps";
-import { DataItem, GroupedData } from "../../@types";
+import { AuthorizationRequest, DataItem, GroupedData } from "../../@types";
 
 import fb from "../../assets/images/facebook.svg";
 import x from "../../assets/images/twitter.svg";
@@ -23,7 +25,7 @@ import ti from "../../assets/images/tiktok.svg";
 import ji from "../../assets/images/ji.svg";
 import ig from "../../assets/images/ig.svg";
 import { manageAdsConnection } from "../helpers/makeAPIcalls";
-import { detectUrlChange } from "../helpers/functions";
+import { detectUrlChange, getThis } from "../helpers/functions";
 
 const props = defineProps<{
   label?: string;
@@ -61,6 +63,8 @@ const isDropdownOpen = ref<boolean>(false);
 const dropdownListRef = ref<HTMLElement | null>(null);
 const dropdownListSecondRef = ref<HTMLElement | null>(null);
 const loading = ref<string>("");
+const showModal = ref(false);
+const modalUrl = ref("");
 
 const inputLabel = computed(() => {
   if (props.position === "up") {
@@ -130,8 +134,12 @@ const manageConnection = async (partner: string) => {
     websiteIds: [12],
   });
 
-  if (res.url) window.open(res.url, "_blank");
-  console.log(res);
+  localStorage.setItem("twitterCodeVerifier", JSON.stringify(res));
+  if (res.url) {
+    console.log(res);
+    modalUrl.value = res.url;
+    showModal.value = true;
+  }
   // loading.value = "";
 };
 
@@ -140,18 +148,23 @@ onMounted(() => {
   onUnmounted(cleanup);
 });
 
-// const makeExchangeRequest = async () => {
-//   const res = await manageAdsConnection({
-//     action: "exchange",
-//     userId: "adamseugene292gmail",
-//     partner: "google",
-//     websiteIds: [12],
-//     code: getThis("code"),
-//   });
+const makeExchangeRequest = async (partner: string) => {
+  let payload: AuthorizationRequest = {
+    action: "exchange" as const,
+    userId: "adamseugene292gmail",
+    partner,
+    websiteIds: [12],
+    code: getThis("code"),
+  };
 
-//   if (res.url) window.open(res.url, "_blank");
-//   console.log(res);
-// };
+  if (partner.toLowerCase() === "x") {
+    payload.twitterCodeVerifier =
+      JSON.parse(localStorage.getItem("twitterCodeVerifier") || "{}")
+        ?.codeVerifier || "";
+  }
+
+  // const res = await manageAdsConnection({ ...payload });
+};
 
 // Watch for dropdown open state and scroll it into view when opened
 watch(isDropdownOpen, async (newValue) => {
@@ -172,7 +185,12 @@ watch(isDropdownOpen, async (newValue) => {
   }
 });
 
-// makeExchangeRequest();
+makeExchangeRequest("x");
+
+const closeModal = () => {
+  showModal.value = false;
+  modalUrl.value = "";
+};
 
 watch(
   () => props.items,
@@ -206,6 +224,11 @@ watch(searchQuery, (newQuery) => {
 
 <template>
   <div class="dropdown-container">
+    <AdsIntegrationModal
+      :show="showModal"
+      :url="modalUrl"
+      @close="closeModal"
+    />
     <div class="dropdown">
       <label for="this_dropdown" class="medium_text">{{
         inputLabel || "Select Platform"

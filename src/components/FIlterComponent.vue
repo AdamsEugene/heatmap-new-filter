@@ -13,7 +13,10 @@ import {
   ReturnData,
   SessionDataItem,
 } from "../@types";
-import { loadCustomFilters } from "./helpers/makeAPIcalls";
+import {
+  loadCustomFilters,
+  saveEditCustomFilter,
+} from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
 
@@ -124,7 +127,7 @@ const removeItemFromPendingList = (filter: CombinedFilter) => {
 };
 
 const onEditingMode = () => {
-  canEdit.value = !canEdit.value;
+  canEdit.value = true;
   cancelEdit.value = false;
 };
 
@@ -155,30 +158,52 @@ const resetFilters = (click?: boolean, enable?: boolean) => {
 };
 
 const saveCustomFilter = async () => {
-  // console.log(selectedItem.value);
-  pendingList.value.push(selectedItem.value);
-  // make a request to save the filters
+  loading.value = true;
+  const res = await saveEditCustomFilter(selectedItem.value);
+  const { name, ...others } = selectedItem.value;
+  const existingItemIndex = customFilters.value.findIndex(
+    (filter) => filter.id === selectedItem.value.id
+  );
+
+  if (res) {
+    if (existingItemIndex === -1) {
+      customFilters.value.push({
+        isDefinitionValueSet: true,
+        name: selectedItem.value.title,
+        ...others,
+      });
+    } else {
+      customFilters.value[existingItemIndex] = {
+        ...customFilters.value[existingItemIndex],
+        isDefinitionValueSet: true,
+        name: selectedItem.value.title,
+        ...others,
+      };
+    }
+  }
   canEdit.value = false;
   if (nameIs("Create Custom Filter"))
     selectedItem.value = prevSelectedItem.value;
+  loading.value = false;
 };
 
 const applyFilters = () => {
-  if (!pendingList.value.length) {
-    const { definition, name, rest } = selectedItem.value;
-    console.log({ definition, name, rest });
+  let returnData: ReturnData[] = [];
+  if (!pendingList.value.length && (waitingRoom.value || selectedItem.value)) {
+    const { definition, name, nameForCompare, rest } =
+      waitingRoom.value || selectedItem.value;
+    returnData = [{ definition, name: nameForCompare || name, rest }];
   } else {
-    console.log(
-      "apply this filters",
-      pendingList.value.map((filter) => ({
-        name: filter.name,
-        definition: filter.definition,
-        rest: filter.rest,
-      }))
-    );
+    const data = pendingList.value.map((filter) => ({
+      name: filter.nameForCompare || filter.name,
+      definition: filter.definition,
+      rest: filter.rest,
+    }));
+
+    returnData = data;
   }
 
-  emit("filter-values", []);
+  emit("filter-values", returnData);
   props.onToggleShowFilterMenu();
 };
 
@@ -186,6 +211,33 @@ const saveApplyFilters = async () => {
   await saveCustomFilter();
   applyFilters();
 };
+
+watch(
+  () => props.defaultValues,
+  (newVal) => {
+    if (newVal) {
+      const names = newVal.map((item) => ({
+        name: item.name.split(":")[0],
+        definition: item.definition,
+      }));
+      const data = [...sessionData, ...eCommerceData, ...customFilters.value];
+
+      const affectedData = data
+        .filter((d) => names.some((nameObj) => nameObj.name === d.name))
+        .map((d) => {
+          const matchingNameObj = names.find(
+            (nameObj) => nameObj.name === d.name
+          );
+          return matchingNameObj
+            ? { ...d, definition: matchingNameObj.definition }
+            : d;
+        });
+
+      pendingList.value = affectedData;
+    }
+  },
+  { immediate: true }
+);
 
 watch(selectedItem, () => {
   canEdit.value = nameIs("Create Custom Filter");
