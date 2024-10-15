@@ -18,7 +18,10 @@ import {
   initialNewFilter,
   options,
 } from "../helpers/functions";
-import { dynamicallyFetchOptions } from "../helpers/makeAPIcalls";
+import {
+  deleteCustomFilter,
+  dynamicallyFetchOptions,
+} from "../helpers/makeAPIcalls";
 import { _data } from "../../data";
 
 type DEF = "main" | "value" | "action" | "condition";
@@ -44,6 +47,7 @@ const emit = defineEmits([
   "on-loading",
   "on-custom-filter-change",
   "on-clear-current-custom-filter",
+  "on-delete-custom-filter",
 ]);
 
 const customData = ref<FilterItem>();
@@ -200,6 +204,14 @@ const addNewFilter = () => {
   else props.selectedItem.data?.push(...copy.value.data!);
 };
 
+const deleteFilter = async () => {
+  emit("on-loading", true);
+  const res = await deleteCustomFilter(props.selectedItem);
+  console.log(res);
+  emit("on-delete-custom-filter");
+  emit("on-loading", false);
+};
+
 onMounted(() => {
   setCustomData();
   newFilter.value = props.selectedItem;
@@ -322,13 +334,12 @@ watch(filterName, async (newName) => {
         :disabled="!canEdit"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
-      <div class="flex_sb">
+      <div
+        v-show="(selectedItem?.data?.length || 0) > 1 && canEdit"
+        class="flex_sb"
+      >
         <div></div>
-        <div
-          v-if="(selectedItem?.data?.length || 0) > 1 && canEdit"
-          class="remove"
-          @click="removeFilter(index)"
-        >
+        <div class="remove" @click.stop="removeFilter(index)">
           <img
             class=""
             src="../../assets/images/remove.svg"
@@ -338,7 +349,7 @@ watch(filterName, async (newName) => {
         </div>
       </div>
       <div
-        v-if="
+        v-show="
           (selectedItem?.data?.length || 0) !== 1 &&
           (selectedItem?.data?.length || 0) !== index + 1
         "
@@ -351,23 +362,22 @@ watch(filterName, async (newName) => {
       </div>
     </div>
   </div>
-
-  <div class="center_me">
+  <div v-show="!canEdit" class="flex_sb">
     <add-filter-button
-      v-show="canEdit"
+      :label="`Delete “${selectedItem.title}”`"
+      :with-border="true"
+      :no-icon="true"
+      :onclick="deleteFilter"
+    />
+  </div>
+  <div v-show="canEdit" class="flex_sb">
+    <add-filter-button
       :label="'Add Additional Filter'"
       :with-border="true"
+      :no-icon="true"
       :onclick="addNewFilter"
     />
   </div>
-  <!-- <div class="flex_sb">
-    <div
-      class="btn primary"
-      @click="saveCustomFilter({ ...newFilter, title: filterName })"
-    >
-      <p class="btn_text">Save</p>
-    </div>
-  </div> -->
 </template>
 
 <style>
@@ -405,7 +415,7 @@ watch(filterName, async (newName) => {
 }
 
 .remove {
-  display: flex !important;
+  display: flex;
   padding: 4px var(--corner-med, 8px) !important;
   justify-content: flex-end !important;
   align-items: center !important;
@@ -657,6 +667,7 @@ watch(filterName, async (newName) => {
   overflow-wrap: break-word !important;
   word-wrap: break-word !important;
   hyphens: auto !important;
+  white-space: normal;
 }
 
 .dropdown-input {
@@ -704,7 +715,7 @@ watch(filterName, async (newName) => {
 }
 
 .flex_sb {
-  display: flex !important;
+  display: flex;
   justify-content: space-between !important;
   gap: var(--corner-med, 8px) !important;
   align-items: center !important;

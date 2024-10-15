@@ -164,3 +164,28 @@ export const saveEditCustomFilter = async (filterData: SessionDataItem) => {
     console.error("Error fetching data:", error);
   }
 };
+
+export const deleteCustomFilter = async (data: SessionDataItem) => {
+  const id = data?.id;
+  if (typeof id === "undefined") return;
+  const dataToDb = JSON.stringify({
+    idSite: getThis("idSite"),
+    definition: "delete",
+    filterId: id,
+  });
+  const requestOptions = { method: "POST", body: dataToDb };
+  const url = `${BASE_URL}/index.php?module=API&format=json&method=API.processCustomFilters`;
+
+  try {
+    const response = await fetch(url, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};

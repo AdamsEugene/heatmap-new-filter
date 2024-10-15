@@ -283,7 +283,7 @@ watch(searchQuery, (newQuery) => {
       class="dropdown-list_ads"
       ref="dropdownListSecondRef"
     >
-      <div class="ads_title">
+      <div class="new_ads_title">
         <p class="medium_text">AD PLATFORM</p>
       </div>
       <div
@@ -296,13 +296,13 @@ watch(searchQuery, (newQuery) => {
         }"
         @click="itemSelectWithDisabled(item, item)"
       >
-        <div class="ads_left">
+        <div class="new_ads_left">
           <img class="button_icon" :src="returnImg(item)" alt="add icon" />
           <p class="medium_text">{{ item }}</p>
         </div>
         <div
           v-show="!hasTokens?.includes(item)"
-          class="ads_right"
+          class="new_ads_right"
           @click.stop="manageConnection(item)"
         >
           <p
@@ -366,7 +366,7 @@ watch(searchQuery, (newQuery) => {
                 </p>
                 <div
                   class="help_icon_inner"
-                  v-if="true"
+                  v-show="true"
                   :title="innerItem.name"
                 >
                   <img class="filter_image" alt="" />
@@ -422,6 +422,7 @@ watch(searchQuery, (newQuery) => {
   overflow-wrap: break-word !important;
   word-wrap: break-word !important;
   hyphens: auto !important;
+  white-space: normal;
 }
 
 .arrow_down {
@@ -482,11 +483,11 @@ watch(searchQuery, (newQuery) => {
 .dropdown-list,
 .dropdown-list_ads {
   position: absolute !important;
-  top: 106% !important;
+  top: 94% !important;
   left: 0 !important;
   width: 100% !important;
   display: flex;
-  max-height: 303px !important;
+  max-height: min(27vh, 303px) !important;
   padding: var(--corner-med, 8px) 0px !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -526,13 +527,13 @@ watch(searchQuery, (newQuery) => {
   }
 }
 
-.ads_left {
+.new_ads_left {
   display: flex !important;
   align-items: center !important;
   gap: var(--corner-med, 8px) !important;
 }
 
-.ads_right {
+.new_ads_right {
   display: flex !important;
   min-width: 94px !important;
   height: 30px !important;
@@ -558,7 +559,7 @@ watch(searchQuery, (newQuery) => {
   transform: rotate(180deg) !important;
 }
 
-.ads_title {
+.new_ads_title {
   display: flex !important;
   padding: 5px var(--horizontal-padding-lg, 12px) !important;
   align-items: center !important;
@@ -656,7 +657,7 @@ input {
       }
 
       .help_icon_inner {
-        display: flex !important;
+        display: flex;
         justify-content: center !important;
         align-items: center !important;
         height: 20px !important;

@@ -187,6 +187,13 @@ const saveCustomFilter = async () => {
   loading.value = false;
 };
 
+const onDeleteCustomFilter = () => {
+  customFilters.value = customFilters.value.filter(
+    (item) => item.id !== selectedItem.value.id
+  );
+  selectedItem.value = sessionData[0];
+};
+
 const applyFilters = () => {
   let returnData: ReturnData[] = [];
   if (!pendingList.value.length && (waitingRoom.value || selectedItem.value)) {
@@ -319,6 +326,7 @@ watch(selectedItem, () => {
           @on-selected="onFilterSelect"
           @editing-mode="onEditingMode"
           @on-save="onSave"
+          @on-delete-custom-filter="onDeleteCustomFilter"
         />
       </div>
       <div class="filter-footer">
@@ -546,7 +554,7 @@ watch(selectedItem, () => {
   display: flex;
   flex-direction: column !important;
   min-width: 208px !important;
-  max-height: calc(620px - 174px) !important;
+  max-height: min(40vh, 446px) !important;
   height: 100% !important;
   border-right: 1px solid var(--Grey-200, #e6e7e8) !important;
   padding: 0 24px 24px 24px !important;

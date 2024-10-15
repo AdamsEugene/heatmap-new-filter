@@ -51,10 +51,10 @@ defineProps<{ filteredValues?: ReturnData[]; onShowFilterMenu: () => void }>();
   background: var(--Grey-White, #fff) !important;
   box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09) !important;
   cursor: pointer !important;
-  font-family: "IBM Plex Sans" !important;
 
   * {
     box-sizing: border-box !important;
+    font-family: "IBM Plex Sans" !important;
   }
 
   p,

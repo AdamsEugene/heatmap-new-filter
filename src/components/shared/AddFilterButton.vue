@@ -29,7 +29,13 @@ watch(
 <template>
   <div
     class="sidebar_filter_button change_color"
-    :class="{ borderClass: withBorder, withBg, edit_mode: label === 'Edit' }"
+    :class="{
+      borderClass: withBorder,
+      withBg,
+      edit_mode: label === 'Edit',
+      deleting_button: label?.includes('Delete'),
+      add_filter: label === 'Add Additional Filter',
+    }"
     @click="onclick"
   >
     <img v-show="!noIcon" class="button_icon" :src="url" alt="add icon" />
@@ -51,17 +57,25 @@ watch(
   .normal_text {
     color: #00936f !important;
   }
-}
 
-.edit_mode {
-  background-color: var(--Grey-50, #f1f2f3) !important ;
+  &.deleting_button {
+    background: var(--Error-50, #ffebe6) !important;
+    border: 1px solid var(--Primary-03-Main, #ffebe6) !important;
 
-  .normal_text {
-    color: #2e3338 !important ;
+    .normal_text {
+      color: var(--Grey-800, #2e3338) !important;
+    }
   }
 
-  &:hover {
-    background-color: var(--Grey-200, #c7ccd1) !important ;
+  &.add_filter {
+    padding: var(--Padding-Horizontal-padding, 8px)
+      var(--Padding-Vertical-padding, 16px) !important;
+    align-items: center;
+    gap: 10px;
+
+    .normal_text {
+      color: var(--Primary-03-Main, #00936f) !important;
+    }
   }
 }
 
@@ -98,12 +112,24 @@ watch(
 .sidebar_filter_button,
 .filter_right_title {
   display: flex;
-  padding: var(--corner-med, 8px) 6px !important;
+  padding: var(--corner-med, 8px) 6px;
   align-items: center !important;
   gap: var(--corner-med, 8px) !important;
   align-self: stretch !important;
   border-radius: 4px !important;
   transition: background-color 0.3s ease-in-out !important;
+
+  &.edit_mode {
+    background-color: var(--Grey-50, #f1f2f3) !important ;
+
+    .normal_text {
+      color: #2e3338 !important ;
+    }
+
+    &:hover {
+      background-color: var(--Grey-200, #c7ccd1) !important ;
+    }
+  }
 }
 
 .change_color {
@@ -112,7 +138,7 @@ watch(
   }
 
   .normal_text {
-    color: #225caf;
+    color: #225caf !important;
   }
 }
 

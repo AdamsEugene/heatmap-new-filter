@@ -38,6 +38,7 @@ const emit = defineEmits([
   "on-add-to-waiting-room",
   "editing-mode",
   "on-save",
+  "on-delete-custom-filter",
 ]);
 
 const nameIs = (name: string) => name === props.selectedItem.name;
@@ -215,6 +216,10 @@ const onLoading = (state: boolean) => {
   emit("on-loading", state);
 };
 
+const onDeleteCustomFilter = () => {
+  emit("on-delete-custom-filter");
+};
+
 const onSelectionError = () => {
   selectionError.value = true;
 
@@ -272,11 +277,11 @@ watch(
             :src="selectedItem.iconSrc"
             :alt="selectedItem.name"
           />
-          <p class="big_text deep_color * { box-sizing: border-box; }ap">
+          <p class="big_text deep_color in_cap">
             {{ selectedItem.name }}
           </p>
         </div>
-        <p v-if="selectedItem.subTitle" class="small_text">
+        <p v-show="selectedItem.subTitle" class="small_text">
           {{ selectedItem.subTitle }}
         </p>
       </div>
@@ -301,6 +306,7 @@ watch(
         @on-loading="onLoading"
         @on-clear-current-custom-filter="onClearCurrentCustomFilter"
         @on-custom-filter-change="onOnCustomFilterChange"
+        @on-delete-custom-filter="onDeleteCustomFilter"
       />
     </div>
     <template v-else-if="!selectedItem?.isDefinitionValueSet">
@@ -448,6 +454,7 @@ watch(
   font-style: normal !important;
   font-weight: 400 !important;
   line-height: 16px !important; /* 133.333% */
+  white-space: normal;
 }
 
 .head {
@@ -475,9 +482,8 @@ watch(
 
   * {
     box-sizing: border-box !important;
+    font-family: "IBM Plex Sans" !important;
   }
-
-  font-family: "IBM Plex Sans" !important;
 
   p,
   ul,
@@ -539,7 +545,7 @@ watch(
   line-height: 28px !important;
 }
 
-.deep_color {
+.deep_color in_cap {
   color: var(--Grey-800, #2e3338) !important;
 }
 
@@ -561,5 +567,6 @@ watch(
   overflow-wrap: break-word !important;
   word-wrap: break-word !important;
   hyphens: auto !important;
+  white-space: normal;
 }
 </style>

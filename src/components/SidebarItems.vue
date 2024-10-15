@@ -30,7 +30,7 @@ defineProps<{
       >
         <img class="button_icon" :src="item.iconSrc" :alt="item.name" />
         <p class="normal_text">{{ item.name }}</p>
-        <div v-if="item.hasBudge" class="budge">
+        <div v-show="item.hasBudge" class="budge">
           <p class="text">NEW</p>
         </div>
       </div>
@@ -64,7 +64,7 @@ defineProps<{
 }
 
 .budge {
-  display: flex !important;
+  display: flex;
   padding: 0px 2px !important;
   justify-content: center !important;
   align-items: center !important;

@@ -48,7 +48,7 @@ const onClick = () => {
   gap: 10px !important;
   width: max-content !important;
   border-radius: var(--Padding-Corner, 6px) !important;
-  background: var(--Grey-100, #f6f6f6) !important;
+  background: var(--Grey-100, #f6f6f6);
   box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09) !important;
   cursor: pointer !important;
 }
@@ -64,15 +64,23 @@ const onClick = () => {
 
 .btn.primary {
   background: var(--Primary-03-Main, #00936f) !important;
-  transition: all 0.3s ease-in-out !important;
+  transition: all 0.3s ease-in-out;
 
   .btn_text {
     color: var(--Grey-White, #fff) !important;
   }
+
+  &.with_opacity {
+    background: var(--Grey-300, #cccfd2) !important;
+
+    .btn_text {
+      color: var(--Grey-White, #fff) !important;
+    }
+  }
 }
 
 .btn_text {
-  color: var(--Grey-800, #2e3338) !important;
+  color: var(--Grey-800, #2e3338);
   text-align: center !important;
   font-family: "Source Sans 3" !important;
   font-size: 14px !important;
