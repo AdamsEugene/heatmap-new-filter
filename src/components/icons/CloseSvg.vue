@@ -26,18 +26,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  props: ['onClick'],
+  props: ["onClick"],
   components: {},
   data(): {} {
-    return {}
+    return {};
   },
-  methods: {}
-})
+  methods: {},
+});
 </script>
 
-<style scoped>
-
-</style>
+<style></style>

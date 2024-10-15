@@ -387,8 +387,8 @@ watch(searchQuery, (newQuery) => {
 
   * {
     box-sizing: border-box !important;
+    font-family: "IBM Plex Sans" !important;
   }
-  font-family: "IBM Plex Sans" !important;
   p,
   ul,
   li,

@@ -22,7 +22,7 @@ const closeModal = () => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .modal {
   display: flex;
   position: fixed;

@@ -68,10 +68,9 @@ onBeforeUnmount(() => {
   position: relative !important;
   width: max-content !important;
 
-  font-family: "IBM Plex Sans" !important;
-
   * {
     box-sizing: border-box !important;
+    font-family: "IBM Plex Sans" !important;
   }
 
   p,

@@ -43,23 +43,23 @@ defineProps<{
   background: var(--Grey-50, #f1f2f3) !important;
 }
 
-.active {
-  background: var(--Grey-50, #08916f) !important ;
-
-  .normal_text {
-    color: #ffffff !important;
-  }
-
-  .button_icon {
-    filter: invert(100%) !important;
-  }
-}
-
 .sidebar_filter_button {
   cursor: pointer !important;
 
   &:hover {
     background-color: var(--Grey-50, #f1f2f3) !important;
+  }
+
+  &.active {
+    background: var(--Grey-50, #08916f) !important ;
+
+    .normal_text {
+      color: #ffffff !important;
+    }
+
+    .button_icon {
+      filter: invert(100%) !important;
+    }
   }
 }
 
@@ -99,15 +99,18 @@ defineProps<{
 
   * {
     box-sizing: border-box !important;
+    font-family: "IBM Plex Sans" !important;
   }
 
-  font-family: "IBM Plex Sans" !important;
   p,
   ul,
   li,
   h3 {
     margin: 0 !important;
     padding: 0 !important;
+  }
+  h3 {
+    font-family: "IBM Plex Sans" !important;
   }
 }
 

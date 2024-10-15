@@ -404,7 +404,7 @@ watch(selectedItem, () => {
   top: 58px !important;
   left: 0 !important;
   z-index: 9 !important;
-  display: flex !important;
+  display: flex;
   width: 682px !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -416,8 +416,8 @@ watch(selectedItem, () => {
 
   * {
     box-sizing: border-box !important;
+    font-family: "IBM Plex Sans" !important;
   }
-  font-family: "IBM Plex Sans" !important;
   p,
   ul,
   li,

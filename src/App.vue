@@ -8,4 +8,4 @@ import HeatmapFilter from "./components/HeatmapFilter.vue";
   </div>
 </template>
 
-<style scoped></style>
+<style></style>

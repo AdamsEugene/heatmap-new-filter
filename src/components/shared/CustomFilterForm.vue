@@ -621,9 +621,8 @@ watch(filterName, async (newName) => {
 
   * {
     box-sizing: border-box !important;
+    font-family: "IBM Plex Sans" !important;
   }
-
-  font-family: "IBM Plex Sans" !important;
 
   p,
   ul,

@@ -288,24 +288,6 @@ watch(
         :with-bg="canEdit"
       />
     </div>
-    <!-- <div v-if="(awaitedFilters?.data?.length || 0) >= 1" class="flex_8">
-      <div
-        v-for="filter in awaitedFilters?.data"
-        :key="filter.name"
-        class="created_filters"
-        @click="setAsCurrentEditableFilter(filter.name + ':' + filter.value)"
-      >
-        <p class="medium_text shot">
-          {{ filter.name + ":" + filter.value }}
-        </p>
-        <img
-          @click.stop="removeItem(filter.name)"
-          class="small_close_icon"
-          src="../assets/images/close.png"
-          alt="add icon"
-        />
-      </div>
-    </div> -->
     <div
       v-if="nameIs('Create Custom Filter') || selectedItem.data"
       class="filter-body_right"
@@ -395,9 +377,9 @@ watch(
   }
 }
 
-.active {
+/* .active {
   background: var(--Grey-50, #f1f2f3) !important;
-}
+} */
 
 /* Fade transition styles */
 .fade-enter-active,

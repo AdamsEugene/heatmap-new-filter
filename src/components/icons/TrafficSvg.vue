@@ -1,5 +1,11 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+  >
     <g clip-path="url(#clip0_7118_789)">
       <path
         d="M15.8919 4.10831C14.5943 2.80932 12.904 1.97524 11.0836 1.73564C9.26326 1.49604 7.41473 1.86434 5.8252 2.78331"
@@ -67,16 +73,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 export default defineComponent({
   props: [],
   components: {},
   data(): {} {
-    return {}
+    return {};
   },
-  methods: {}
-})
+  methods: {},
+});
 </script>
 
-<style scoped></style>
+<style></style>
