@@ -264,7 +264,7 @@ watch(
 
 <template>
   <div class="filter-body_right padding_32">
-    <div v-if="!canEdit" class="filter_right_title">
+    <div v-show="!canEdit" class="filter_right_title">
       <div class="head">
         <div class="flex_8">
           <img
@@ -272,7 +272,9 @@ watch(
             :src="selectedItem.iconSrc"
             :alt="selectedItem.name"
           />
-          <p class="big_text deep_color in_cap">{{ selectedItem.name }}</p>
+          <p class="big_text deep_color * { box-sizing: border-box; }ap">
+            {{ selectedItem.name }}
+          </p>
         </div>
         <p v-if="selectedItem.subTitle" class="small_text">
           {{ selectedItem.subTitle }}
@@ -376,206 +378,206 @@ watch(
 
 <style>
 .enabled_to_select {
-  position: absolute;
-  bottom: 0;
-  z-index: 9;
-  width: 80%;
+  position: absolute !important;
+  bottom: 0 !important;
+  z-index: 9 !important;
+  width: 80% !important;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  background-color: tomato;
-  padding: 8px;
-  border-radius: 8px;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  background-color: tomato !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
 
   .medium_text {
-    color: #fff;
+    color: #fff !important;
   }
 }
 
 .active {
-  background: var(--Grey-50, #f1f2f3);
+  background: var(--Grey-50, #f1f2f3) !important;
 }
 
 /* Fade transition styles */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.3s ease-in-out !important;
 }
 .fade-enter, 
 .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
-  opacity: 0;
+  opacity: 0 !important;
 }
 
 .fade-scale-enter-active,
 .fade-scale-leave-active {
-  transition: all 0.4s ease;
+  transition: all 0.4s ease !important;
 }
 .fade-scale-enter, 
 .fade-scale-leave-to /* .fade-scale-leave-active in <2.1.8 */ {
-  opacity: 0;
-  transform: scale(0.95);
+  opacity: 0 !important;
+  transform: scale(0.95) !important;
 }
 
 /* Image and text animations */
 .title_icon {
-  transition: transform 0.4s ease;
+  transition: transform 0.4s ease !important;
 }
 .big_text {
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease !important;
 }
 
 .center_me {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .new_text {
-  color: var(--Primary-04-Dark, #016f52);
-  text-align: center;
-  font-family: "Source Sans 3";
-  font-size: 14px;
-  font-style: italic;
-  font-weight: 600;
-  line-height: 20px; /* 142.857% */
+  color: var(--Primary-04-Dark, #016f52) !important;
+  text-align: center !important;
+  font-family: "Source Sans 3" !important;
+  font-size: 14px !important;
+  font-style: italic !important;
+  font-weight: 600 !important;
+  line-height: 20px !important; /* 142.857% */
 }
 
 .shot {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  max-width: 120px;
-  white-space: nowrap;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  max-width: 120px !important;
+  white-space: nowrap !important;
 }
 
 .with_opacity {
-  background: var(--Grey-300, #cccfd2) !important;
-  cursor: not-allowed;
+  background: var(--Grey-300, #cccfd2) !important ;
+  cursor: not-allowed !important;
   .btn_text {
-    color: var(--Grey-White, #fff);
+    color: var(--Grey-White, #fff) !important;
   }
 }
 
 .small_text {
-  color: #4b5563;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 16px; /* 133.333% */
+  color: #4b5563 !important;
+  font-size: 12px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 16px !important; /* 133.333% */
 }
 
 .head {
-  display: flex;
-  flex-direction: column;
-  gap: 4;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4 !important;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease-in-out;
+  transition: opacity 0.5s ease-in-out !important;
 }
 
 .fade-enter, 
 .fade-leave-to /* .fade-leave-active in versions before 2.1.8 */ {
-  opacity: 0;
+  opacity: 0 !important;
 }
 
 .filter-body_right {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  width: 100% !important;
 
   * {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
 
-  font-family: "IBM Plex Sans";
+  font-family: "IBM Plex Sans" !important;
 
   p,
   ul,
   li,
   h3 {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
 .padding_32 {
-  max-height: calc(620px - 174px);
-  /* height: 100%; */
-  width: 80%;
-  padding: var(--vertical-padding-lg, 32px);
-  transition: all 0.3s ease-in-out;
+  max-height: calc(620px - 174px) !important;
+  /* height: 100% !important;  */
+  width: 80% !important;
+  padding: var(--vertical-padding-lg, 32px) !important;
+  transition: all 0.3s ease-in-out !important;
 
-  overflow-y: auto;
-  scrollbar-width: none; /* For Firefox */
-  -ms-overflow-style: none; /* For IE and Edge */
+  overflow-y: auto !important;
+  scrollbar-width: none !important; /* For Firefox */
+  -ms-overflow-style: none !important; /* For IE and Edge */
 }
 
 .sidebar_filter_button,
 .filter_right_title {
   display: flex;
-  padding: var(--corner-med, 8px) 6px;
-  align-items: center;
-  gap: var(--corner-med, 8px);
-  align-self: stretch;
-  border-radius: 4px;
-  transition: background-color 0.3s ease-in-out;
+  padding: var(--corner-med, 8px) 6px !important;
+  align-items: center !important;
+  gap: var(--corner-med, 8px) !important;
+  align-self: stretch !important;
+  border-radius: 4px !important;
+  transition: background-color 0.3s ease-in-out !important;
 }
 
 .filter_right_title {
-  position: sticky;
-  top: -34px;
-  justify-content: space-between;
-  background: #ffffff;
-  z-index: 2;
+  position: sticky !important;
+  top: -34px !important;
+  justify-content: space-between !important;
+  background: #ffffff !important;
+  z-index: 2 !important;
 }
 
 .flex_8 {
-  display: flex;
-  gap: var(--corner-med, 8px);
-  align-items: center;
+  display: flex !important;
+  gap: var(--corner-med, 8px) !important;
+  align-items: center !important;
 }
 
 .title_icon {
-  width: 19.2px;
-  height: 19.2px;
-  flex-shrink: 0;
+  width: 19.2px !important;
+  height: 19.2px !important;
+  flex-shrink: 0 !important;
 }
 
 .big_text {
-  color: #4b5563;
-  font-size: 18px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 28px;
+  color: #4b5563 !important;
+  font-size: 18px !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: 28px !important;
 }
 
 .deep_color {
-  color: var(--Grey-800, #2e3338);
+  color: var(--Grey-800, #2e3338) !important;
 }
 
 .in_cap {
-  text-transform: capitalize;
+  text-transform: capitalize !important;
 }
 
 .medium_text {
-  color: #4b5563;
-  font-family: "Source Sans 3";
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 20px;
-  text-transform: capitalize;
-  transition: color 0.3s ease-in-out;
-  width: 100%;
+  color: #4b5563 !important;
+  font-family: "Source Sans 3" !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: 20px !important;
+  text-transform: capitalize !important;
+  transition: color 0.3s ease-in-out !important;
+  width: 100% !important;
 
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  hyphens: auto;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  hyphens: auto !important;
 }
 </style>

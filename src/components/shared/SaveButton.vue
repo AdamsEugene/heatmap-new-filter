@@ -21,70 +21,70 @@ const onClick = () => {
 <style>
 .flex_sb {
   display: flex;
-  justify-content: space-between;
-  gap: var(--corner-med, 8px);
-  align-items: center;
+  justify-content: space-between !important;
+  gap: var(--corner-med, 8px) !important;
+  align-items: center !important;
 
   * {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
-  font-family: "IBM Plex Sans";
+  font-family: "IBM Plex Sans" !important;
   p,
   ul,
   li,
   h3 {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
 .btn {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center !important;
+  align-items: center !important;
   padding: var(--Padding-Horizontal-padding, 6px)
-    var(--Padding-Vertical-padding, 16px);
-  align-items: flex-start;
-  gap: 10px;
-  width: max-content;
-  border-radius: var(--Padding-Corner, 6px);
-  background: var(--Grey-100, #f6f6f6);
-  box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09);
-  cursor: pointer;
+    var(--Padding-Vertical-padding, 16px) !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  width: max-content !important;
+  border-radius: var(--Padding-Corner, 6px) !important;
+  background: var(--Grey-100, #f6f6f6) !important;
+  box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09) !important;
+  cursor: pointer !important;
 }
 
 .btn.border {
-  border: 1.5px solid var(--Primary-03-Main, #00936f);
-  background: var(--Grey-100, #ffffff);
+  border: 1.5px solid var(--Primary-03-Main, #00936f) !important;
+  background: var(--Grey-100, #ffffff) !important;
 
   .btn_text {
-    color: var(--Primary-600, #08916f);
+    color: var(--Primary-600, #08916f) !important;
   }
 }
 
 .btn.primary {
-  background: var(--Primary-03-Main, #00936f);
-  transition: all 0.3s ease-in-out;
+  background: var(--Primary-03-Main, #00936f) !important;
+  transition: all 0.3s ease-in-out !important;
 
   .btn_text {
-    color: var(--Grey-White, #fff);
+    color: var(--Grey-White, #fff) !important;
   }
 }
 
 .btn_text {
-  color: var(--Grey-800, #2e3338);
-  text-align: center;
-  font-family: "Source Sans 3";
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 20px; /* 142.857% */
-  text-transform: capitalize;
+  color: var(--Grey-800, #2e3338) !important;
+  text-align: center !important;
+  font-family: "Source Sans 3" !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: 20px !important; /* 142.857% */
+  text-transform: capitalize !important;
 }
 
 .right_btns {
-  display: flex;
-  align-items: center;
-  gap: var(--horizontal-padding-lg, 12px);
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--horizontal-padding-lg, 12px) !important;
 }
 </style>

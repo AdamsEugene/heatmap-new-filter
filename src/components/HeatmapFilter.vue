@@ -33,8 +33,7 @@ function handleClickOutside(event: MouseEvent) {
     filterWrapper.value &&
     !filterWrapper.value.contains(event.target as Node)
   ) {
-    // console.log(event.target);
-    // showFilterMenu.value = false;
+    showFilterMenu.value = false;
   }
 }
 
@@ -66,21 +65,21 @@ onBeforeUnmount(() => {
 
 <style>
 .main_filter_wrapper {
-  position: relative;
-  width: max-content;
+  position: relative !important;
+  width: max-content !important;
 
-  font-family: "IBM Plex Sans";
+  font-family: "IBM Plex Sans" !important;
 
   * {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
 
   p,
   ul,
   li,
   h3 {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 </style>

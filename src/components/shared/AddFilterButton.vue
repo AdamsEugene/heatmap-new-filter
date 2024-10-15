@@ -32,83 +32,83 @@ watch(
     :class="{ borderClass: withBorder, withBg, edit_mode: label === 'Edit' }"
     @click="onclick"
   >
-    <img v-if="!noIcon" class="button_icon" :src="url" alt="add icon" />
+    <img v-show="!noIcon" class="button_icon" :src="url" alt="add icon" />
     <p class="normal_text">{{ label || "Add Custom" }}</p>
   </div>
 </template>
 
 <style>
 .borderClass {
-  border-radius: var(--Padding-Corner, 6px);
-  border: 1px solid var(--Primary-03-Main, #00936f);
-  box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09);
+  border-radius: var(--Padding-Corner, 6px) !important;
+  border: 1px solid var(--Primary-03-Main, #00936f) !important;
+  box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09) !important;
 
   .button_icon {
-    filter: #00936f;
-    margin-bottom: -4px !important;
+    filter: #00936f !important;
+    margin-bottom: -4px !important ;
   }
 
   .normal_text {
-    color: #00936f;
+    color: #00936f !important;
   }
 }
 
 .edit_mode {
-  background-color: var(--Grey-50, #f1f2f3) !important;
+  background-color: var(--Grey-50, #f1f2f3) !important ;
 
   .normal_text {
-    color: #2e3338;
+    color: #2e3338 !important ;
   }
 
   &:hover {
-    background-color: var(--Grey-200, #c7ccd1) !important;
+    background-color: var(--Grey-200, #c7ccd1) !important ;
   }
 }
 
 .withBg {
-  background-color: #00936f;
+  background-color: #00936f !important;
   .normal_text {
-    color: #ffffff;
+    color: #ffffff !important;
   }
 
   &:hover {
-    background-color: #003f2f;
+    background-color: #003f2f !important;
   }
 }
 
 .sidebar_filter_buttons {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  align-self: stretch;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  align-self: stretch !important;
 
   * {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
-  font-family: "IBM Plex Sans";
+  font-family: "IBM Plex Sans" !important;
   p,
   ul,
   li,
   h3 {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
 .sidebar_filter_button,
 .filter_right_title {
   display: flex;
-  padding: var(--corner-med, 8px) 6px;
-  align-items: center;
-  gap: var(--corner-med, 8px);
-  align-self: stretch;
-  border-radius: 4px;
-  transition: background-color 0.3s ease-in-out;
+  padding: var(--corner-med, 8px) 6px !important;
+  align-items: center !important;
+  gap: var(--corner-med, 8px) !important;
+  align-self: stretch !important;
+  border-radius: 4px !important;
+  transition: background-color 0.3s ease-in-out !important;
 }
 
 .change_color {
   img {
-    margin-top: -6px;
+    margin-top: -6px !important;
   }
 
   .normal_text {
@@ -117,22 +117,22 @@ watch(
 }
 
 .change_color {
-  color: #00936f !important;
+  color: #00936f;
 }
 
 .button_icon {
-  width: var(--horizontal-padding-lg, 18px);
-  height: var(--horizontal-padding-lg, 18px);
-  transition: all 0.3s ease-in-out;
+  width: var(--horizontal-padding-lg, 18px) !important;
+  height: var(--horizontal-padding-lg, 18px) !important;
+  transition: all 0.3s ease-in-out !important;
 }
 
 .normal_text {
   color: var(--Grey-800, #34404b);
-  font-family: "Source Sans 3";
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 12px;
-  transition: all 0.3s ease-in-out;
+  font-family: "Source Sans 3" !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: 12px !important;
+  transition: all 0.3s ease-in-out !important;
 }
 </style>

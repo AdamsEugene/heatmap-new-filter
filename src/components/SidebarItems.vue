@@ -40,114 +40,114 @@ defineProps<{
 
 <style>
 .selected {
-  background: var(--Grey-50, #f1f2f3);
+  background: var(--Grey-50, #f1f2f3) !important;
 }
 
 .active {
-  background: var(--Grey-50, #08916f) !important;
+  background: var(--Grey-50, #08916f) !important ;
 
   .normal_text {
-    color: #ffffff;
+    color: #ffffff !important;
   }
 
   .button_icon {
-    filter: invert(100%);
+    filter: invert(100%) !important;
   }
 }
 
 .sidebar_filter_button {
-  cursor: pointer;
+  cursor: pointer !important;
 
   &:hover {
-    background-color: var(--Grey-50, #f1f2f3);
+    background-color: var(--Grey-50, #f1f2f3) !important;
   }
 }
 
 .budge {
-  display: flex;
-  padding: 0px 2px;
-  justify-content: center;
-  align-items: center;
-  gap: var(--corner-med, 8px);
-  border-radius: 2px;
-  background: var(--Primary-100, #baf7de);
+  display: flex !important;
+  padding: 0px 2px !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: var(--corner-med, 8px) !important;
+  border-radius: 2px !important;
+  background: var(--Primary-100, #baf7de) !important;
 
   .text {
-    color: var(--Primary-600, #08916f);
-    font-family: "Source Sans 3";
-    font-size: 10px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 12px; /* 120% */
-    text-transform: uppercase;
+    color: var(--Primary-600, #08916f) !important;
+    font-family: "Source Sans 3" !important;
+    font-size: 10px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: 12px !important; /* 120% */
+    text-transform: uppercase !important;
   }
 }
 
 /* Disabled state style */
 .disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
 }
 
 .sidebar_dropdown {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--corner-med, 8px);
-  align-self: stretch;
-  padding-top: 16px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: var(--corner-med, 8px) !important;
+  align-self: stretch !important;
+  padding-top: 16px !important;
 
   * {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
 
-  font-family: "IBM Plex Sans";
+  font-family: "IBM Plex Sans" !important;
   p,
   ul,
   li,
   h3 {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
 .lg_text {
-  flex: 1 0 0;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 18px; /* 128.571% */
+  flex: 1 0 0 !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 600 !important;
+  line-height: 18px !important; /* 128.571% */
 }
 
 .with_green {
-  color: var(--Primary-04-Dark, #016f52);
-  position: sticky;
-  top: 0px;
-  background: #ffffff;
-  width: 100%;
-  z-index: 3;
+  color: var(--Primary-04-Dark, #016f52) !important;
+  position: sticky !important;
+  top: 0px !important;
+  background: #ffffff !important;
+  width: 100% !important;
+  z-index: 3 !important;
 }
 
 .sidebar_filter_buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  align-self: stretch;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  align-self: stretch !important;
 }
 
 .button_icon {
-  width: var(--horizontal-padding-lg, 18px);
-  height: var(--horizontal-padding-lg, 18px);
-  transition: all 0.3s ease-in-out;
+  width: var(--horizontal-padding-lg, 18px) !important;
+  height: var(--horizontal-padding-lg, 18px) !important;
+  transition: all 0.3s ease-in-out !important;
 }
 
 .normal_text {
-  color: var(--Grey-800, #34404b);
-  font-family: "Source Sans 3";
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 12px;
-  transition: all 0.3s ease-in-out;
+  color: var(--Grey-800, #34404b) !important;
+  font-family: "Source Sans 3" !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  line-height: 12px !important;
+  transition: all 0.3s ease-in-out !important;
 }
 </style>
