@@ -309,6 +309,7 @@ watch(filterName, async (newName) => {
         :initial-value="filter?.action"
         :clear-fields="clearFields"
         :disabled="!canEdit"
+        :all-action-items="allActionItems"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -660,7 +661,6 @@ watch(filterName, async (newName) => {
   font-style: normal !important;
   font-weight: 500 !important;
   line-height: 20px !important;
-  text-transform: capitalize !important;
   transition: color 0.3s ease-in-out !important;
   width: 100% !important;
 

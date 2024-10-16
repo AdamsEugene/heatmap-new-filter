@@ -29,7 +29,7 @@ defineProps<{
         }"
       >
         <img class="button_icon" :src="item.iconSrc" :alt="item.name" />
-        <p class="normal_text">{{ item.name }}</p>
+        <p class="normal_text trim_text_3_dots">{{ item.name }}</p>
         <div v-show="item.hasBudge" class="budge">
           <p class="text">NEW</p>
         </div>
@@ -96,6 +96,7 @@ defineProps<{
   gap: var(--corner-med, 8px) !important;
   align-self: stretch !important;
   padding-top: 16px !important;
+  width: 174px;
 
   * {
     box-sizing: border-box !important;
@@ -136,6 +137,7 @@ defineProps<{
   flex-direction: column !important;
   align-items: flex-start !important;
   align-self: stretch !important;
+  width: 174px;
 }
 
 .button_icon {
@@ -152,5 +154,11 @@ defineProps<{
   font-weight: 500 !important;
   line-height: 12px !important;
   transition: all 0.3s ease-in-out !important;
+
+  &.trim_text_3_dots {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 }
 </style>

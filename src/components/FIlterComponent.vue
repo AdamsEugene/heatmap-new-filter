@@ -8,6 +8,7 @@ import LoadingSpinner from "./shared/LoadingSpinner.vue";
 
 import { sessionData, eCommerceData } from "../data";
 import {
+  AuthorizationRequest,
   CombinedFilter,
   FilterList,
   ReturnData,
@@ -15,10 +16,12 @@ import {
 } from "../@types";
 import {
   loadCustomFilters,
+  manageAdsConnection,
   saveEditCustomFilter,
 } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
+import { getThis } from "./helpers/functions";
 
 const props = defineProps<{
   onToggleShowFilterMenu: () => void;
@@ -86,6 +89,36 @@ onMounted(() => {
   document.addEventListener("disable-comparison-event", (event: any) => {
     disabledComparison.value = event.detail.disabled;
   });
+  const url = location.href;
+  localStorage.setItem("heatmap_com_redirect_url", url);
+  const partner = localStorage.getItem("ads-partner-name");
+
+  console.log({ partner, code: getThis("code") });
+
+  if (partner && getThis("code")) {
+    const makeExchangeRequest = async (partner: string) => {
+      let payload: AuthorizationRequest = {
+        action: "exchange" as const,
+        userId: "adamseugene292gmail",
+        partner,
+        websiteIds: [12],
+        code: getThis("code"),
+        redirectType: "dashboard",
+      };
+
+      if (partner.toLowerCase() === "x") {
+        payload.twitterCodeVerifier =
+          JSON.parse(localStorage.getItem("twitterCodeVerifier") || "{}")
+            ?.codeVerifier || "";
+      }
+
+      const res = await manageAdsConnection({ ...payload });
+      console.log(res);
+      localStorage.removeItem("ads-partner-name");
+    };
+
+    makeExchangeRequest(partner);
+  }
 });
 
 const onLoading = (status: boolean) => {
@@ -269,7 +302,7 @@ watch(selectedItem, () => {
               {{ filter.nameForCompare || filter.name }}
             </p>
             <img
-              @click="removeItemFromPendingList(filter)"
+              @click.stop="removeItemFromPendingList(filter)"
               class="small_close_icon"
               src="../assets/images/close.png"
               alt="add icon"
@@ -451,7 +484,7 @@ watch(selectedItem, () => {
   gap: var(--corner-med, 8px) !important;
   align-self: stretch !important;
   /* min-height: 90px !important; */
-  border-radius: 4px !important;
+  border-radius: 4px;
   padding: var(--vertical-padding-lg, 24px) !important;
   border-bottom: 1px solid var(--Grey-200, #e6e7e8) !important;
 }
@@ -553,18 +586,13 @@ watch(selectedItem, () => {
 .filter-body_left {
   display: flex;
   flex-direction: column !important;
-  min-width: 208px !important;
-  max-height: min(40vh, 446px) !important;
+  min-width: 216px !important;
+  max-height: min(45vh, 446px) !important;
   height: 100% !important;
   border-right: 1px solid var(--Grey-200, #e6e7e8) !important;
   padding: 0 24px 24px 24px !important;
   overflow-y: auto !important;
-  scrollbar-width: none !important; /* For Firefox */
-  -ms-overflow-style: none !important; /* For IE and Edge */
-}
-
-.filter-body_left::-webkit-scrollbar {
-  display: none !important; /* For Chrome, Safari, and Opera */
+  overflow-x: hidden;
 }
 
 .filter-footer {

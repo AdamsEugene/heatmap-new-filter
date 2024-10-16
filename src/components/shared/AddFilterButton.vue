@@ -61,6 +61,7 @@ watch(
   &.deleting_button {
     background: var(--Error-50, #ffebe6) !important;
     border: 1px solid var(--Primary-03-Main, #ffebe6) !important;
+    border-radius: var(--Padding-Corner, 6px);
 
     .normal_text {
       color: var(--Grey-800, #2e3338) !important;
@@ -68,6 +69,7 @@ watch(
   }
 
   &.add_filter {
+    border-radius: var(--Padding-Corner, 6px);
     padding: var(--Padding-Horizontal-padding, 8px)
       var(--Padding-Vertical-padding, 16px) !important;
     align-items: center;
@@ -116,7 +118,7 @@ watch(
   align-items: center !important;
   gap: var(--corner-med, 8px) !important;
   align-self: stretch !important;
-  border-radius: 4px !important;
+  border-radius: 4px;
   transition: background-color 0.3s ease-in-out !important;
 
   &.edit_mode {

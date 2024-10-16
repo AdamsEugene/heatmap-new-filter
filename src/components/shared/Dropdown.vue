@@ -16,7 +16,7 @@ import {
   SecondLabelMap,
   SecondPlaceholderMap,
 } from "../helpers/lookUps";
-import { AuthorizationRequest, DataItem, GroupedData } from "../../@types";
+import { DataItem, GroupedData } from "../../@types";
 
 import fb from "../../assets/images/facebook.svg";
 import x from "../../assets/images/twitter.svg";
@@ -25,7 +25,7 @@ import ti from "../../assets/images/tiktok.svg";
 import ji from "../../assets/images/ji.svg";
 import ig from "../../assets/images/ig.svg";
 import { manageAdsConnection } from "../helpers/makeAPIcalls";
-import { detectUrlChange, getThis } from "../helpers/functions";
+import { actionItemsSearch, detectUrlChange } from "../helpers/functions";
 
 const props = defineProps<{
   label?: string;
@@ -42,6 +42,7 @@ const props = defineProps<{
   disabledItem?: string[];
   disabled?: boolean;
   hasTokens?: string[];
+  allActionItems?: GroupedData;
 }>();
 
 const returnImg = (name: string) => {
@@ -82,17 +83,23 @@ const inputPlaceholder = computed(() => {
 
 const filteredItems = computed(() => {
   return Array.isArray(props?.items)
-    ? props?.items?.slice().sort((a, b) => {
-        const query = searchQuery.value.toLowerCase();
-        const aMatch = a.toLowerCase().includes(query);
-        const bMatch = b.toLowerCase().includes(query);
-
-        if (aMatch && !bMatch) return -1;
-        if (!aMatch && bMatch) return 1;
-        return a.localeCompare(b);
-      })
+    ? props.items.filter((item) =>
+        item.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )
     : props.items;
 });
+
+const filteredActionItems = computed(() =>
+  props.actionItems
+    ? actionItemsSearch(
+        props.actionItems,
+        searchQuery.value,
+        props.allActionItems
+      )
+    : props.actionItems
+);
+
+console.log(filteredActionItems.value);
 
 const disabledItems = computed(
   () => (item: string) => props.disabledItem?.find((name) => name === item)
@@ -132,11 +139,11 @@ const manageConnection = async (partner: string) => {
     userId: "adamseugene292gmail",
     partner,
     websiteIds: [12],
-    redirectType: "locala",
+    redirectType: "dashboard",
   });
-
+  localStorage.setItem("ads-partner-name", partner);
   localStorage.setItem("twitterCodeVerifier", JSON.stringify(res));
-  if (res.url) window.open(res.url, "_blank");
+  if (res.url) window.location.href = res.url;
 
   // loading.value = "";
 };
@@ -145,24 +152,6 @@ onMounted(() => {
   const cleanup = detectUrlChange();
   onUnmounted(cleanup);
 });
-
-const makeExchangeRequest = async (partner: string) => {
-  let payload: AuthorizationRequest = {
-    action: "disconnect" as const,
-    userId: "adamseugene292gmail",
-    partner,
-    websiteIds: [12],
-    code: getThis("code"),
-  };
-
-  if (partner.toLowerCase() === "x") {
-    payload.twitterCodeVerifier =
-      JSON.parse(localStorage.getItem("twitterCodeVerifier") || "{}")
-        ?.codeVerifier || "";
-  }
-
-  // const res = await manageAdsConnection({ ...payload });
-};
 
 // Watch for dropdown open state and scroll it into view when opened
 watch(isDropdownOpen, async (newValue) => {
@@ -182,8 +171,6 @@ watch(isDropdownOpen, async (newValue) => {
     }
   }
 });
-
-makeExchangeRequest("x");
 
 const closeModal = () => {
   showModal.value = false;
@@ -271,7 +258,7 @@ watch(searchQuery, (newQuery) => {
           selected: searchQuery === item || disabledItem?.includes(item),
           disabled_item: disabledItems(item),
         }"
-        @click="itemSelectWithDisabled(item, item)"
+        @click.stop="itemSelectWithDisabled(item, item)"
       >
         <p class="medium_text">{{ item }}</p>
       </div>
@@ -294,7 +281,7 @@ watch(searchQuery, (newQuery) => {
           selected: searchQuery === item || disabledItem?.includes(item),
           disabled_item: disabledItems(item),
         }"
-        @click="itemSelectWithDisabled(item, item)"
+        @click.stop="itemSelectWithDisabled(item, item)"
       >
         <div class="new_ads_left">
           <img class="button_icon" :src="returnImg(item)" alt="add icon" />
@@ -334,7 +321,10 @@ watch(searchQuery, (newQuery) => {
           class=""
           :class="{ align_center: true }"
         >
-          <li v-for="(itemsToLoop, category) in actionItems" :key="category">
+          <li
+            v-for="(itemsToLoop, category) in filteredActionItems"
+            :key="category"
+          >
             <label
               :for="String(category)"
               class="dropdown_menu_item action"
@@ -359,7 +349,7 @@ watch(searchQuery, (newQuery) => {
                 :class="{
                   activeClass: innerItem.name === searchQuery,
                 }"
-                @click="itemSelectWithDisabled(innerItem, innerItem.name)"
+                @click.stop="itemSelectWithDisabled(innerItem, innerItem.name)"
               >
                 <p>
                   {{ innerItem.name }}
@@ -415,7 +405,6 @@ watch(searchQuery, (newQuery) => {
   font-style: normal !important;
   font-weight: 500 !important;
   line-height: 20px !important;
-  text-transform: capitalize !important;
   transition: color 0.3s ease-in-out !important;
   width: 100% !important;
 
@@ -452,6 +441,7 @@ watch(searchQuery, (newQuery) => {
   font-weight: 500 !important;
   line-height: 20px !important; /* 142.857% */
   text-transform: capitalize !important;
+  margin: 0 !important;
 
   &.no_padding {
     padding-right: 12px !important;
@@ -483,7 +473,7 @@ watch(searchQuery, (newQuery) => {
 .dropdown-list,
 .dropdown-list_ads {
   position: absolute !important;
-  top: 94% !important;
+  top: 106% !important;
   left: 0 !important;
   width: 100% !important;
   display: flex;
@@ -496,8 +486,6 @@ watch(searchQuery, (newQuery) => {
   border: 1px solid var(--Grey-200, #e6e7e8) !important;
   background: var(--Grey-White, #fff) !important;
   overflow-y: auto !important;
-  scrollbar-width: none !important; /* For Firefox */
-  -ms-overflow-style: none !important; /* For IE and Edge */
 }
 
 .dropdown-item,
@@ -534,7 +522,7 @@ watch(searchQuery, (newQuery) => {
 }
 
 .new_ads_right {
-  display: flex !important;
+  display: flex;
   min-width: 94px !important;
   height: 30px !important;
   padding: 0px var(--corner-med, 8px) !important;

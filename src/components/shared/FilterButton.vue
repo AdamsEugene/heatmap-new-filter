@@ -86,7 +86,7 @@ defineProps<{ filteredValues?: ReturnData[]; onShowFilterMenu: () => void }>();
       align-items: center !important;
       justify-content: center !important;
       gap: var(--corner-med, 8px) !important;
-      border-radius: 4px !important;
+      border-radius: 4px;
       background: var(--Grey-100, #f6f6f6) !important;
 
       .selected_filter_text {

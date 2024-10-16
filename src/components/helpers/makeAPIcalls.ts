@@ -122,6 +122,9 @@ export async function manageAdsConnection(params: AuthorizationRequest) {
     }
 
     const result = await response.json();
+
+    console.log(result);
+
     return result;
   } catch (error) {
     console.error("Error fetching data:", error);

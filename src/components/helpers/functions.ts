@@ -227,3 +227,25 @@ export const checkForTokens = (data: any): string[] => {
 
   return keysWithTokens;
 };
+
+export const actionItemsSearch = (
+  obj: GroupedData,
+  searchTerm: string,
+  allActionItems?: GroupedData
+): GroupedData => {
+  const result: GroupedData = {};
+  const objCopy: GroupedData = JSON.parse(JSON.stringify(obj));
+  for (const category in objCopy) {
+    const matchedItems = objCopy[category].filter((item) => {
+      return (
+        item.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+        category?.toLowerCase()?.includes(searchTerm.toLowerCase())
+      );
+    });
+    if (matchedItems.length > 0) {
+      result[category] = matchedItems;
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : allActionItems!;
+};

@@ -513,7 +513,7 @@ watch(
   align-items: center !important;
   gap: var(--corner-med, 8px) !important;
   align-self: stretch !important;
-  border-radius: 4px !important;
+  border-radius: 4px;
   transition: background-color 0.3s ease-in-out !important;
 }
 
@@ -560,7 +560,6 @@ watch(
   font-style: normal !important;
   font-weight: 500 !important;
   line-height: 20px !important;
-  text-transform: capitalize !important;
   transition: color 0.3s ease-in-out !important;
   width: 100% !important;
 
