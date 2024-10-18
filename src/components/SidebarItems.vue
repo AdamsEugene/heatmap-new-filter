@@ -13,7 +13,7 @@ defineProps<{
 
 <template>
   <div class="sidebar_dropdown">
-    <h3 class="lg_text with_green">{{ title || "Session Data" }}</h3>
+    <div class="lg_text with_green">{{ title || "Session Data" }}</div>
     <div class="sidebar_filter_buttons">
       <div
         v-for="item in data"
@@ -93,7 +93,7 @@ defineProps<{
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
-  gap: var(--corner-med, 8px) !important;
+  gap: var(--corner-med, 4px) !important;
   align-self: stretch !important;
   padding-top: 16px !important;
   width: 174px;
@@ -130,6 +130,7 @@ defineProps<{
   background: #ffffff !important;
   width: 100% !important;
   z-index: 3 !important;
+  padding: 4px 0;
 }
 
 .sidebar_filter_buttons {
@@ -152,7 +153,7 @@ defineProps<{
   font-size: 14px !important;
   font-style: normal !important;
   font-weight: 500 !important;
-  line-height: 12px !important;
+  line-height: 18px !important;
   transition: all 0.3s ease-in-out !important;
 
   &.trim_text_3_dots {

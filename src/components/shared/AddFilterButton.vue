@@ -160,7 +160,7 @@ watch(
   font-size: 14px !important;
   font-style: normal !important;
   font-weight: 500 !important;
-  line-height: 12px !important;
+  line-height: 18px !important;
   transition: all 0.3s ease-in-out !important;
 }
 </style>

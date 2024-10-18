@@ -5,7 +5,11 @@ import Dropdown from "./shared/Dropdown.vue";
 import AddFilterButton from "./shared/AddFilterButton.vue";
 import CustomFilterForm from "./shared/CustomFilterForm.vue";
 import SaveButton from "./shared/SaveButton.vue";
-import { manageAdsConnection, fetchSegmentData } from "./helpers/makeAPIcalls";
+import {
+  manageAdsConnection,
+  fetchSegmentData,
+  loadPartnerFilers,
+} from "./helpers/makeAPIcalls";
 import {
   alreadyHaveDisplayName,
   formatUrl,
@@ -15,13 +19,17 @@ import {
   insertItemBeforeSemicolon,
   makeRequestFor,
   numberInput,
+  secondNumberInput,
   replaceAfterItem,
   replaceAfterEquals,
   conditions,
-  replaceAfterSymbols,
   isArrayValid,
   checkForTokens,
+  insertValueInRevenueOrder,
+  replaceAfterRevenueOrder,
 } from "./helpers/functions";
+import validate from "./helpers/inputsValidator";
+import errorMsgs from "./helpers/errorMsgs";
 
 const props = defineProps<{
   selectedItem: SessionDataItem;
@@ -30,6 +38,7 @@ const props = defineProps<{
   canEdit: boolean;
   canAdd: boolean;
   cancelEdit: boolean;
+  errorMsg: string;
 }>();
 
 const emit = defineEmits([
@@ -54,7 +63,9 @@ const selectionError = ref(false);
 
 const listForValues = ref<string[]>();
 const listOfSelectedItems = ref<string[]>([]);
+const mapOfSelectedItems = ref<Map<string, string>>(new Map());
 const hasTokens = ref<string[]>();
+const _errorMsg = ref(props.errorMsg);
 
 let selected: SessionDataItem = { ...props.selectedItem };
 
@@ -96,13 +107,22 @@ const freeUpSpace = () => {
   simpleListResponse.value = [];
   initiallySavedCustomFilters.value = undefined;
   listOfSelectedItems.value = [];
+  mapOfSelectedItems.value?.clear();
 };
 
 const onProceed = () => {
-  emit("on-selected", { item: selected });
-  selected = { ...props.selectedItem };
-  emit("on-save", false);
-  clearFields.value = true;
+  const isValid = validate(selected);
+  console.log({ isValid });
+
+  if (isValid) {
+    emit("on-selected", { item: selected });
+    selected = { ...props.selectedItem };
+    emit("on-save", false);
+    clearFields.value = true;
+  } else {
+    _errorMsg.value = errorMsgs(selected);
+    onSelectionError();
+  }
 };
 
 const saveCustomFilter = (filter: CustomValues & { title: string }) => {
@@ -112,18 +132,22 @@ const saveCustomFilter = (filter: CustomValues & { title: string }) => {
   }
 };
 
-const onSelected = (item: { item: string; kind: "main" | "value" }) => {
+const onSelected = async (item: { item: string; kind: "main" | "value" }) => {
   const KV = keyValueResponse.value as any;
   const seOrAd = nameIs("Session Tag") || nameIs("Ads Platform");
   shouldEncode.value = true;
   clearFields.value = false;
   if (item.kind === "main" && seOrAd) {
+    emit("on-loading", true);
+    const res = await loadPartnerFilers(item.item);
+    console.log(res);
     listForValues.value = KV[item.item];
     selected = {
       ...selected,
       definition: insertItemBeforeSemicolon(selected.definition, item.item),
       nameForCompare: selected.name + ": " + formatUrl(item.item),
     };
+    emit("on-loading", false);
   } else if (item.kind === "main" && nameIs("A/B Tests")) {
     const partnersFriendly = getKeyByValue(KV.partners_friendly, item.item);
     if (partnersFriendly) {
@@ -141,9 +165,8 @@ const onSelected = (item: { item: string; kind: "main" | "value" }) => {
   } else if (item.kind === "main" && nameIs("Average Order Value")) {
     selected = {
       ...selected,
-      definition: replaceAfterItem(
+      definition: insertValueInRevenueOrder(
         selected.definition,
-        "revenueOrder",
         (conditions as any)[item.item]
       ),
       nameForCompare: selected.name + ": " + formatUrl(item.item),
@@ -156,8 +179,10 @@ const onSelected = (item: { item: string; kind: "main" | "value" }) => {
     else if (nameIs("Total Pages Visited"))
       definition = replaceAfterEquals(selected.definition, item.item);
     else if (nameIs("Average Order Value")) {
-      definition = replaceAfterSymbols(selected.definition, item.item);
+      definition = replaceAfterRevenueOrder(selected.definition, item.item);
       shouldEncode.value = false;
+    } else if (seOrAd) {
+      console.log(item);
     } else definition = replaceAfterEquals(selected.definition, item.item);
 
     selected = {
@@ -167,12 +192,14 @@ const onSelected = (item: { item: string; kind: "main" | "value" }) => {
       rest: rest,
     };
     listOfSelectedItems.value = [...listOfSelectedItems.value, item.item];
+    mapOfSelectedItems.value.set("name", "adams");
+
     emit("on-save", true);
   }
   // console.log(selected);
 
   emit("on-add-to-waiting-room", { item: selected });
-  console.log(item);
+  // console.log(item);
 };
 
 const getABTestingData = (item: string, definition: string, rest: any) => {
@@ -243,6 +270,18 @@ watch(
 );
 
 watch(
+  () => props.errorMsg,
+  (msg) => {
+    if (msg) {
+      _errorMsg.value = msg;
+      onSelectionError();
+    } else {
+      selectionError.value = false;
+    }
+  }
+);
+
+watch(
   () => props.canAdd,
   (newValue) => {
     console.log({ newValue });
@@ -268,7 +307,10 @@ watch(
 </script>
 
 <template>
-  <div class="filter-body_right padding_32">
+  <div
+    class="filter-body_right padding_32"
+    :class="{ align_me_center: canEdit }"
+  >
     <div v-show="!canEdit" class="filter_right_title">
       <div class="head">
         <div class="flex_8">
@@ -295,7 +337,8 @@ watch(
     </div>
     <div
       v-if="nameIs('Create Custom Filter') || selectedItem.data"
-      class="filter-body_right"
+      class="filter-body_right with_margin_bottom"
+      :class="{ with_small_width: canEdit }"
     >
       <Custom-filter-form
         :selectedItem="selectedItem"
@@ -330,7 +373,9 @@ watch(
           :key="'dropdown2'"
           :items="listForValues"
           :label="selectedItem.name"
-          :input-type="numberInput(props.selectedItem.name) ? 'number' : 'text'"
+          :input-type="
+            secondNumberInput(props.selectedItem.name) ? 'number' : 'text'
+          "
           :definition="'value'"
           :as-input="!listForValues"
           :disabled-item="listOfSelectedItems"
@@ -357,7 +402,10 @@ watch(
     <transition name="fade">
       <div v-show="selectionError" class="enabled_to_select">
         <p class="medium_text">
-          You have already selected this item. Please choose a different one.
+          {{
+            _errorMsg ||
+            "You have already selected this item. Please choose a different one."
+          }}
         </p>
       </div>
     </transition>
@@ -367,19 +415,19 @@ watch(
 <style>
 .enabled_to_select {
   position: absolute !important;
-  bottom: 0 !important;
+  bottom: 8px !important;
   z-index: 9 !important;
   width: 80% !important;
   display: flex;
   justify-content: center !important;
   align-items: center !important;
   text-align: center !important;
-  background-color: tomato !important;
+  background-color: #ffebe6 !important;
   padding: 8px !important;
   border-radius: 8px !important;
 
   .medium_text {
-    color: #fff !important;
+    color: #2e3338 !important;
   }
 }
 
@@ -480,6 +528,14 @@ watch(
   gap: 16px !important;
   width: 100% !important;
 
+  &.with_small_width {
+    width: 70% !important;
+  }
+
+  &.with_margin_bottom {
+    margin-bottom: 36px;
+  }
+
   * {
     box-sizing: border-box !important;
     font-family: "IBM Plex Sans" !important;
@@ -495,15 +551,15 @@ watch(
 }
 
 .padding_32 {
-  max-height: calc(620px - 174px) !important;
-  /* height: 100% !important;  */
-  width: 80% !important;
+  max-height: min(45vh, 446px) !important;
   padding: var(--vertical-padding-lg, 32px) !important;
   transition: all 0.3s ease-in-out !important;
-
   overflow-y: auto !important;
-  scrollbar-width: none !important; /* For Firefox */
-  -ms-overflow-style: none !important; /* For IE and Edge */
+  width: 100% !important;
+
+  &.align_me_center {
+    align-items: center;
+  }
 }
 
 .sidebar_filter_button,

@@ -21,7 +21,9 @@ import {
 } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
-import { getThis } from "./helpers/functions";
+import { getThis, removeUrlParams } from "./helpers/functions";
+import validate from "./helpers/inputsValidator";
+import errorMsgs from "./helpers/errorMsgs";
 
 const props = defineProps<{
   onToggleShowFilterMenu: () => void;
@@ -43,6 +45,8 @@ const canEdit = ref(nameIs("Create Custom Filter"));
 const canAdd = ref(false);
 const cancelEdit = ref(false);
 const disabledComparison = ref(false);
+
+const errorMsg = ref("");
 
 // const updatedSelectedItem = ref<SessionDataItem>();
 const pendingList = ref<CombinedFilter[]>([]);
@@ -93,7 +97,7 @@ onMounted(() => {
   localStorage.setItem("heatmap_com_redirect_url", url);
   const partner = localStorage.getItem("ads-partner-name");
 
-  console.log({ partner, code: getThis("code") });
+  // console.log({ partner, code: getThis("code") });
 
   if (partner && getThis("code")) {
     const makeExchangeRequest = async (partner: string) => {
@@ -115,6 +119,7 @@ onMounted(() => {
       const res = await manageAdsConnection({ ...payload });
       console.log(res);
       localStorage.removeItem("ads-partner-name");
+      removeUrlParams(["heatmap_com_token", "code"]);
     };
 
     makeExchangeRequest(partner);
@@ -138,17 +143,39 @@ const createCustomFilter = () => {
 
 const handleAddToWaitingRoom = (item: { item: CombinedFilter }) => {
   waitingRoom.value = item.item;
-  // console.log("waitingRoom", waitingRoom.value);
+  console.log("waitingRoom", waitingRoom.value);
 };
 
 const handleSidebarItemClick = (item: SessionDataItem) => {
+  errorMsg.value = "";
+  if (selectedItem.value.name !== item.name) {
+    waitingRoom.value = undefined;
+    canAdd.value = false;
+  }
   selectedItem.value = item;
   if (item.name !== "Create Custom Filter") prevSelectedItem.value = item;
 };
 
 const handleCompareFilters = () => {
-  if (waitingRoom.value) pendingList.value.push(waitingRoom.value);
-  else pendingList.value.push(selectedItem.value);
+  if (waitingRoom.value) {
+    const isValid = validate(waitingRoom.value);
+    console.log(validate(waitingRoom.value));
+    if (isValid) {
+      pendingList.value.push(waitingRoom.value);
+      errorMsg.value = "";
+    } else {
+      errorMsg.value = errorMsgs(waitingRoom.value);
+    }
+  } else {
+    const isValid = validate(selectedItem.value);
+    console.log(validate(selectedItem.value));
+    if (isValid) {
+      pendingList.value.push(selectedItem.value);
+      errorMsg.value = "";
+    } else {
+      errorMsg.value = errorMsgs(selectedItem.value);
+    }
+  }
   waitingRoom.value = undefined;
   canAdd.value = false;
 };
@@ -354,6 +381,7 @@ watch(selectedItem, () => {
           :can-edit="canEdit"
           :can-add="canAdd"
           :cancel-edit="cancelEdit"
+          :error-msg="errorMsg"
           @on-add-to-waiting-room="handleAddToWaitingRoom"
           @on-loading="onLoading"
           @on-selected="onFilterSelect"
@@ -483,7 +511,7 @@ watch(selectedItem, () => {
   align-items: center !important;
   gap: var(--corner-med, 8px) !important;
   align-self: stretch !important;
-  /* min-height: 90px !important; */
+  min-height: 89px !important;
   border-radius: 4px;
   padding: var(--vertical-padding-lg, 24px) !important;
   border-bottom: 1px solid var(--Grey-200, #e6e7e8) !important;

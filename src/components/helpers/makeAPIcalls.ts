@@ -192,3 +192,22 @@ export const deleteCustomFilter = async (data: SessionDataItem) => {
     console.error("Error fetching data:", error);
   }
 };
+
+export const loadPartnerFilers = async (partner: string) => {
+  const requestOptions = {
+    method: "GET",
+    redirect: "follow",
+  };
+  try {
+    const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=41fe84f4edd1a743b97679ab63c3f07c&idSite=1562&userId=6&partner=${partner}&live=0`;
+    const response = await fetch(url, requestOptions as any);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};

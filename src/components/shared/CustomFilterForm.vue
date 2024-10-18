@@ -310,6 +310,7 @@ watch(filterName, async (newName) => {
         :clear-fields="clearFields"
         :disabled="!canEdit"
         :all-action-items="allActionItems"
+        :filter-index="index"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -322,6 +323,7 @@ watch(filterName, async (newName) => {
         :initial-value="filter?.default"
         :clear-fields="clearFields"
         :disabled="!canEdit"
+        :filter-index="index"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -333,8 +335,10 @@ watch(filterName, async (newName) => {
         :initial-value="filter?.value"
         :clear-fields="clearFields"
         :disabled="!canEdit"
+        :filter-index="index"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
+      <div v-if="!canEdit && (selectedItem?.data?.length || 0) !== index + 1" />
       <div
         v-show="(selectedItem?.data?.length || 0) > 1 && canEdit"
         class="flex_sb"
@@ -503,99 +507,6 @@ watch(filterName, async (newName) => {
   line-height: 24px !important; /* 150% */
 }
 
-.dropdown_menu_wrapper {
-  position: absolute !important;
-  width: 100% !important;
-  border-radius: var(--corner-med, 10px) !important;
-  background: var(--Grey-White, #fff) !important;
-  border: 1px solid var(--Grey-200, #e6e7e8) !important;
-  box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09) !important;
-  list-style: none !important;
-  margin-top: 4px !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  z-index: 1 !important;
-
-  &.align_center {
-    top: 50% !important;
-    transform: translate(0px, -28%) !important;
-  }
-
-  .dropdown_menu_item {
-    display: flex !important;
-    padding: var(--corner-med, 8px) var(--horizontal-padding-lg, 12px) !important;
-    align-items: flex-start !important;
-    align-self: stretch !important;
-    cursor: pointer !important;
-    white-space: pre-wrap !important ;
-
-    &.action {
-      display: flex !important;
-      padding: 10px 14px 10px var(--horizontal-padding-lg, 12px) !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      align-self: stretch !important;
-      background: var(--Grey-100, #f6f6f6) !important;
-    }
-
-    color: var(--Grey-800, #34404b) !important;
-    font-size: 14px !important;
-    font-style: normal !important;
-    font-weight: 400 !important;
-    line-height: 20px !important; /* 142.857% */
-    &:not(:last-child) {
-      border-bottom: 1px solid var(--Grey-200, #e6e7e8) !important;
-    }
-    &.activeClass {
-      color: var(--Grey-800, #fff) !important ;
-      /* background: #03c191 !important !important; */
-    }
-
-    &.inner_items {
-      display: flex !important;
-      padding: var(--horizontal-padding-lg, 12px)
-        var(--vertical-padding-lg, 24px) !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      align-self: stretch !important;
-      font-weight: 600 !important;
-      line-height: 18px !important; /* 138.462% */
-      transition: all 0.3s ease-in-out !important;
-      &.activeClass {
-        background: #03c191 !important;
-        color: #fff !important;
-
-        p {
-          color: #fff !important ;
-        }
-
-        .help_icon_inner {
-          img {
-            filter: invert(100%) !important;
-          }
-        }
-      }
-
-      .help_icon_inner {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        height: 20px !important;
-        transition: all 0.3s ease-in-out !important;
-
-        img {
-          height: 16px !important;
-          transition: all 0.3s ease-in-out !important;
-        }
-      }
-    }
-  }
-
-  .dropdown_menu_item:hover {
-    background: #e6e7e8 !important;
-  }
-}
-
 #accordion {
   display: flex !important;
   flex-direction: column !important;
@@ -628,7 +539,9 @@ watch(filterName, async (newName) => {
   display: flex !important;
   flex-direction: column !important;
   gap: 16px !important;
-  width: 100% !important;
+  /* width: 100% !important; */
+
+  width: 80% !important;
 
   * {
     box-sizing: border-box !important;
@@ -727,7 +640,7 @@ watch(filterName, async (newName) => {
   font-size: 14px !important;
   font-style: normal !important;
   font-weight: 500 !important;
-  line-height: 12px !important;
+  line-height: 18px !important;
   transition: all 0.3s ease-in-out !important;
 }
 

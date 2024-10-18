@@ -50,9 +50,8 @@ export const formatUrl = (url?: string): string => {
       }
     }
   } catch (error) {
-    // console.error(`Invalid URL: ${url}`, error);
-    const len = (url || "")?.split("/")?.length;
-    return (url || "")?.split("/")?.[len - 1] || "";
+    const len = (url?.toString() || "")?.split("/")?.length;
+    return (url?.toString() || "")?.split("/")?.[len - 1] || "";
   }
 };
 
@@ -70,6 +69,9 @@ export const hasNoDropdown = (name: string) =>
 export const numberInput = (name: string) =>
   ["Total Pages Visited"].includes(name);
 
+export const secondNumberInput = (name: string) =>
+  ["Total Pages Visited", "Average Order Value"].includes(name);
+
 export const provideAdditionalButton = (name: string) =>
   ["Total Pages Visited"].includes(name);
 
@@ -81,6 +83,31 @@ export const replaceAfterItem = (
   item: string,
   newValue: string
 ) => input.replace(new RegExp(`${item}.*`), `${item}${newValue}`);
+
+export function insertValueInRevenueOrder(str: string, value: string): string {
+  const pattern = /^revenueOrder([=><]{1,2})?(.*)$/;
+  const match = str.match(pattern);
+  if (match) {
+    const number = match[2] || "";
+    return `revenueOrder${value}${number}`;
+  }
+  return `revenueOrder${value}`;
+}
+
+export function replaceAfterRevenueOrder(
+  str: string,
+  value: string,
+  operator = null
+): string {
+  const pattern = /^revenueOrder([=><]{1,2})?(.*)$/;
+  const match = str.match(pattern);
+  if (match) {
+    const matchedOperator = match[1] || "";
+    const usedOperator = operator !== null ? operator : matchedOperator;
+    return `revenueOrder${usedOperator}${value}`;
+  }
+  return str;
+}
 
 export const replaceAfterSymbols = (
   input: string,
@@ -249,3 +276,47 @@ export const actionItemsSearch = (
 
   return Object.keys(result).length > 0 ? result : allActionItems!;
 };
+
+export const removeUrlParams = (params: string[]) => {
+  const url = new URL(window.location.href);
+
+  params.forEach((param) => {
+    url.searchParams.delete(param);
+  });
+
+  window.history.replaceState(null, "", url);
+};
+
+export function hasContentAfterOperator(
+  operator: string,
+  str: string
+): boolean {
+  const escapedOperator = operator.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special regex characters
+  const regex = new RegExp(`${escapedOperator}(.+)`);
+  return regex.test(str.trim());
+}
+
+export function getValueAfterOperator(
+  operator: string,
+  str: string
+): string | null {
+  const escapedOperator = operator.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special regex characters
+  const regex = new RegExp(`${escapedOperator}(.+)`);
+  const match = str.trim().match(regex);
+  return match ? match[1].trim() : null; // Return the value after the operator, or null if not found
+}
+
+export function isConvertibleToNumber(value: any): boolean {
+  const num = parseFloat(value);
+  return !isNaN(num);
+}
+
+export function isValidRevenueOrderString(str: string): boolean {
+  const pattern = /^revenueOrder([=><]{1,2})(\d+)$/;
+  return pattern.test(str);
+}
+
+export function checkPartnerAndFriendlyNames(str: string): boolean {
+  const regex = /^partnerName==[^;]+;friendlyName==[^;]+$/;
+  return regex.test(str);
+}

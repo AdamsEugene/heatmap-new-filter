@@ -43,6 +43,8 @@ const props = defineProps<{
   disabled?: boolean;
   hasTokens?: string[];
   allActionItems?: GroupedData;
+  filterIndex?: number;
+  errorMsg?: string;
 }>();
 
 const returnImg = (name: string) => {
@@ -62,6 +64,7 @@ const emit = defineEmits(["on-selected", "on-selection-error"]);
 const searchQuery = ref<string>(props.initialValue || "");
 const isDropdownOpen = ref<boolean>(false);
 const dropdownListRef = ref<HTMLElement | null>(null);
+const mainDropdownListRef = ref<HTMLElement | null>(null);
 const dropdownListSecondRef = ref<HTMLElement | null>(null);
 const loading = ref<string>("");
 const showModal = ref(false);
@@ -98,8 +101,6 @@ const filteredActionItems = computed(() =>
       )
     : props.actionItems
 );
-
-console.log(filteredActionItems.value);
 
 const disabledItems = computed(
   () => (item: string) => props.disabledItem?.find((name) => name === item)
@@ -163,6 +164,12 @@ watch(isDropdownOpen, async (newValue) => {
         block: "center",
       });
     }
+    if (mainDropdownListRef.value) {
+      mainDropdownListRef.value.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
     if (dropdownListSecondRef.value) {
       dropdownListSecondRef.value.scrollIntoView({
         behavior: "smooth",
@@ -199,11 +206,18 @@ watch(
 );
 
 watch(searchQuery, (newQuery) => {
-  (nameIs("Total Pages Visited") ||
-    ((nameIs("Average Order Value") || props.asInput) &&
-      props.definition === "value")) &&
-    newQuery &&
+  const isAOV = nameIs("Average Order Value") || props.asInput;
+  const isSec = props.definition === "value";
+  let validInput = false;
+  if (typeof newQuery === "number") validInput = true;
+  else validInput = Boolean(newQuery);
+  // console.log(
+  //   (nameIs("Total Pages Visited") || (isAOV && isSec)) && validInput
+  // );
+
+  if ((nameIs("Total Pages Visited") || (isAOV && isSec)) && validInput) {
     emit("on-selected", { item: newQuery, kind: props.definition });
+  }
 });
 </script>
 
@@ -215,17 +229,22 @@ watch(searchQuery, (newQuery) => {
       @close="closeModal"
     />
     <div class="dropdown">
-      <label for="this_dropdown" class="medium_text">{{
-        inputLabel || "Select Platform"
-      }}</label>
+      <label
+        :for="`this_dropdown_${inputLabel} ${filterIndex}`"
+        class="medium_text"
+        >{{ inputLabel || "Select Platform" }}</label
+      >
       <input
-        id="this_dropdown"
+        :id="`this_dropdown_${inputLabel} ${filterIndex}`"
         class="dropdown-input"
         autocomplete="off"
         v-model="searchQuery"
         :type="inputType"
         :placeholder="inputPlaceholder || 'Select items...'"
-        :class="{ no_padding: inputType === 'number' }"
+        :class="{
+          no_padding: inputType === 'number',
+          align_me_right: nameIs('Average Order Value') && !position,
+        }"
         :disabled="disabled"
         @focus="isDropdownOpen = true"
         @blur="closeDropdown"
@@ -242,13 +261,21 @@ watch(searchQuery, (newQuery) => {
         />
       </div>
     </div>
-
+    <div
+      v-show="nameIs('Average Order Value') && !position"
+      class="position_me_absolute medium_text"
+    >
+      $
+    </div>
+    <div v-if="errorMsg" class="flex_sb error_sb">
+      <p class="input_selection_error medium_text">{{ errorMsg }}</p>
+    </div>
     <div
       v-show="
         !nameIs('Ads Platform') && isDropdownOpen && !asInput && !forCustom
       "
       class="dropdown-list"
-      ref="dropdownListRef"
+      ref="mainDropdownListRef"
     >
       <div
         v-for="(item, index) in filteredItems"
@@ -388,6 +415,18 @@ watch(searchQuery, (newQuery) => {
   }
 }
 
+.error_sb {
+  &.flex_sb {
+    margin-top: 2px;
+  }
+}
+
+.input_selection_error {
+  &.medium_text {
+    color: var(--Error-04-Dark, #b71e2d) !important;
+  }
+}
+
 .dropdown {
   display: flex !important;
   position: relative !important;
@@ -447,6 +486,11 @@ watch(searchQuery, (newQuery) => {
     padding-right: 12px !important;
   }
 
+  &.align_me_right {
+    text-align: right;
+    padding-right: 12px !important;
+  }
+
   /* Shadows/XS */
   box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09) !important;
 }
@@ -464,6 +508,16 @@ watch(searchQuery, (newQuery) => {
 .dropdown-input:focus {
   border-color: #00936f !important;
   outline: none !important; /* Removes default outline */
+}
+
+.position_me_absolute {
+  position: absolute;
+  top: 36px;
+  left: 12px;
+
+  &.medium_text {
+    width: min-content !important;
+  }
 }
 
 .change_color {
@@ -574,6 +628,7 @@ input {
 .dropdown_menu_wrapper {
   position: absolute !important;
   width: 100% !important;
+  max-height: min(34vh, 248px);
   border-radius: var(--corner-med, 10px) !important;
   background: var(--Grey-White, #fff) !important;
   border: 1px solid var(--Grey-200, #e6e7e8) !important;
