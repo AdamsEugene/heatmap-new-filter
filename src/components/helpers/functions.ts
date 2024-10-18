@@ -320,3 +320,13 @@ export function checkPartnerAndFriendlyNames(str: string): boolean {
   const regex = /^partnerName==[^;]+;friendlyName==[^;]+$/;
   return regex.test(str);
 }
+
+export function replaceAdIdValue(str: string, newValue: string): string {
+  const pattern = /ad_id==[^;]*/;
+  return str.replace(pattern, `ad_id==${newValue}`);
+}
+
+export function checkAdPartnerAndAdId(str: string): boolean {
+  const regex = /^ad_partner==[^;]+;ad_id==[^;]+$/;
+  return regex.test(str);
+}

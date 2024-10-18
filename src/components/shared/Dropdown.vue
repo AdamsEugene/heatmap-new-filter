@@ -59,7 +59,11 @@ const returnImg = (name: string) => {
   return (obj as any)[name] || go;
 };
 
-const emit = defineEmits(["on-selected", "on-selection-error"]);
+const emit = defineEmits([
+  "on-selected",
+  "on-selection-error",
+  "clear-all-error-msgs",
+]);
 
 const searchQuery = ref<string>(props.initialValue || "");
 const isDropdownOpen = ref<boolean>(false);
@@ -117,6 +121,11 @@ const closeDropdown = () => {
     setTimeout(() => {
       isDropdownOpen.value = false;
     }, 150);
+};
+
+const onfocus = () => {
+  emit("clear-all-error-msgs");
+  isDropdownOpen.value = true;
 };
 
 const nameIs = (name: string) => name === props.label;
@@ -246,7 +255,7 @@ watch(searchQuery, (newQuery) => {
           align_me_right: nameIs('Average Order Value') && !position,
         }"
         :disabled="disabled"
-        @focus="isDropdownOpen = true"
+        @focus="onfocus"
         @blur="closeDropdown"
       />
       <div
@@ -272,7 +281,10 @@ watch(searchQuery, (newQuery) => {
     </div>
     <div
       v-show="
-        !nameIs('Ads Platform') && isDropdownOpen && !asInput && !forCustom
+        (!nameIs('Ads Platform') || position !== 'up') &&
+        isDropdownOpen &&
+        !asInput &&
+        !forCustom
       "
       class="dropdown-list"
       ref="mainDropdownListRef"
@@ -292,7 +304,11 @@ watch(searchQuery, (newQuery) => {
     </div>
     <div
       v-show="
-        nameIs('Ads Platform') && isDropdownOpen && !asInput && !forCustom
+        nameIs('Ads Platform') &&
+        position === 'up' &&
+        isDropdownOpen &&
+        !asInput &&
+        !forCustom
       "
       class="dropdown-list_ads"
       ref="dropdownListSecondRef"

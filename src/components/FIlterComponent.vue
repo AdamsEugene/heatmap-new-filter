@@ -205,6 +205,7 @@ const onSave = (state: boolean) => {
 const resetFilters = (click?: boolean, enable?: boolean) => {
   pendingList.value = [];
   reset.value = true;
+  errorMsg.value = "";
 
   if (enable) {
     emit("filter-values", []);
@@ -254,12 +255,23 @@ const onDeleteCustomFilter = () => {
   selectedItem.value = sessionData[0];
 };
 
+const resetErrors = () => {
+  errorMsg.value = "";
+};
+
 const applyFilters = () => {
   let returnData: ReturnData[] = [];
   if (!pendingList.value.length && (waitingRoom.value || selectedItem.value)) {
-    const { definition, name, nameForCompare, rest } =
-      waitingRoom.value || selectedItem.value;
-    returnData = [{ definition, name: nameForCompare || name, rest }];
+    const isValid = validate(waitingRoom.value || selectedItem.value);
+    if (isValid) {
+      const { definition, name, nameForCompare, rest } =
+        waitingRoom.value || selectedItem.value;
+      returnData = [{ definition, name: nameForCompare || name, rest }];
+      emit("filter-values", returnData);
+      props.onToggleShowFilterMenu();
+    } else {
+      errorMsg.value = "Please make sure you have a filter selected first";
+    }
   } else {
     const data = pendingList.value.map((filter) => ({
       name: filter.nameForCompare || filter.name,
@@ -268,10 +280,11 @@ const applyFilters = () => {
     }));
 
     returnData = data;
+    emit("filter-values", returnData);
+    props.onToggleShowFilterMenu();
   }
 
-  emit("filter-values", returnData);
-  props.onToggleShowFilterMenu();
+  console.log({ returnData });
 };
 
 const saveApplyFilters = async () => {
@@ -388,6 +401,7 @@ watch(selectedItem, () => {
           @editing-mode="onEditingMode"
           @on-save="onSave"
           @on-delete-custom-filter="onDeleteCustomFilter"
+          @reset-errors="resetErrors"
         />
       </div>
       <div class="filter-footer">

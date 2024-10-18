@@ -206,7 +206,7 @@ export const loadPartnerFilers = async (partner: string) => {
     }
 
     const result = await response.json();
-    return result;
+    return result.msg;
   } catch (error) {
     console.error("Error fetching data:", error);
   }

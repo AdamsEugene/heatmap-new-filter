@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
-import { CustomValues, Experiment, SessionDataItem } from "../@types";
+import { Ad, CustomValues, Experiment, SessionDataItem } from "../@types";
 import Dropdown from "./shared/Dropdown.vue";
 import AddFilterButton from "./shared/AddFilterButton.vue";
 import CustomFilterForm from "./shared/CustomFilterForm.vue";
@@ -27,6 +27,7 @@ import {
   checkForTokens,
   insertValueInRevenueOrder,
   replaceAfterRevenueOrder,
+  replaceAdIdValue,
 } from "./helpers/functions";
 import validate from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
@@ -48,6 +49,7 @@ const emit = defineEmits([
   "editing-mode",
   "on-save",
   "on-delete-custom-filter",
+  "reset-errors",
 ]);
 
 const nameIs = (name: string) => name === props.selectedItem.name;
@@ -66,6 +68,7 @@ const listOfSelectedItems = ref<string[]>([]);
 const mapOfSelectedItems = ref<Map<string, string>>(new Map());
 const hasTokens = ref<string[]>();
 const _errorMsg = ref(props.errorMsg);
+const currentAd = ref<Ad[]>();
 
 let selected: SessionDataItem = { ...props.selectedItem };
 
@@ -140,8 +143,9 @@ const onSelected = async (item: { item: string; kind: "main" | "value" }) => {
   if (item.kind === "main" && seOrAd) {
     emit("on-loading", true);
     const res = await loadPartnerFilers(item.item);
-    console.log(res);
-    listForValues.value = KV[item.item];
+    currentAd.value = res[item.item] || undefined;
+    console.log(currentAd.value);
+    listForValues.value = currentAd.value?.map((ad) => ad.ad_name);
     selected = {
       ...selected,
       definition: insertItemBeforeSemicolon(selected.definition, item.item),
@@ -182,7 +186,11 @@ const onSelected = async (item: { item: string; kind: "main" | "value" }) => {
       definition = replaceAfterRevenueOrder(selected.definition, item.item);
       shouldEncode.value = false;
     } else if (seOrAd) {
-      console.log(item);
+      if (currentAd.value) {
+        const adId =
+          currentAd.value.find((ad) => ad.ad_name === item.item)?.ad_id || "";
+        definition = replaceAdIdValue(selected.definition, adId);
+      }
     } else definition = replaceAfterEquals(selected.definition, item.item);
 
     selected = {
@@ -251,8 +259,13 @@ const onSelectionError = () => {
   selectionError.value = true;
 
   setTimeout(() => {
+    emit("reset-errors");
     selectionError.value = false;
   }, 3000);
+};
+
+const clearAllErrorMsgs = () => {
+  _errorMsg.value = "";
 };
 
 onMounted(() => {
@@ -364,8 +377,10 @@ watch(
         :disabled-item="listOfSelectedItems"
         :clear-fields="clearFields"
         :has-tokens="hasTokens"
+        :error-msg="_errorMsg"
         @on-selected="onSelected"
         @on-selection-error="onSelectionError"
+        @clear-all-error-msgs="clearAllErrorMsgs"
       />
       <transition name="fade" mode="default">
         <Dropdown
@@ -380,8 +395,10 @@ watch(
           :as-input="!listForValues"
           :disabled-item="listOfSelectedItems"
           :clear-fields="clearFields"
+          :error-msg="_errorMsg"
           @on-selected="onSelected"
           @on-selection-error="onSelectionError"
+          @clear-all-error-msgs="clearAllErrorMsgs"
         />
       </transition>
       <save-button

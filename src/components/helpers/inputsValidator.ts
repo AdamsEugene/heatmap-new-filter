@@ -1,5 +1,6 @@
 import { SessionDataItem } from "../../@types";
 import {
+  checkAdPartnerAndAdId,
   checkPartnerAndFriendlyNames,
   getValueAfterOperator,
   hasContentAfterOperator,
@@ -32,6 +33,10 @@ const validate = (data: SessionDataItem) => {
 
   if (name === "A/B Tests") {
     return checkPartnerAndFriendlyNames(definition);
+  }
+
+  if (name === "Ads Platform") {
+    return checkAdPartnerAndAdId(definition);
   }
 
   return false;

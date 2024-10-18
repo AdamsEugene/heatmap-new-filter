@@ -22,7 +22,7 @@ export const sessionData: SessionDataItem[] = [
     title: "QuickFilter-EntryPage",
   },
   {
-    definition: "sessionTagName==;sessionTagValue==",
+    definition: "ad_partner==;ad_id==",
     iconSrc: adsPlatform,
     idsegment: 0,
     name: "Ads Platform",

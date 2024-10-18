@@ -138,3 +138,28 @@ export type AuthorizationRequest = {
 };
 
 export type ReturnData = { definition: string; name: string; rest?: any };
+
+export type AdSet = {
+  id: string;
+  name: string;
+  status: string;
+  campaign_id: string;
+  campaign_attribution: string;
+  configured_status: string;
+  start_time: string;
+  campaign: {
+    id: string;
+  };
+  daily_budget: string;
+};
+
+export type Ad = {
+  ad_name: string;
+  account_id: string;
+  objective: string;
+  status: string;
+  ad_id: string;
+  start_time: string;
+  updated_time: string;
+  adsets: AdSet[];
+};
