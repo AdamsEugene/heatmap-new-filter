@@ -28,6 +28,7 @@ import {
   insertValueInRevenueOrder,
   replaceAfterRevenueOrder,
   replaceAdIdValue,
+  areAllTrue,
 } from "./helpers/functions";
 import validate from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
@@ -39,7 +40,7 @@ const props = defineProps<{
   canEdit: boolean;
   canAdd: boolean;
   cancelEdit: boolean;
-  errorMsg: string;
+  errorMsg: Map<number, string>;
 }>();
 
 const emit = defineEmits([
@@ -115,16 +116,18 @@ const freeUpSpace = () => {
 
 const onProceed = () => {
   const isValid = validate(selected);
-  console.log({ isValid });
-
-  if (isValid) {
+  if (areAllTrue(isValid)) {
     emit("on-selected", { item: selected });
     selected = { ...props.selectedItem };
     emit("on-save", false);
     clearFields.value = true;
   } else {
-    _errorMsg.value = errorMsgs(selected);
-    onSelectionError();
+    isValid.forEach((v, i) => {
+      if (!v) {
+        _errorMsg.value?.set(i, errorMsgs(selected)[i]);
+        onSelectionError();
+      }
+    });
   }
 };
 
@@ -259,13 +262,14 @@ const onSelectionError = () => {
   selectionError.value = true;
 
   setTimeout(() => {
-    emit("reset-errors");
     selectionError.value = false;
+    emit("reset-errors");
+    _errorMsg.value.clear();
   }, 3000);
 };
 
 const clearAllErrorMsgs = () => {
-  _errorMsg.value = "";
+  _errorMsg.value.clear();
 };
 
 onMounted(() => {
@@ -285,20 +289,19 @@ watch(
 watch(
   () => props.errorMsg,
   (msg) => {
-    if (msg) {
-      _errorMsg.value = msg;
+    if (msg.get(10)) {
+      _errorMsg.value.set(10, msg.get(10)!);
       onSelectionError();
     } else {
       selectionError.value = false;
     }
-  }
+  },
+  { immediate: true, deep: true }
 );
 
 watch(
   () => props.canAdd,
   (newValue) => {
-    console.log({ newValue });
-
     if (!newValue) {
       selected = { ...props.selectedItem };
       clearFields.value = true;
@@ -310,6 +313,7 @@ watch(
   () => props.selectedItem,
   () => {
     freeUpSpace();
+    _errorMsg.value.clear();
     makeRequestFor(props.selectedItem.name) && fetchSegment();
     selected = { ...props.selectedItem };
     if (nameIs("Average Order Value"))
@@ -377,7 +381,7 @@ watch(
         :disabled-item="listOfSelectedItems"
         :clear-fields="clearFields"
         :has-tokens="hasTokens"
-        :error-msg="_errorMsg"
+        :error-msg="_errorMsg.get(0)"
         @on-selected="onSelected"
         @on-selection-error="onSelectionError"
         @clear-all-error-msgs="clearAllErrorMsgs"
@@ -395,7 +399,7 @@ watch(
           :as-input="!listForValues"
           :disabled-item="listOfSelectedItems"
           :clear-fields="clearFields"
-          :error-msg="_errorMsg"
+          :error-msg="_errorMsg.get(1)"
           @on-selected="onSelected"
           @on-selection-error="onSelectionError"
           @clear-all-error-msgs="clearAllErrorMsgs"
@@ -420,7 +424,7 @@ watch(
       <div v-show="selectionError" class="enabled_to_select">
         <p class="medium_text">
           {{
-            _errorMsg ||
+            _errorMsg.get(10) ||
             "You have already selected this item. Please choose a different one."
           }}
         </p>
@@ -431,8 +435,8 @@ watch(
 
 <style>
 .enabled_to_select {
-  position: absolute !important;
-  bottom: 8px !important;
+  position: sticky !important;
+  bottom: 0px !important;
   z-index: 9 !important;
   width: 80% !important;
   display: flex;

@@ -210,7 +210,9 @@ export const generateSegmentString = (data: CustomValues[]): string => {
   return data
     .map(
       (item) =>
-        `${item.segment}${(conditions as any)[item.default]}${item.value}`
+        `${item.segment}${(conditions as any)[item.default] || ""}${
+          item.value || ""
+        }`
     )
     .join(";");
 };
@@ -311,14 +313,21 @@ export function isConvertibleToNumber(value: any): boolean {
   return !isNaN(num);
 }
 
-export function isValidRevenueOrderString(str: string): boolean {
-  const pattern = /^revenueOrder([=><]{1,2})(\d+)$/;
-  return pattern.test(str);
+export function isValidRevenueOrderString(str: string): [boolean, boolean] {
+  const pattern = /^revenueOrder([=><]{1,2})?(\d+)?$/;
+  const match = str.match(pattern);
+
+  return [!!match?.[1], !!match?.[2]];
 }
 
-export function checkPartnerAndFriendlyNames(str: string): boolean {
-  const regex = /^partnerName==[^;]+;friendlyName==[^;]+$/;
-  return regex.test(str);
+export function checkPartnerAndFriendlyNames(str: string): [boolean, boolean] {
+  const partnerNameRegex = /partnerName==[^;]+/;
+  const friendlyNameRegex = /friendlyName==[^;]+/;
+
+  const partnerNameMatch = partnerNameRegex.test(str);
+  const friendlyNameMatch = friendlyNameRegex.test(str);
+
+  return [partnerNameMatch, friendlyNameMatch];
 }
 
 export function replaceAdIdValue(str: string, newValue: string): string {
@@ -326,7 +335,43 @@ export function replaceAdIdValue(str: string, newValue: string): string {
   return str.replace(pattern, `ad_id==${newValue}`);
 }
 
-export function checkAdPartnerAndAdId(str: string): boolean {
-  const regex = /^ad_partner==[^;]+;ad_id==[^;]+$/;
-  return regex.test(str);
+export function checkAdPartnerAndAdId(str: string): [boolean, boolean] {
+  const partnerRegex = /ad_partner==[^;]+/;
+  const idRegex = /ad_id==[^;]+/;
+
+  const hasPartner = partnerRegex.test(str);
+  const hasId = idRegex.test(str);
+
+  return [hasPartner, hasId];
+}
+
+export function areAllTrue(values: boolean[]): boolean {
+  return values.every((value) => value === true);
+}
+
+export function evaluateFilterExpression(expression: string) {
+  const filters = expression.split(";");
+  const results = [];
+
+  for (const filter of filters) {
+    const [key, operator, value] = filter.split(/([=<>&]+)/);
+
+    const keyValid = key?.length > 0 && key !== "undefined";
+    const operatorValid = ["==", "<", ">", "&&"].includes(operator);
+    const valueValid = value?.length > 0 && value !== "undefined";
+
+    results.push([keyValid, operatorValid, valueValid]);
+  }
+
+  return results.flat();
+}
+
+export function chunkArray<T>(arr: T[], chunkSize: number): T[][] {
+  const slicedArray = arr.slice(1);
+  const chunks: T[][] = [];
+  for (let i = 0; i < slicedArray.length; i += chunkSize) {
+    const chunk = slicedArray.slice(i, i + chunkSize);
+    chunks.push(chunk);
+  }
+  return chunks;
 }

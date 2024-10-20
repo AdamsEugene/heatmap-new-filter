@@ -253,6 +253,7 @@ watch(searchQuery, (newQuery) => {
         :class="{
           no_padding: inputType === 'number',
           align_me_right: nameIs('Average Order Value') && !position,
+          input_error: errorMsg,
         }"
         :disabled="disabled"
         @focus="onfocus"
@@ -276,9 +277,11 @@ watch(searchQuery, (newQuery) => {
     >
       $
     </div>
-    <div v-if="errorMsg" class="flex_sb error_sb">
-      <p class="input_selection_error medium_text">{{ errorMsg }}</p>
-    </div>
+    <transition name="fade">
+      <div v-show="errorMsg" class="flex_sb error_sb">
+        <p class="input_selection_error medium_text">{{ errorMsg }}</p>
+      </div>
+    </transition>
     <div
       v-show="
         (!nameIs('Ads Platform') || position !== 'up') &&
@@ -369,7 +372,7 @@ watch(searchQuery, (newQuery) => {
             :key="category"
           >
             <label
-              :for="String(category)"
+              :for="String(category) + filterIndex"
               class="dropdown_menu_item action"
               :class="{ activeClass: category === undefined }"
             >
@@ -381,7 +384,7 @@ watch(searchQuery, (newQuery) => {
             <input
               type="checkbox"
               name="accordion"
-              :id="String(category)"
+              :id="String(category) + filterIndex"
               hidden
             />
             <ul class="content">
@@ -429,6 +432,15 @@ watch(searchQuery, (newQuery) => {
     margin: 0 !important;
     padding: 0 !important;
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .error_sb {
@@ -500,6 +512,10 @@ watch(searchQuery, (newQuery) => {
 
   &.no_padding {
     padding-right: 12px !important;
+  }
+
+  &.input_error {
+    border-color: #b71e2d !important;
   }
 
   &.align_me_right {

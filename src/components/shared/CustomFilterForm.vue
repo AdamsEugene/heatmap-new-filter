@@ -11,6 +11,8 @@ import {
 } from "../../@types";
 import {
   addOptionsToData,
+  areAllTrue,
+  chunkArray,
   convertOptionToArray,
   generateSegmentString,
   getUniqueArray,
@@ -23,6 +25,8 @@ import {
   dynamicallyFetchOptions,
 } from "../helpers/makeAPIcalls";
 import { _data } from "../../data";
+import validate from "../helpers/inputsValidator";
+import errorMsgs from "../helpers/errorMsgs";
 
 type DEF = "main" | "value" | "action" | "condition";
 type SELECTED_ITEMS = { item: DataItem | string; kind: DEF; index: number };
@@ -52,6 +56,8 @@ const emit = defineEmits([
 
 const customData = ref<FilterItem>();
 const filterName = ref<string>("");
+const errorMsgTitle = ref<string>();
+const errorMsg = ref<Map<number, Map<number, string>>>(new Map());
 
 const nameIs = (name: string) => name === props.selectedItem.name;
 const isString = (item: any) => typeof item === "string";
@@ -115,7 +121,7 @@ const loadInitialData = async (filter?: CustomValues) => {
 };
 
 const onSelected = async (item: SELECTED_ITEMS) => {
-  // console.log("onSelected: ", item.item);
+  errorMsg.value.clear();
   if (item.kind === "action" && typeof item.item !== "string") {
     let _options: string[] | undefined = undefined;
 
@@ -151,6 +157,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       setValues(item.index, item.item.conditions, _options);
       emit("on-loading", false);
     }
+    newFilter.value.definition = generateSegmentString(newFilter.value.data);
   }
 
   if (
@@ -176,7 +183,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
 
   emit("on-custom-filter-change", { ...newFilter.value });
 
-  console.log(newFilter.value);
+  // console.log(newFilter.value);
 };
 
 const setValues = (
@@ -189,6 +196,9 @@ const setValues = (
     props.selectedItem.data[index].options = options;
     props.selectedItem.data[index].default = "";
     props.selectedItem.data[index].value = "";
+    props.selectedItem.definition = generateSegmentString(
+      props.selectedItem.data
+    );
   }
 };
 
@@ -199,9 +209,48 @@ const removeFilter = (index: number) => {
 };
 
 const addNewFilter = () => {
-  const copy = ref({ ...copyOfInitialNewFilter });
-  if (!props.selectedItem.data) props.selectedItem.data = copy.value.data;
-  else props.selectedItem.data?.push(...copy.value.data!);
+  const isValid = validate(props.selectedItem);
+  const lastIndex = props.selectedItem.data?.length;
+  let chunks = chunkArray(isValid, 3);
+
+  if (lastIndex && props.selectedItem.data) {
+    if (props.selectedItem.data.length > chunks.length) {
+      const dataToCheck = props.selectedItem.data[
+        lastIndex - 1
+      ] as CustomValues;
+      const isValidAction = String(dataToCheck.action).trim() !== "";
+      const isValidCondition = String(dataToCheck.default).trim() !== "";
+
+      const isValidValue = String(dataToCheck.value).trim() !== "";
+      isValid.push(isValidAction, isValidCondition, isValidValue);
+      console.log(dataToCheck);
+      chunks = chunkArray(isValid, 3);
+    }
+  }
+
+  if (areAllTrue(isValid)) {
+    const copy = ref({ ...copyOfInitialNewFilter });
+    const newCopy = JSON.parse(JSON.stringify(copy.value));
+    if (!props.selectedItem.data) props.selectedItem.data = newCopy.data;
+    else props.selectedItem.data?.push(...newCopy.data!);
+  } else {
+    errorMsgTitle.value = !isValid[0]
+      ? "Please provide a valid name for your filter"
+      : "";
+    chunks.forEach((chunk, i) => {
+      if (!errorMsg.value.has(i)) {
+        errorMsg.value.set(i, new Map<number, string>());
+      }
+      const er = errorMsg.value.get(i);
+
+      chunk.forEach((c, j) => {
+        if (!c) {
+          er?.set(j, errorMsgs(props.selectedItem)[j]);
+        }
+      });
+    });
+    console.log(chunks);
+  }
 };
 
 const deleteFilter = async () => {
@@ -231,7 +280,6 @@ watch(
   (newSelectedItem) => {
     setCustomData();
     selectedItemCopy.value = { ...newSelectedItem };
-    console.log(selectedItemCopy.value);
 
     filterName.value = customData.value?.title || "";
     filterName.value = nameIs("Create Custom Filter")
@@ -257,6 +305,7 @@ watch(
 watch(
   () => props.cancelEdit,
   (newValue) => {
+    errorMsg.value.clear();
     if (newValue) {
       props.selectedItem.data = selectedItemCopy.data;
       props.selectedItem.title = selectedItemCopy.title;
@@ -288,10 +337,17 @@ watch(filterName, async (newName) => {
         type="text"
         :placeholder="'Enter filter name'"
         class="dropdown-input"
+        :class="{ input_error: errorMsgTitle }"
         v-model="filterName"
         autocomplete="off"
         :disabled="!canEdit"
+        @focus="errorMsgTitle = ''"
       />
+      <transition name="fade">
+        <div v-show="errorMsgTitle" class="flex_sb error_sb">
+          <p class="input_selection_error medium_text">{{ errorMsgTitle }}</p>
+        </div>
+      </transition>
     </div>
     <div
       v-for="(filter, index) in selectedItem?.data"
@@ -311,6 +367,7 @@ watch(filterName, async (newName) => {
         :disabled="!canEdit"
         :all-action-items="allActionItems"
         :filter-index="index"
+        :error-msg="errorMsg.get(index)?.get(0)"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -324,6 +381,7 @@ watch(filterName, async (newName) => {
         :clear-fields="clearFields"
         :disabled="!canEdit"
         :filter-index="index"
+        :error-msg="errorMsg.get(index)?.get(1)"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -336,6 +394,7 @@ watch(filterName, async (newName) => {
         :clear-fields="clearFields"
         :disabled="!canEdit"
         :filter-index="index"
+        :error-msg="errorMsg.get(index)?.get(2)"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <div v-if="!canEdit && (selectedItem?.data?.length || 0) !== index + 1" />

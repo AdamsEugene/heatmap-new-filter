@@ -6,25 +6,26 @@ import {
   hasContentAfterOperator,
   isConvertibleToNumber,
   isValidRevenueOrderString,
+  evaluateFilterExpression,
 } from "./functions";
 
-const validate = (data: SessionDataItem) => {
-  const { name, definition } = data;
-  console.log(data);
-  if (noValidation.includes(name)) return true;
+const validate = (_data: SessionDataItem) => {
+  const { name, definition, data, title } = _data;
+  //   console.log(data);
+  if (noValidation.includes(name)) return [true];
 
   if (
     name === "Entry Page" ||
     name === "Traffic Source" ||
     name === "Viewed Page"
   ) {
-    return hasContentAfterOperator("==", definition);
+    return [hasContentAfterOperator("==", definition)];
   }
 
   if (name === "Total Pages Visited") {
     const isValid = hasContentAfterOperator("==", definition);
     const value = getValueAfterOperator("==", definition);
-    return isValid && isConvertibleToNumber(value);
+    return [isValid && isConvertibleToNumber(value)];
   }
 
   if (name === "Average Order Value") {
@@ -39,7 +40,14 @@ const validate = (data: SessionDataItem) => {
     return checkAdPartnerAndAdId(definition);
   }
 
-  return false;
+  if (name === "Create Custom Filter" || data?.length) {
+    const isNameValid =
+      title.trim().length > 3 && title !== "Create Custom Filter";
+    const isFilterOk = evaluateFilterExpression(definition);
+    return [isNameValid, ...isFilterOk];
+  }
+
+  return [false];
 };
 
 const noValidation = [

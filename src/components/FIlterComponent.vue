@@ -21,7 +21,7 @@ import {
 } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
-import { getThis, removeUrlParams } from "./helpers/functions";
+import { areAllTrue, getThis, removeUrlParams } from "./helpers/functions";
 import validate from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
 
@@ -46,7 +46,7 @@ const canAdd = ref(false);
 const cancelEdit = ref(false);
 const disabledComparison = ref(false);
 
-const errorMsg = ref("");
+const errorMsg = ref<Map<number, string>>(new Map());
 
 // const updatedSelectedItem = ref<SessionDataItem>();
 const pendingList = ref<CombinedFilter[]>([]);
@@ -116,8 +116,7 @@ onMounted(() => {
             ?.codeVerifier || "";
       }
 
-      const res = await manageAdsConnection({ ...payload });
-      console.log(res);
+      await manageAdsConnection({ ...payload });
       localStorage.removeItem("ads-partner-name");
       removeUrlParams(["heatmap_com_token", "code"]);
     };
@@ -138,20 +137,23 @@ const onFilterSelect = (item: { item: SessionDataItem }) => {
 };
 
 const createCustomFilter = () => {
-  selectedItem.value = customData.value;
+  const newCopy = JSON.parse(JSON.stringify(customData.value));
+  selectedItem.value = newCopy;
 };
 
 const handleAddToWaitingRoom = (item: { item: CombinedFilter }) => {
   waitingRoom.value = item.item;
-  console.log("waitingRoom", waitingRoom.value);
+  // console.log("waitingRoom", waitingRoom.value);
 };
 
 const handleSidebarItemClick = (item: SessionDataItem) => {
-  errorMsg.value = "";
+  errorMsg.value?.clear();
   if (selectedItem.value.name !== item.name) {
     waitingRoom.value = undefined;
     canAdd.value = false;
   }
+  console.log(item);
+
   selectedItem.value = item;
   if (item.name !== "Create Custom Filter") prevSelectedItem.value = item;
 };
@@ -159,21 +161,27 @@ const handleSidebarItemClick = (item: SessionDataItem) => {
 const handleCompareFilters = () => {
   if (waitingRoom.value) {
     const isValid = validate(waitingRoom.value);
-    console.log(validate(waitingRoom.value));
-    if (isValid) {
+    if (areAllTrue(isValid)) {
       pendingList.value.push(waitingRoom.value);
-      errorMsg.value = "";
+      errorMsg.value?.clear();
     } else {
-      errorMsg.value = errorMsgs(waitingRoom.value);
+      isValid.forEach((v, i) => {
+        if (!v) {
+          errorMsg.value?.set(i, errorMsgs(waitingRoom.value!)[i]);
+        }
+      });
     }
   } else {
     const isValid = validate(selectedItem.value);
-    console.log(validate(selectedItem.value));
-    if (isValid) {
+    if (areAllTrue(isValid)) {
       pendingList.value.push(selectedItem.value);
-      errorMsg.value = "";
+      errorMsg.value?.clear();
     } else {
-      errorMsg.value = errorMsgs(selectedItem.value);
+      isValid.forEach((v, i) => {
+        if (!v) {
+          errorMsg.value?.set(i, errorMsgs(selectedItem.value)[i]);
+        }
+      });
     }
   }
   waitingRoom.value = undefined;
@@ -205,7 +213,7 @@ const onSave = (state: boolean) => {
 const resetFilters = (click?: boolean, enable?: boolean) => {
   pendingList.value = [];
   reset.value = true;
-  errorMsg.value = "";
+  errorMsg.value?.clear();
 
   if (enable) {
     emit("filter-values", []);
@@ -219,33 +227,44 @@ const resetFilters = (click?: boolean, enable?: boolean) => {
 };
 
 const saveCustomFilter = async () => {
-  loading.value = true;
-  const res = await saveEditCustomFilter(selectedItem.value);
-  const { name, ...others } = selectedItem.value;
-  const existingItemIndex = customFilters.value.findIndex(
-    (filter) => filter.id === selectedItem.value.id
-  );
+  const isValid = validate(selectedItem.value);
+  if (areAllTrue(isValid)) {
+    loading.value = true;
+    const res = await saveEditCustomFilter(selectedItem.value);
+    const { name, ...others } = selectedItem.value;
+    const existingItemIndex = customFilters.value.findIndex(
+      (filter) => filter.id === selectedItem.value.id
+    );
 
-  if (res) {
-    if (existingItemIndex === -1) {
-      customFilters.value.push({
-        isDefinitionValueSet: true,
-        name: selectedItem.value.title,
-        ...others,
-      });
-    } else {
-      customFilters.value[existingItemIndex] = {
-        ...customFilters.value[existingItemIndex],
-        isDefinitionValueSet: true,
-        name: selectedItem.value.title,
-        ...others,
-      };
+    if (res) {
+      if (existingItemIndex === -1) {
+        customFilters.value.push({
+          isDefinitionValueSet: true,
+          name: selectedItem.value.title,
+          ...others,
+        });
+      } else {
+        customFilters.value[existingItemIndex] = {
+          ...customFilters.value[existingItemIndex],
+          isDefinitionValueSet: true,
+          name: selectedItem.value.title,
+          ...others,
+        };
+      }
     }
+    canEdit.value = false;
+    if (nameIs("Create Custom Filter")) {
+      selectedItem.value.name = selectedItem.value.title;
+    }
+    loading.value = false;
+    return true;
+  } else {
+    errorMsg.value?.set(
+      10,
+      "Please ensure all fields are filled out correctly."
+    );
+    return false;
   }
-  canEdit.value = false;
-  if (nameIs("Create Custom Filter"))
-    selectedItem.value = prevSelectedItem.value;
-  loading.value = false;
 };
 
 const onDeleteCustomFilter = () => {
@@ -256,21 +275,24 @@ const onDeleteCustomFilter = () => {
 };
 
 const resetErrors = () => {
-  errorMsg.value = "";
+  errorMsg.value?.clear();
 };
 
 const applyFilters = () => {
   let returnData: ReturnData[] = [];
   if (!pendingList.value.length && (waitingRoom.value || selectedItem.value)) {
     const isValid = validate(waitingRoom.value || selectedItem.value);
-    if (isValid) {
+    if (areAllTrue(isValid)) {
       const { definition, name, nameForCompare, rest } =
         waitingRoom.value || selectedItem.value;
       returnData = [{ definition, name: nameForCompare || name, rest }];
       emit("filter-values", returnData);
       props.onToggleShowFilterMenu();
     } else {
-      errorMsg.value = "Please make sure you have a filter selected first";
+      errorMsg.value?.set(
+        10,
+        "Please make sure you have a filter selected first"
+      );
     }
   } else {
     const data = pendingList.value.map((filter) => ({
@@ -280,11 +302,16 @@ const applyFilters = () => {
     }));
 
     returnData = data;
-    emit("filter-values", returnData);
-    props.onToggleShowFilterMenu();
+    if (returnData.length) {
+      emit("filter-values", returnData);
+      props.onToggleShowFilterMenu();
+    } else {
+      errorMsg.value?.set(
+        10,
+        "Please make sure you have a filter selected first"
+      );
+    }
   }
-
-  console.log({ returnData });
 };
 
 const saveApplyFilters = async () => {
