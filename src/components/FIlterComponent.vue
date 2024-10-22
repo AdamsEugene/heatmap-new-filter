@@ -113,7 +113,7 @@ onMounted(() => {
         partner,
         websiteIds: [+getThis("idSite")],
         code: getThis("code") || getThis("oauth_verifier"),
-        redirectType: "locala",
+        redirectType: "dashboard",
       };
 
       if (partner.toLowerCase() === "x") {

@@ -149,6 +149,10 @@ const onSelected = async (item: { item: string; kind: "main" | "value" }) => {
   if (item.kind === "main" && seOrAd) {
     emit("on-loading", true);
     const res = await loadPartnerFilers(item.item);
+    if (!res) {
+      emit("on-loading", false);
+      return;
+    }
     currentAd.value = res[item.item] || undefined;
     listForValues.value = currentAd.value?.map((ad) => ad.ad_name);
     selected = {

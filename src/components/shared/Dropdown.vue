@@ -150,7 +150,7 @@ const manageConnection = async (partner: string) => {
     userId: props.accountID || +accountId,
     partner,
     websiteIds: [+getThis("idSite")],
-    redirectType: "locala",
+    redirectType: "dashboard",
   });
   localStorage.setItem("ads-partner-name", partner);
   localStorage.setItem("twitterCodeVerifier", JSON.stringify(res));
