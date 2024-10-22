@@ -69,8 +69,6 @@ const groupedData = groupDataByCategory(dataWithConvertedOptions);
 const allActionItems = ref(groupedData);
 const actionItems = ref({ ...allActionItems.value });
 
-// console.log(actionItems.value);
-
 const setCustomData = () => {
   if (props.selectedItem.data) {
     customData.value = {
@@ -121,7 +119,9 @@ const loadInitialData = async (filter?: CustomValues) => {
 };
 
 const onSelected = async (item: SELECTED_ITEMS) => {
-  errorMsg.value.clear();
+  const position =
+    item.kind === "action" ? 0 : item.kind === "condition" ? 1 : 2;
+  errorMsg.value.get(item.index)?.delete(position);
   if (item.kind === "action" && typeof item.item !== "string") {
     let _options: string[] | undefined = undefined;
 
@@ -182,8 +182,6 @@ const onSelected = async (item: SELECTED_ITEMS) => {
   }
 
   emit("on-custom-filter-change", { ...newFilter.value });
-
-  // console.log(newFilter.value);
 };
 
 const setValues = (
@@ -223,7 +221,6 @@ const addNewFilter = () => {
 
       const isValidValue = String(dataToCheck.value).trim() !== "";
       isValid.push(isValidAction, isValidCondition, isValidValue);
-      console.log(dataToCheck);
       chunks = chunkArray(isValid, 3);
     }
   }
@@ -249,14 +246,12 @@ const addNewFilter = () => {
         }
       });
     });
-    console.log(chunks);
   }
 };
 
 const deleteFilter = async () => {
   emit("on-loading", true);
-  const res = await deleteCustomFilter(props.selectedItem);
-  console.log(res);
+  await deleteCustomFilter(props.selectedItem);
   emit("on-delete-custom-filter");
   emit("on-loading", false);
 };

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import FilterComponent from "./FIlterComponent.vue";
 import FilterButton from "./shared/FilterButton.vue";
 import { ReturnData, Site, User } from "../@types";
@@ -11,12 +11,11 @@ const emit = defineEmits<{
   (e: "on-filter-reset"): void;
 }>();
 
-const props = defineProps<{ user?: User; websites?: Site[] }>();
+defineProps<{ user?: User; websites?: Site[] }>();
 
 const filterWrapper = ref<HTMLElement | null>(null);
 
 function onFilterValuesChange(values: ReturnData[]) {
-  console.log(values);
   filteredValues.value = values.length > 0 ? values : undefined;
   emit("on-filter-values-change", values);
 }
@@ -46,15 +45,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleClickOutside);
 });
-
-watch(
-  () => props.websites,
-  (newWebsites) => {
-    console.log("====================================");
-    console.log(newWebsites);
-    console.log("====================================");
-  }
-);
 </script>
 
 <template>

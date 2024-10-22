@@ -6,8 +6,6 @@ export default function validator(
   data: AllData[],
   props?: CombinedFilter
 ): boolean {
-  //   console.log(data);
-  //   console.log(props);
   let valid = false;
 
   // for Entry Page || Traffic Source

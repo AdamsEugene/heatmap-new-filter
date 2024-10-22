@@ -64,11 +64,7 @@ const returnImg = (name: string) => {
   return (obj as any)[name] || go;
 };
 
-const emit = defineEmits([
-  "on-selected",
-  "on-selection-error",
-  "clear-all-error-msgs",
-]);
+const emit = defineEmits(["on-selected", "on-selection-error"]);
 
 const searchQuery = ref<string>(props.initialValue || "");
 const isDropdownOpen = ref<boolean>(false);
@@ -129,7 +125,6 @@ const closeDropdown = () => {
 };
 
 const onfocus = () => {
-  emit("clear-all-error-msgs");
   isDropdownOpen.value = true;
 };
 
@@ -226,9 +221,6 @@ watch(searchQuery, (newQuery) => {
   let validInput = false;
   if (typeof newQuery === "number") validInput = true;
   else validInput = Boolean(newQuery);
-  // console.log(
-  //   (nameIs("Total Pages Visited") || (isAOV && isSec)) && validInput
-  // );
 
   if ((nameIs("Total Pages Visited") || (isAOV && isSec)) && validInput) {
     emit("on-selected", { item: newQuery, kind: props.definition });

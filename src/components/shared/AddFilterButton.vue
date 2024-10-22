@@ -36,7 +36,7 @@ watch(
       deleting_button: label?.includes('Delete'),
       add_filter: label === 'Add Additional Filter',
     }"
-    @click="onclick"
+    @click.stop="onclick"
   >
     <img v-show="!noIcon" class="button_icon" :src="url" alt="add icon" />
     <p class="normal_text">{{ label || "Add Custom" }}</p>

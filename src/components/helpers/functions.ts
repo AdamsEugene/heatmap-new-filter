@@ -224,11 +224,8 @@ function getCodeFromUrl() {
 
 export function detectUrlChange() {
   const handleUrlChange = () => {
-    console.log("popstate");
-
     const code = getCodeFromUrl();
     if (code) {
-      console.log("Code parameter changed:", code);
     }
   };
 

@@ -11,7 +11,6 @@ import {
 
 const validate = (_data: SessionDataItem) => {
   const { name, definition, data, title } = _data;
-  //   console.log(data);
   if (noValidation.includes(name)) return [true];
 
   if (

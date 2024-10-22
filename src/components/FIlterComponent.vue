@@ -10,6 +10,7 @@ import { sessionData, eCommerceData } from "../data";
 import {
   AuthorizationRequest,
   CombinedFilter,
+  CustomValues,
   FilterList,
   ReturnData,
   SessionDataItem,
@@ -23,7 +24,7 @@ import {
 } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
-import { areAllTrue, getThis } from "./helpers/functions";
+import { areAllTrue, chunkArray, getThis } from "./helpers/functions";
 import validate from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
 
@@ -103,8 +104,6 @@ onMounted(() => {
   localStorage.setItem("heatmap_com_redirect_url", url);
   const partner = localStorage.getItem("ads-partner-name");
 
-  // console.log({ partner, code: getThis("code") });
-
   if (partner && getThis("code")) {
     const makeExchangeRequest = async (partner: string) => {
       const accountId = localStorage.getItem("filter-account-id") || 0;
@@ -125,7 +124,6 @@ onMounted(() => {
 
       await manageAdsConnection({ ...payload });
       localStorage.removeItem("ads-partner-name");
-      // removeUrlParams(["heatmap_com_token", "code"]);
     };
 
     makeExchangeRequest(partner);
@@ -137,10 +135,7 @@ const onLoading = (status: boolean) => {
 };
 
 const onFilterSelect = (item: { item: SessionDataItem }) => {
-  // updatedSelectedItem.value = item.item;
-  // if (pendingList.value.length === 1)
   pendingList.value.push(item.item);
-  // console.log(selectedItem.value, item);
 };
 
 const createCustomFilter = () => {
@@ -150,7 +145,6 @@ const createCustomFilter = () => {
 
 const handleAddToWaitingRoom = (item: { item: CombinedFilter }) => {
   waitingRoom.value = item.item;
-  // console.log("waitingRoom", waitingRoom.value);
 };
 
 const handleSidebarItemClick = (item: SessionDataItem) => {
@@ -159,7 +153,6 @@ const handleSidebarItemClick = (item: SessionDataItem) => {
     waitingRoom.value = undefined;
     canAdd.value = false;
   }
-  console.log(item);
 
   selectedItem.value = item;
   if (item.name !== "Create Custom Filter") prevSelectedItem.value = item;
@@ -235,6 +228,24 @@ const resetFilters = (click?: boolean, enable?: boolean) => {
 
 const saveCustomFilter = async () => {
   const isValid = validate(selectedItem.value);
+
+  const lastIndex = selectedItem.value.data?.length;
+  let chunks = chunkArray(isValid, 3);
+
+  if (lastIndex && selectedItem.value.data) {
+    if (selectedItem.value.data.length > chunks.length) {
+      const dataToCheck = selectedItem.value.data[
+        lastIndex - 1
+      ] as CustomValues;
+      const isValidAction = String(dataToCheck.action).trim() !== "";
+      const isValidCondition = String(dataToCheck.default).trim() !== "";
+
+      const isValidValue = String(dataToCheck.value).trim() !== "";
+      isValid.push(isValidAction, isValidCondition, isValidValue);
+      chunks = chunkArray(isValid, 3);
+    }
+  }
+
   if (areAllTrue(isValid)) {
     loading.value = true;
     const res = await saveEditCustomFilter(selectedItem.value);
@@ -278,21 +289,24 @@ const onDeleteCustomFilter = () => {
   customFilters.value = customFilters.value.filter(
     (item) => item.id !== selectedItem.value.id
   );
-  selectedItem.value = sessionData[0];
+  selectedItem.value =
+    customFilters.value.length > 0 ? customFilters.value[0] : eCommerceData[3];
 };
 
-const resetErrors = () => {
-  errorMsg.value?.clear();
+const resetErrors = (err?: number) => {
+  if (err) errorMsg.value.delete(err);
+  else errorMsg.value?.clear();
 };
 
-const applyFilters = () => {
+const applyFilters = (fromCustom?: boolean) => {
   let returnData: ReturnData[] = [];
   if (!pendingList.value.length && (waitingRoom.value || selectedItem.value)) {
     const isValid = validate(waitingRoom.value || selectedItem.value);
     if (areAllTrue(isValid)) {
-      const { definition, name, nameForCompare, rest } =
+      const { definition, name, nameForCompare, rest, title } =
         waitingRoom.value || selectedItem.value;
-      returnData = [{ definition, name: nameForCompare || name, rest }];
+      const newName = fromCustom ? title : name;
+      returnData = [{ definition, name: nameForCompare || newName, rest }];
       emit("filter-values", returnData);
       props.onToggleShowFilterMenu();
     } else {
@@ -322,8 +336,8 @@ const applyFilters = () => {
 };
 
 const saveApplyFilters = async () => {
-  await saveCustomFilter();
-  applyFilters();
+  const res = await saveCustomFilter();
+  if (res) applyFilters(res);
 };
 
 watch(
@@ -470,7 +484,11 @@ watch(selectedItem, () => {
           <div v-show="canEdit" class="btn border" @click="saveCustomFilter">
             <p class="btn_text">Save</p>
           </div>
-          <div v-show="!canEdit" class="btn primary" @click="applyFilters">
+          <div
+            v-show="!canEdit"
+            class="btn primary"
+            @click="applyFilters(false)"
+          >
             <p class="btn_text">
               {{ pendingList.length === 2 ? "Compare" : "Apply" }}
             </p>

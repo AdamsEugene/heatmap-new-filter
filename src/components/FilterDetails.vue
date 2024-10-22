@@ -45,15 +45,15 @@ const props = defineProps<{
   accountID?: number;
 }>();
 
-const emit = defineEmits([
-  "on-loading",
-  "on-selected",
-  "on-add-to-waiting-room",
-  "editing-mode",
-  "on-save",
-  "on-delete-custom-filter",
-  "reset-errors",
-]);
+const emit = defineEmits<{
+  (e: "on-loading", state: boolean): void;
+  (e: "on-selected", item: { item: SessionDataItem }): void;
+  (e: "on-add-to-waiting-room", item: { item: SessionDataItem }): void;
+  (e: "editing-mode"): void;
+  (e: "on-save", saved: boolean): void;
+  (e: "on-delete-custom-filter"): void;
+  (e: "reset-errors", err?: number): void;
+}>();
 
 const nameIs = (name: string) => name === props.selectedItem.name;
 
@@ -94,7 +94,6 @@ const fetchSegment = async () => {
   if (nameIs("Session Tag") || nameIs("Ads Platform")) {
     simpleListResponse.value = Object.keys(res || {});
     hasTokens.value = checkForTokens(res);
-    // console.log(hasTokens.value);
   } else if (nameIs("A/B Tests")) {
     simpleListResponse.value = getPartnerValues(
       res.partners_friendly,
@@ -105,7 +104,6 @@ const fetchSegment = async () => {
     simpleListResponse.value = res;
     hasTokens.value = undefined;
   }
-  // console.log(res);
   emit("on-loading", false);
 };
 
@@ -143,6 +141,8 @@ const saveCustomFilter = (filter: CustomValues & { title: string }) => {
 
 const onSelected = async (item: { item: string; kind: "main" | "value" }) => {
   const KV = keyValueResponse.value as any;
+  if (item.kind === "main") _errorMsg.value.delete(0);
+  else _errorMsg.value.delete(1);
   const seOrAd = nameIs("Session Tag") || nameIs("Ads Platform");
   shouldEncode.value = true;
   clearFields.value = false;
@@ -150,7 +150,6 @@ const onSelected = async (item: { item: string; kind: "main" | "value" }) => {
     emit("on-loading", true);
     const res = await loadPartnerFilers(item.item);
     currentAd.value = res[item.item] || undefined;
-    console.log(currentAd.value);
     listForValues.value = currentAd.value?.map((ad) => ad.ad_name);
     selected = {
       ...selected,
@@ -210,10 +209,8 @@ const onSelected = async (item: { item: string; kind: "main" | "value" }) => {
 
     emit("on-save", true);
   }
-  // console.log(selected);
 
   emit("on-add-to-waiting-room", { item: selected });
-  // console.log(item);
 };
 
 const getABTestingData = (item: string, definition: string, rest: any) => {
@@ -266,13 +263,15 @@ const onSelectionError = () => {
 
   setTimeout(() => {
     selectionError.value = false;
-    emit("reset-errors");
-    _errorMsg.value.clear();
-  }, 3000);
-};
 
-const clearAllErrorMsgs = () => {
-  _errorMsg.value.clear();
+    if (_errorMsg.value.get(10)) {
+      emit("reset-errors", 10);
+      _errorMsg.value.delete(10);
+    } else {
+      _errorMsg.value.clear();
+      emit("reset-errors");
+    }
+  }, 3000);
 };
 
 onMounted(() => {
@@ -388,7 +387,6 @@ watch(
         :account-id="accountID"
         @on-selected="onSelected"
         @on-selection-error="onSelectionError"
-        @clear-all-error-msgs="clearAllErrorMsgs"
       />
       <transition name="fade" mode="default">
         <Dropdown
@@ -407,7 +405,6 @@ watch(
           :account-id="accountID"
           @on-selected="onSelected"
           @on-selection-error="onSelectionError"
-          @clear-all-error-msgs="clearAllErrorMsgs"
         />
       </transition>
       <save-button
