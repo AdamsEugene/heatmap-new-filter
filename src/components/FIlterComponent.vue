@@ -13,6 +13,8 @@ import {
   FilterList,
   ReturnData,
   SessionDataItem,
+  Site,
+  User,
 } from "../@types";
 import {
   loadCustomFilters,
@@ -21,13 +23,15 @@ import {
 } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
-import { areAllTrue, getThis, removeUrlParams } from "./helpers/functions";
+import { areAllTrue, getThis } from "./helpers/functions";
 import validate from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
 
 const props = defineProps<{
   onToggleShowFilterMenu: () => void;
   defaultValues?: ReturnData[];
+  user?: User;
+  websites?: Site[];
 }>();
 
 const emit = defineEmits<{
@@ -60,6 +64,8 @@ const customData = ref<SessionDataItem>({
   title: "Create Custom Filter",
   data: [{ action: "", default: "", name: "", segment: "", value: "" }],
 });
+
+const accountID = ref<number>();
 
 const readyToCompare = computed(() => pendingList.value.length);
 
@@ -101,11 +107,12 @@ onMounted(() => {
 
   if (partner && getThis("code")) {
     const makeExchangeRequest = async (partner: string) => {
+      const accountId = localStorage.getItem("filter-account-id") || 0;
       let payload: AuthorizationRequest = {
         action: "exchange" as const,
-        userId: "adamseugene292gmail",
+        userId: accountID.value || +accountId,
         partner,
-        websiteIds: [12],
+        websiteIds: [+getThis("idSite")],
         code: getThis("code"),
         redirectType: "dashboard",
       };
@@ -118,7 +125,7 @@ onMounted(() => {
 
       await manageAdsConnection({ ...payload });
       localStorage.removeItem("ads-partner-name");
-      removeUrlParams(["heatmap_com_token", "code"]);
+      // removeUrlParams(["heatmap_com_token", "code"]);
     };
 
     makeExchangeRequest(partner);
@@ -320,6 +327,18 @@ const saveApplyFilters = async () => {
 };
 
 watch(
+  () => props.websites,
+  (newWebsites) => {
+    const currentWebsite = newWebsites?.find(
+      (website) => website.idsite === +getThis("idSite")
+    );
+    accountID.value = currentWebsite?.account_id;
+    if (accountID.value)
+      localStorage.setItem("filter-account-id", String(accountID.value));
+  }
+);
+
+watch(
   () => props.defaultValues,
   (newVal) => {
     if (newVal) {
@@ -422,6 +441,8 @@ watch(selectedItem, () => {
           :can-add="canAdd"
           :cancel-edit="cancelEdit"
           :error-msg="errorMsg"
+          :websites="websites"
+          :account-i-d="accountID"
           @on-add-to-waiting-room="handleAddToWaitingRoom"
           @on-loading="onLoading"
           @on-selected="onFilterSelect"

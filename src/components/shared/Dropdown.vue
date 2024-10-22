@@ -25,7 +25,11 @@ import ti from "../../assets/images/tiktok.svg";
 import ji from "../../assets/images/ji.svg";
 import ig from "../../assets/images/ig.svg";
 import { manageAdsConnection } from "../helpers/makeAPIcalls";
-import { actionItemsSearch, detectUrlChange } from "../helpers/functions";
+import {
+  actionItemsSearch,
+  detectUrlChange,
+  getThis,
+} from "../helpers/functions";
 
 const props = defineProps<{
   label?: string;
@@ -45,6 +49,7 @@ const props = defineProps<{
   allActionItems?: GroupedData;
   filterIndex?: number;
   errorMsg?: string;
+  accountID?: number;
 }>();
 
 const returnImg = (name: string) => {
@@ -143,12 +148,13 @@ const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
 };
 
 const manageConnection = async (partner: string) => {
+  const accountId = localStorage.getItem("filter-account-id") || 0;
   loading.value = partner;
   const res = await manageAdsConnection({
     action: "authorize",
-    userId: "adamseugene292gmail",
+    userId: props.accountID || +accountId,
     partner,
-    websiteIds: [12],
+    websiteIds: [+getThis("idSite")],
     redirectType: "dashboard",
   });
   localStorage.setItem("ads-partner-name", partner);

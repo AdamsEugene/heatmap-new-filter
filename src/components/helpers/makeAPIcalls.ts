@@ -198,8 +198,14 @@ export const loadPartnerFilers = async (partner: string) => {
     method: "GET",
     redirect: "follow",
   };
+  const token = localStorage.getItem("heatUserId");
+  const accountId = localStorage.getItem("filter-account-id");
   try {
-    const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=41fe84f4edd1a743b97679ab63c3f07c&idSite=1562&userId=6&partner=${partner}&live=0`;
+    const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=${
+      token || "41fe84f4edd1a743b97679ab63c3f07c"
+    }&idSite=${getThis(
+      "idSite"
+    )}&userId=${accountId}&partner=${partner}&live=0`;
     const response = await fetch(url, requestOptions as any);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

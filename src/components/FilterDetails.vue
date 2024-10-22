@@ -29,6 +29,7 @@ import {
   replaceAfterRevenueOrder,
   replaceAdIdValue,
   areAllTrue,
+  getThis,
 } from "./helpers/functions";
 import validate from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
@@ -41,6 +42,7 @@ const props = defineProps<{
   canAdd: boolean;
   cancelEdit: boolean;
   errorMsg: Map<number, string>;
+  accountID?: number;
 }>();
 
 const emit = defineEmits([
@@ -74,14 +76,15 @@ const currentAd = ref<Ad[]>();
 let selected: SessionDataItem = { ...props.selectedItem };
 
 const fetchSegment = async () => {
+  const accountId = localStorage.getItem("filter-account-id") || 0;
   emit("on-loading", true);
   const [segmentName] = props.selectedItem?.definition?.split("==") || "";
   let res: any;
   if (nameIs("Ads Platform")) {
     res = await manageAdsConnection({
       action: "status",
-      userId: "adamseugene292gmail",
-      websiteIds: [12],
+      userId: props.accountID || +accountId,
+      websiteIds: [+getThis("idSite")],
     });
   } else {
     res = await fetchSegmentData(segmentName);
@@ -382,6 +385,7 @@ watch(
         :clear-fields="clearFields"
         :has-tokens="hasTokens"
         :error-msg="_errorMsg.get(0)"
+        :account-id="accountID"
         @on-selected="onSelected"
         @on-selection-error="onSelectionError"
         @clear-all-error-msgs="clearAllErrorMsgs"
@@ -400,6 +404,7 @@ watch(
           :disabled-item="listOfSelectedItems"
           :clear-fields="clearFields"
           :error-msg="_errorMsg.get(1)"
+          :account-id="accountID"
           @on-selected="onSelected"
           @on-selection-error="onSelectionError"
           @clear-all-error-msgs="clearAllErrorMsgs"
@@ -438,7 +443,7 @@ watch(
   position: sticky !important;
   bottom: 0px !important;
   z-index: 9 !important;
-  width: 80% !important;
+  width: 100% !important;
   display: flex;
   justify-content: center !important;
   align-items: center !important;

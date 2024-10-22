@@ -129,7 +129,7 @@ export type GroupedData = {
 
 export type AuthorizationRequest = {
   action: "authorize" | "exchange" | "disconnect" | "status" | "refresh";
-  userId: string;
+  userId: string | number;
   websiteIds: number[];
   partner?: string;
   code?: string;
@@ -162,4 +162,31 @@ export type Ad = {
   start_time: string;
   updated_time: string;
   adsets: AdSet[];
+};
+
+export type User = {
+  id: number;
+  full_name: string;
+  account_id: number;
+  email: string;
+  login: string;
+  gender: string | null;
+  first_time: boolean;
+  user_type: string;
+  popup: any;
+};
+
+export type Site = {
+  idsite: number;
+  name: string;
+  account_id: number;
+  main_url: string;
+  ecommerce: number; // Assuming this is a numeric value representing some state
+  status: string;
+  ai_settings: any[]; // Assuming this is an array, adjust if you know the structure
+  notify: string; // Assuming this is a string that represents a notification state
+  is_free: boolean;
+  enable_recording: number; // Assuming this is numeric to represent some flag
+  currencySymbol: string;
+  features: any;
 };

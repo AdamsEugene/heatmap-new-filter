@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import FilterComponent from "./FIlterComponent.vue";
 import FilterButton from "./shared/FilterButton.vue";
-import { ReturnData } from "../@types";
+import { ReturnData, Site, User } from "../@types";
 
 const filteredValues = ref<ReturnData[]>();
 const showFilterMenu = ref(false);
@@ -10,6 +10,8 @@ const emit = defineEmits<{
   (e: "on-filter-values-change", values: ReturnData[]): void;
   (e: "on-filter-reset"): void;
 }>();
+
+const props = defineProps<{ user?: User; websites?: Site[] }>();
 
 const filterWrapper = ref<HTMLElement | null>(null);
 
@@ -44,6 +46,15 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleClickOutside);
 });
+
+watch(
+  () => props.websites,
+  (newWebsites) => {
+    console.log("====================================");
+    console.log(newWebsites);
+    console.log("====================================");
+  }
+);
 </script>
 
 <template>
@@ -56,6 +67,8 @@ onBeforeUnmount(() => {
       v-show="showFilterMenu"
       :onToggleShowFilterMenu="onToggleShowFilterMenu"
       :defaultValues="filteredValues"
+      :user="user"
+      :websites="websites"
       @filter-values="onFilterValuesChange"
       @reset-all-filters="onResetAllFilters"
       ref="filterComponent"
