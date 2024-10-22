@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
-import { Ad, CustomValues, Experiment, SessionDataItem } from "../@types";
+import {
+  Ad,
+  CustomValues,
+  Experiment,
+  Selected,
+  SessionDataItem,
+} from "../@types";
 import Dropdown from "./shared/Dropdown.vue";
 import AddFilterButton from "./shared/AddFilterButton.vue";
 import CustomFilterForm from "./shared/CustomFilterForm.vue";
@@ -88,6 +94,10 @@ const fetchSegment = async () => {
     });
   } else {
     res = await fetchSegmentData(segmentName);
+    if (!res) {
+      emit("on-loading", false);
+      return;
+    }
   }
 
   keyValueResponse.value = res;
@@ -139,7 +149,8 @@ const saveCustomFilter = (filter: CustomValues & { title: string }) => {
   }
 };
 
-const onSelected = async (item: { item: string; kind: "main" | "value" }) => {
+const onSelected = async (item: Selected) => {
+  if (typeof item.item !== "string") return;
   const KV = keyValueResponse.value as any;
   if (item.kind === "main") _errorMsg.value.delete(0);
   else _errorMsg.value.delete(1);
@@ -262,7 +273,8 @@ const onDeleteCustomFilter = () => {
   emit("on-delete-custom-filter");
 };
 
-const onSelectionError = () => {
+const onSelectionError = (msg?: string) => {
+  if (msg) _errorMsg.value.set(10, msg);
   selectionError.value = true;
 
   setTimeout(() => {

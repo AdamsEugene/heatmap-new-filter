@@ -34,6 +34,7 @@ export async function fetchSegmentData(segmentName: string) {
 
   if (response.ok) {
     const result = await response.json();
+    if (result.result === "error") return false;
     return result;
   } else return false;
 }
@@ -202,7 +203,7 @@ export const loadPartnerFilers = async (partner: string) => {
       token || "41fe84f4edd1a743b97679ab63c3f07c"
     }&idSite=${getThis(
       "idSite"
-    )}&userId=${accountId}&partner=${partner}&live=0`;
+    )}&userId=${accountId}&partner=${partner}&live=1`;
     const response = await fetch(url, requestOptions as any);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

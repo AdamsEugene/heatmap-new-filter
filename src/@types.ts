@@ -190,3 +190,8 @@ export type Site = {
   currencySymbol: string;
   features: any;
 };
+
+export interface Selected {
+  item: string | DataItem;
+  kind: "main" | "value" | "action" | "condition";
+}

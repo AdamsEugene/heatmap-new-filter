@@ -16,7 +16,7 @@ import {
   SecondLabelMap,
   SecondPlaceholderMap,
 } from "../helpers/lookUps";
-import { DataItem, GroupedData } from "../../@types";
+import { DataItem, GroupedData, Selected } from "../../@types";
 
 import fb from "../../assets/images/facebook.svg";
 import x from "../../assets/images/twitter.svg";
@@ -64,7 +64,10 @@ const returnImg = (name: string) => {
   return (obj as any)[name] || go;
 };
 
-const emit = defineEmits(["on-selected", "on-selection-error"]);
+const emit = defineEmits<{
+  (e: "on-selected", selected: Selected): void;
+  (e: "on-selection-error", msg?: string): void;
+}>();
 
 const searchQuery = ref<string>(props.initialValue || "");
 const isDropdownOpen = ref<boolean>(false);
@@ -97,7 +100,7 @@ const filteredItems = computed(() => {
     : props.items;
 });
 
-const filteredActionItems = computed(() =>
+let filteredActionItems = computed(() =>
   props.actionItems
     ? actionItemsSearch(
         props.actionItems,
@@ -125,7 +128,13 @@ const closeDropdown = () => {
 };
 
 const onfocus = () => {
+  searchQuery.value = "";
   isDropdownOpen.value = true;
+};
+
+const onArrowClick = () => {
+  if (!isDropdownOpen.value) searchQuery.value = "";
+  isDropdownOpen.value = !isDropdownOpen.value;
 };
 
 const nameIs = (name: string) => name === props.label;
@@ -138,6 +147,11 @@ const handleItemSelection = (item: string | DataItem) => {
 };
 
 const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
+  if (typeof item === "string" && !props.hasTokens?.includes(item)) {
+    emit("on-selection-error", "Please make sure your connected first");
+    return;
+  }
+
   if (!_disabled(check)) handleItemSelection(item);
   else emit("on-selection-error");
 };
@@ -255,11 +269,7 @@ watch(searchQuery, (newQuery) => {
         @focus="onfocus"
         @blur="closeDropdown"
       />
-      <div
-        v-show="!asInput"
-        class="arrow_down"
-        @click="isDropdownOpen = !isDropdownOpen"
-      >
+      <div v-show="!asInput" class="arrow_down" @click="onArrowClick">
         <img
           :class="['arrow_icon', { rotate: isDropdownOpen }]"
           src="../../assets/images/ArrowDown.svg"
