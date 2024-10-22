@@ -104,7 +104,7 @@ onMounted(() => {
   localStorage.setItem("heatmap_com_redirect_url", url);
   const partner = localStorage.getItem("ads-partner-name");
 
-  if (partner && getThis("code")) {
+  if (partner && (getThis("code") || getThis("oauth_verifier"))) {
     const makeExchangeRequest = async (partner: string) => {
       const accountId = localStorage.getItem("filter-account-id") || 0;
       let payload: AuthorizationRequest = {
@@ -112,14 +112,19 @@ onMounted(() => {
         userId: accountID.value || +accountId,
         partner,
         websiteIds: [+getThis("idSite")],
-        code: getThis("code"),
-        redirectType: "dashboard",
+        code: getThis("code") || getThis("oauth_verifier"),
+        redirectType: "locala",
       };
 
       if (partner.toLowerCase() === "x") {
-        payload.twitterCodeVerifier =
-          JSON.parse(localStorage.getItem("twitterCodeVerifier") || "{}")
-            ?.codeVerifier || "";
+        const url = JSON.parse(
+          localStorage.getItem("twitterCodeVerifier") || "{}"
+        );
+        if (url && url.url) {
+          const newUrl = new URL(url.url);
+          const searchParams = new URLSearchParams(newUrl.search);
+          payload.twitterCodeVerifier = searchParams.get("oauth_token") || "";
+        }
       }
 
       await manageAdsConnection({ ...payload });
