@@ -199,9 +199,33 @@ export const loadPartnerFilers = async (partner: string) => {
   const token = localStorage.getItem("heatUserId");
   const accountId = localStorage.getItem("filter-account-id");
   try {
-    const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.accounts&token=${
+    const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=${
       token || "41fe84f4edd1a743b97679ab63c3f07c"
     }&idSite=${getThis(
+      "idSite"
+    )}&userId=${accountId}&partner=${partner}&live=1`;
+    const response = await fetch(url, requestOptions as any);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.msg;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return false;
+  }
+};
+
+export const justMakeThis = async (partner: string) => {
+  const requestOptions = {
+    method: "GET",
+    redirect: "follow",
+  };
+  const token = localStorage.getItem("heatUserId");
+  const accountId = localStorage.getItem("filter-account-id");
+  try {
+    const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.accounts&token=${token}&idSite=${getThis(
       "idSite"
     )}&userId=${accountId}&partner=${partner}&live=1`;
     const response = await fetch(url, requestOptions as any);

@@ -18,6 +18,7 @@ import {
   User,
 } from "../@types";
 import {
+  justMakeThis,
   loadCustomFilters,
   manageAdsConnection,
   saveEditCustomFilter,
@@ -130,6 +131,7 @@ onMounted(() => {
       }
 
       await manageAdsConnection({ ...payload });
+      await justMakeThis(partner);
       localStorage.removeItem("ads-partner-name");
     };
 
