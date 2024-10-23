@@ -72,6 +72,8 @@ const readyToCompare = computed(() => pendingList.value.length);
 
 const activeClasses = computed(() => pendingList.value.map((i) => i.name));
 
+const isRageClick = computed(() => getThis("segment") === "heatmapType==rage");
+
 const runOnCreated = async () => {
   loading.value = true;
   const _customFilters = await loadCustomFilters<FilterList>();
@@ -133,6 +135,8 @@ onMounted(() => {
 
     makeExchangeRequest(partner);
   }
+
+  if (isRageClick) pendingList.value.push(sessionData[7]);
 });
 
 const onLoading = (status: boolean) => {
