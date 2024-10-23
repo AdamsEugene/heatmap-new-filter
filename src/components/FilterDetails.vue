@@ -164,8 +164,10 @@ const onSelected = async (item: Selected) => {
       emit("on-loading", false);
       return;
     }
+
     currentAd.value = res[item.item] || undefined;
-    listForValues.value = currentAd.value?.map((ad) => ad.ad_name);
+    listForValues.value = currentAd.value?.map((ad) => ad.ad_name || ad.name);
+
     selected = {
       ...selected,
       definition: insertItemBeforeSemicolon(selected.definition, item.item),
@@ -207,8 +209,11 @@ const onSelected = async (item: Selected) => {
       shouldEncode.value = false;
     } else if (seOrAd) {
       if (currentAd.value) {
-        const adId =
-          currentAd.value.find((ad) => ad.ad_name === item.item)?.ad_id || "";
+        const cur = currentAd.value.find(
+          (ad) => (ad.ad_name || ad.name) === item.item
+        );
+        const adId = cur?.ad_id || cur?.id || "";
+
         definition = replaceAdIdValue(selected.definition, adId);
       }
     } else definition = replaceAfterEquals(selected.definition, item.item);

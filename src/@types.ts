@@ -155,6 +155,8 @@ export type AdSet = {
 
 export type Ad = {
   ad_name: string;
+  name: string;
+  id: string;
   account_id: string;
   objective: string;
   status: string;

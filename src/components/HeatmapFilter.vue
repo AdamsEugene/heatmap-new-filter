@@ -16,6 +16,7 @@ defineProps<{ user?: User; websites?: Site[] }>();
 const filterWrapper = ref<HTMLElement | null>(null);
 
 function onFilterValuesChange(values: ReturnData[]) {
+  console.log(values);
   filteredValues.value = values.length > 0 ? values : undefined;
   emit("on-filter-values-change", values);
 }

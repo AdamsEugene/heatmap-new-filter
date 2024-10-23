@@ -200,7 +200,7 @@ export const loadPartnerFilers = async (partner: string) => {
   const accountId = localStorage.getItem("filter-account-id");
   try {
     const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=${
-      token || "41fe84f4edd1a743b97679ab63c3f07c"
+      token || "7b3f2fb80935a197d641f73ce98c35d5"
     }&idSite=${getThis(
       "idSite"
     )}&userId=${accountId}&partner=${partner}&live=1`;
@@ -216,7 +216,7 @@ export const loadPartnerFilers = async (partner: string) => {
     return false;
   }
 };
-
+// https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=7b3f2fb80935a197d641f73ce98c35d5&idSite=1562&userId=6&partner=x&live=1
 export const justMakeThis = async (partner: string) => {
   const requestOptions = {
     method: "GET",

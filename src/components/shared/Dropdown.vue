@@ -306,7 +306,7 @@ watch(searchQuery, (newQuery) => {
           selected: searchQuery === item || disabledItem?.includes(item),
           disabled_item: disabledItems(item),
         }"
-        @click.stop="itemSelectWithDisabled(item, item)"
+        @click.stop="handleItemSelection(item)"
       >
         <p class="medium_text">{{ item }}</p>
       </div>
