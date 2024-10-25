@@ -466,9 +466,13 @@ watch(
   justify-content: center !important;
   align-items: center !important;
   text-align: center !important;
-  background-color: #ffebe6 !important;
+  background-color: #ffebe6;
   padding: 8px !important;
   border-radius: 8px !important;
+
+  &.not_error {
+    background-color: #e8ffe6ff !important;
+  }
 
   .medium_text {
     color: #2e3338 !important;

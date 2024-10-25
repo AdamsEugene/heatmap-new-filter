@@ -66,7 +66,7 @@ const returnImg = (name: string) => {
 
 const emit = defineEmits<{
   (e: "on-selected", selected: Selected): void;
-  (e: "on-selection-error", msg?: string): void;
+  (e: "on-selection-error", msg?: string, succ?: boolean): void;
 }>();
 
 const searchQuery = ref<string>(props.initialValue || "");
@@ -147,6 +147,10 @@ const handleItemSelection = (item: string | DataItem) => {
 };
 
 const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
+  if (typeof item === "string" && item === "google") {
+    emit("on-selection-error", "Coming soon", true);
+    return;
+  }
   if (typeof item === "string" && !props.hasTokens?.includes(item)) {
     emit("on-selection-error", "Please make sure your connected first");
     return;
@@ -157,6 +161,7 @@ const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
 };
 
 const manageConnection = async (partner: string) => {
+  if (partner === "google") return;
   const accountId = localStorage.getItem("filter-account-id") || 0;
   loading.value = partner;
   const res = await manageAdsConnection({
@@ -351,9 +356,16 @@ watch(searchQuery, (newQuery) => {
                 searchQuery === item || disabledItem?.includes(item),
             }"
           >
-            {{ loading === item ? "Connecting..." : "Connect" }}
+            {{
+              item === "google"
+                ? "Coming soon"
+                : loading === item
+                ? "Connecting..."
+                : "Connect"
+            }}
           </p>
           <img
+            v-if="item !== 'google'"
             class="button_icon"
             src="../../assets/images/link.svg"
             alt="add icon"

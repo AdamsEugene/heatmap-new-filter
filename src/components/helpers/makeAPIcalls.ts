@@ -1,7 +1,8 @@
 import { AuthorizationRequest, SessionDataItem } from "../../@types";
 import { getThis, useEntryPage } from "./functions";
 
-const BASE_URL = "https://stage14.heatmapcore.com/";
+// const BASE_URL = "https://stage14.heatmapcore.com/";
+const BASE_URL = "/";
 
 export async function loadCustomFilters<T>(): Promise<T | false> {
   const body = JSON.stringify({
@@ -199,7 +200,7 @@ export const loadPartnerFilers = async (partner: string) => {
   const token = localStorage.getItem("heatUserId");
   const accountId = localStorage.getItem("filter-account-id");
   try {
-    const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=${
+    const url = `/index.php?module=API&method=AdsIntegration.ads&token=${
       token || "7b3f2fb80935a197d641f73ce98c35d5"
     }&idSite=${getThis(
       "idSite"
@@ -225,7 +226,7 @@ export const justMakeThis = async (partner: string) => {
   const token = localStorage.getItem("heatUserId");
   const accountId = localStorage.getItem("filter-account-id");
   try {
-    const url = `https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.accounts&token=${token}&idSite=${getThis(
+    const url = `/index.php?module=API&method=AdsIntegration.accounts&token=${token}&idSite=${getThis(
       "idSite"
     )}&userId=${accountId}&partner=${partner}&live=1`;
     const response = await fetch(url, requestOptions as any);
