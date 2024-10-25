@@ -138,7 +138,7 @@ onMounted(() => {
     makeExchangeRequest(partner);
   }
 
-  if (isRageClick) pendingList.value.push(sessionData[7]);
+  if (isRageClick.value) pendingList.value.push(sessionData[7]);
 });
 
 const onLoading = (status: boolean) => {

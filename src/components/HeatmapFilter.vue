@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import FilterComponent from "./FIlterComponent.vue";
 import FilterButton from "./shared/FilterButton.vue";
 import { ReturnData, Site, User } from "../@types";
+import { getThis } from "./helpers/functions";
 
 const filteredValues = ref<ReturnData[]>();
 const showFilterMenu = ref(false);
@@ -14,6 +15,8 @@ const emit = defineEmits<{
 defineProps<{ user?: User; websites?: Site[] }>();
 
 const filterWrapper = ref<HTMLElement | null>(null);
+
+const isRageClick = computed(() => getThis("segment") === "heatmapType==rage");
 
 function onFilterValuesChange(values: ReturnData[]) {
   console.log(values);
@@ -41,6 +44,10 @@ function handleClickOutside(event: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  if (isRageClick.value)
+    filteredValues.value = [
+      { definition: "heatmapType==rage", name: "Rage Clicks" },
+    ];
 });
 
 onBeforeUnmount(() => {
