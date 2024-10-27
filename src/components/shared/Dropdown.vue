@@ -152,7 +152,7 @@ const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
     return;
   }
   if (typeof item === "string" && !props.hasTokens?.includes(item)) {
-    emit("on-selection-error", "Please make sure your connected first");
+    emit("on-selection-error", "Please ensure that you are connected first.");
     return;
   }
 
@@ -345,8 +345,9 @@ watch(searchQuery, (newQuery) => {
           <p class="medium_text">{{ item }}</p>
         </div>
         <div
-          v-show="!hasTokens?.includes(item)"
+          v-show="item === 'google' || !hasTokens?.includes(item)"
           class="new_ads_right"
+          :class="{ no_background: item === 'google' }"
           @click.stop="manageConnection(item)"
         >
           <p
@@ -635,6 +636,14 @@ watch(searchQuery, (newQuery) => {
   gap: var(--corner-med, 8px) !important;
   border-radius: var(--corner-med, 8px) !important;
   background: var(--Grey-50, #f1f2f3) !important;
+
+  &.no_background {
+    background: transparent !important;
+
+    .medium_text {
+      color: var(--Grey-400, #8f99a3) !important;
+    }
+  }
 }
 
 .dropdown-item_ads {
