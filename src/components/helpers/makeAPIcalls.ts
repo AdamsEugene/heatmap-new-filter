@@ -1,8 +1,11 @@
 import { AuthorizationRequest, SessionDataItem } from "../../@types";
-import { getThis, useEntryPage } from "./functions";
+import { getRedirectType, getThis, useEntryPage } from "./functions";
 
 // const BASE_URL = "https://stage14.heatmapcore.com/";
-const BASE_URL = "/";
+let BASE_URL = "/";
+
+if (getRedirectType() === "dashboard")
+  BASE_URL = "https://stage14.heatmapcore.com/";
 
 export async function loadCustomFilters<T>(): Promise<T | false> {
   const body = JSON.stringify({

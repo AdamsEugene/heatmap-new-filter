@@ -166,7 +166,8 @@ const onSelected = async (item: Selected) => {
     }
 
     currentAd.value = res[item.item] || undefined;
-    listForValues.value = currentAd.value?.map((ad) => ad.ad_name || ad.name);
+    if (currentAd.value && currentAd.value.length > 0)
+      listForValues.value = currentAd.value?.map((ad) => ad.ad_name || ad.name);
 
     selected = {
       ...selected,
