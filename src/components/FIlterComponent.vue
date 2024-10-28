@@ -25,7 +25,12 @@ import {
 } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
-import { areAllTrue, chunkArray, getThis } from "./helpers/functions";
+import {
+  areAllTrue,
+  chunkArray,
+  getThis,
+  getRedirectType,
+} from "./helpers/functions";
 import validate from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
 
@@ -116,7 +121,7 @@ onMounted(() => {
         partner,
         websiteIds: [+getThis("idSite")],
         code: getThis("code") || getThis("oauth_verifier"),
-        redirectType: "dashboard",
+        redirectType: getRedirectType(),
       };
 
       if (partner.toLowerCase() === "x") {

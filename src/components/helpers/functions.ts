@@ -15,6 +15,16 @@ export const getThis = (item: string) => {
   return searchParams.get(item) || hashParams.get(item) || "";
 };
 
+export function getRedirectType(): "dashboard" | "locala" | "deves" | "dever" {
+  const url = new URL(window.location.href);
+  const hostname = url.hostname;
+  if (hostname.includes("localhost")) return "locala";
+  if (hostname.includes("dashboard")) return "dashboard";
+  if (hostname.includes("early-release")) return "dever";
+  if (hostname.includes("earlystage")) return "deves";
+  return "dashboard";
+}
+
 export const makeRequestFor = (name?: string): boolean => {
   const allowRequestList = [
     "Entry Page",

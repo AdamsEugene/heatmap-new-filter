@@ -28,6 +28,7 @@ import { manageAdsConnection } from "../helpers/makeAPIcalls";
 import {
   actionItemsSearch,
   detectUrlChange,
+  getRedirectType,
   getThis,
 } from "../helpers/functions";
 
@@ -169,7 +170,7 @@ const manageConnection = async (partner: string) => {
     userId: props.accountID || +accountId,
     partner,
     websiteIds: [+getThis("idSite")],
-    redirectType: "dashboard",
+    redirectType: getRedirectType(),
   });
   localStorage.setItem("ads-partner-name", partner);
   localStorage.setItem("twitterCodeVerifier", JSON.stringify(res));
