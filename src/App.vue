@@ -4,7 +4,7 @@ import HeatmapFilter from "./components/HeatmapFilter.vue";
 
 <template>
   <div class="wrapper">
-    <heatmap-filter :user="undefined" :websites="[]" />
+    <heatmap-filter :user="undefined" :websites="[]" :ads-platform="true" />
   </div>
 </template>
 

@@ -1,14 +1,31 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { SessionDataItem } from "../@types";
 
-defineProps<{
+const props = defineProps<{
   data: SessionDataItem[];
   title?: string;
+  adsPlatform: boolean;
   selectedItem?: SessionDataItem;
   handleSidebarItemClick: (item: SessionDataItem) => void;
   disabled: boolean;
   activeClasses?: string[];
 }>();
+
+const filteredItems = computed(() => {
+  return props.data.filter((item) => {
+    if (item.name === "Ads Platform") {
+      return props.adsPlatform;
+    }
+    return true;
+  });
+});
+
+const isItemSelected = computed(() => {
+  return (item: SessionDataItem) =>
+    (props.selectedItem?.name || "") + (props.selectedItem?.id || "") ===
+    (item.name || "") + (item?.id || "");
+});
 </script>
 
 <template>
@@ -16,16 +33,14 @@ defineProps<{
     <div class="lg_text with_green">{{ title || "Session Data" }}</div>
     <div class="sidebar_filter_buttons">
       <div
-        v-for="item in data"
+        v-for="item in filteredItems"
         :key="item.name"
         @click="disabled ? null : handleSidebarItemClick(item)"
         class="sidebar_filter_button"
         :class="{
           active: activeClasses?.includes(item.name),
           disabled,
-          selected:
-            (selectedItem?.name || '') + (selectedItem?.id || '') ===
-            (item.name || '') + (item?.id || ''),
+          selected: isItemSelected(item),
         }"
       >
         <img class="button_icon" :src="item.iconSrc" :alt="item.name" />

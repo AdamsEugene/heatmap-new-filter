@@ -36,6 +36,7 @@ import errorMsgs from "./helpers/errorMsgs";
 
 const props = defineProps<{
   onToggleShowFilterMenu: () => void;
+  adsPlatform: boolean;
   defaultValues?: ReturnData[];
   user?: User;
   websites?: Site[];
@@ -439,6 +440,7 @@ watch(selectedItem, () => {
           <div v-show="!canEdit" class="filter-body_left">
             <sidebar-items
               :data="sessionData"
+              :ads-platform="adsPlatform"
               :selected-item="selectedItem"
               :handle-sidebar-item-click="handleSidebarItemClick"
               :disabled="pendingList.length === 2"
@@ -447,6 +449,7 @@ watch(selectedItem, () => {
             <sidebar-items
               :data="eCommerceData"
               :title="'Ecommerce Data'"
+              :ads-platform="adsPlatform"
               :selected-item="selectedItem"
               :handle-sidebar-item-click="handleSidebarItemClick"
               :disabled="pendingList.length === 2"
@@ -455,6 +458,7 @@ watch(selectedItem, () => {
             <sidebar-items
               :data="customFilters"
               :title="'Custom Filters'"
+              :ads-platform="adsPlatform"
               :selected-item="selectedItem"
               :handle-sidebar-item-click="handleSidebarItemClick"
               :disabled="pendingList.length === 2"

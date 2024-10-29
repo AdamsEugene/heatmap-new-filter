@@ -12,7 +12,7 @@ const emit = defineEmits<{
   (e: "on-filter-reset"): void;
 }>();
 
-defineProps<{ user?: User; websites?: Site[] }>();
+defineProps<{ user?: User; websites?: Site[]; adsPlatform: boolean }>();
 
 const filterWrapper = ref<HTMLElement | null>(null);
 
@@ -67,6 +67,7 @@ onBeforeUnmount(() => {
       :defaultValues="filteredValues"
       :user="user"
       :websites="websites"
+      :ads-platform="adsPlatform"
       @filter-values="onFilterValuesChange"
       @reset-all-filters="onResetAllFilters"
       ref="filterComponent"
