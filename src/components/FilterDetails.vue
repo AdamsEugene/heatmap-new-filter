@@ -94,7 +94,11 @@ const fetchSegment = async () => {
     });
   } else {
     res = await fetchSegmentData(segmentName);
-    if (!res) {
+    const isValidArray = Array.isArray(res) && res.length > 0;
+    const isValidObject =
+      res && typeof res === "object" && Object.keys(res).length > 0;
+
+    if (!res || (typeof res === "object" && !isValidArray && !isValidObject)) {
       emit("on-loading", false);
       return;
     }

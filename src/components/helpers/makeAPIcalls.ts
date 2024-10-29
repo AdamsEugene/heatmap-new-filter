@@ -4,7 +4,7 @@ import { getRedirectType, getThis, useEntryPage } from "./functions";
 // const BASE_URL = "https://stage14.heatmapcore.com/";
 let BASE_URL = "/";
 
-if (getRedirectType() === "dashboard")
+if (getRedirectType() === "locala")
   BASE_URL = "https://stage14.heatmapcore.com/";
 
 export async function loadCustomFilters<T>(): Promise<T | false> {
@@ -23,6 +23,7 @@ export async function loadCustomFilters<T>(): Promise<T | false> {
 
   if (response.ok) {
     const result = await response.json();
+    if (result.result === "error") return false;
     return result.message;
   } else return false;
 }

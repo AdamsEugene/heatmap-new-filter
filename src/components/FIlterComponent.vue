@@ -85,7 +85,7 @@ const runOnCreated = async () => {
   loading.value = true;
   const _customFilters = await loadCustomFilters<FilterList>();
 
-  if (_customFilters) {
+  if (_customFilters && _customFilters.length > 0) {
     customFilters.value = _customFilters.map((data: any) => ({
       definition: data.definition,
       iconSrc: task,
