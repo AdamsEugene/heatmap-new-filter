@@ -1,6 +1,6 @@
 {
   "name": "heatmap-filter-new",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "main": "./dist/heatmap-filter-new.umd.cjs",
   "module": "./dist/heatmap-filter-new.es.js",
   "types": "./dist/index.d.ts",

@@ -248,7 +248,7 @@ const resetFilters = (click?: boolean, enable?: boolean) => {
 };
 
 const saveCustomFilter = async () => {
-  const isValid = validate(selectedItem.value);
+  const isValid = validate(selectedItem.value, existingNames.value);
 
   const lastIndex = selectedItem.value.data?.length;
   let chunks = chunkArray(isValid, 3);
