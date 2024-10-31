@@ -2,7 +2,7 @@ import { AuthorizationRequest, SessionDataItem } from "../../@types";
 import { getRedirectType, getThis, useEntryPage } from "./functions";
 
 // const BASE_URL = "https://stage14.heatmapcore.com/";
-let BASE_URL = "/";
+let BASE_URL = "";
 
 if (getRedirectType() === "locala")
   BASE_URL = "https://stage14.heatmapcore.com/";
@@ -17,7 +17,7 @@ export async function loadCustomFilters<T>(): Promise<T | false> {
   const requestOptions = { method: "POST", body };
 
   const response = await fetch(
-    `${BASE_URL}index.php?module=API&format=json&method=API.processCustomFilters`,
+    `${BASE_URL}/index.php?module=API&format=json&method=API.processCustomFilters`,
     requestOptions
   );
 
@@ -29,7 +29,7 @@ export async function loadCustomFilters<T>(): Promise<T | false> {
 }
 
 export async function fetchSegmentData(segmentName: string) {
-  const url = `${BASE_URL}index.php?idSite=${getThis(
+  const url = `${BASE_URL}/index.php?idSite=${getThis(
     "idSite"
   )}&idSiteHsr=${getThis(
     "subcategory"
@@ -47,7 +47,7 @@ export async function fetchSegmentData(segmentName: string) {
 export const dynamicallyFetchOptions = async (segment?: string) => {
   if (!segment) return;
 
-  const url = `${BASE_URL}index.php?idSite=${getThis(
+  const url = `${BASE_URL}/index.php?idSite=${getThis(
     "idSite"
   )}&idSiteHsr=${getThis(
     "subcategory"
