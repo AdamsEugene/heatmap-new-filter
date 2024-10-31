@@ -47,6 +47,7 @@ const props = defineProps<{
   canEdit: boolean;
   canAdd: boolean;
   cancelEdit: boolean;
+  existingNames: string[];
   errorMsg: Map<number, string>;
   accountID?: number;
 }>();
@@ -391,6 +392,7 @@ watch(
         :clear-fields="clearFields"
         :can-edit="canEdit"
         :cancel-edit="cancelEdit"
+        :existing-names="existingNames"
         @on-loading="onLoading"
         @on-clear-current-custom-filter="onClearCurrentCustomFilter"
         @on-custom-filter-change="onOnCustomFilterChange"

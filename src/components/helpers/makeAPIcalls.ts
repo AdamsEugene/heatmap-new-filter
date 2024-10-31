@@ -3,9 +3,12 @@ import { getRedirectType, getThis, useEntryPage } from "./functions";
 
 // const BASE_URL = "https://stage14.heatmapcore.com/";
 let BASE_URL = "";
+let BASE_URL_2 = "";
 
-if (getRedirectType() === "locala")
-  BASE_URL = "https://stage14.heatmapcore.com/";
+if (getRedirectType() === "locala") {
+  BASE_URL = "https://stage9.heatmapcore.com/";
+  BASE_URL_2 = "https://stage1.heatmapcore.com";
+}
 
 export async function loadCustomFilters<T>(): Promise<T | false> {
   const body = JSON.stringify({
@@ -204,7 +207,7 @@ export const loadPartnerFilers = async (partner: string) => {
   const token = localStorage.getItem("heatUserId");
   const accountId = localStorage.getItem("filter-account-id");
   try {
-    const url = `/index.php?module=API&method=AdsIntegration.ads&token=${
+    const url = `${BASE_URL_2}/index.php?module=API&method=AdsIntegration.ads&token=${
       token || "7b3f2fb80935a197d641f73ce98c35d5"
     }&idSite=${getThis(
       "idSite"
@@ -230,7 +233,7 @@ export const justMakeThis = async (partner: string) => {
   const token = localStorage.getItem("heatUserId");
   const accountId = localStorage.getItem("filter-account-id");
   try {
-    const url = `/index.php?module=API&method=AdsIntegration.accounts&token=${token}&idSite=${getThis(
+    const url = `${BASE_URL_2}/index.php?module=API&method=AdsIntegration.accounts&token=${token}&idSite=${getThis(
       "idSite"
     )}&userId=${accountId}&partner=${partner}&live=1`;
     const response = await fetch(url, requestOptions as any);

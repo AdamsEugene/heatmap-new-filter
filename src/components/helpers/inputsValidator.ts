@@ -9,7 +9,7 @@ import {
   evaluateFilterExpression,
 } from "./functions";
 
-const validate = (_data: SessionDataItem) => {
+const validate = (_data: SessionDataItem, existingNames?: string[]) => {
   const { name, definition, data, title } = _data;
   if (noValidation.includes(name)) return [true];
 
@@ -41,7 +41,9 @@ const validate = (_data: SessionDataItem) => {
 
   if (name === "Create Custom Filter" || data?.length) {
     const isNameValid =
-      title.trim().length > 3 && title !== "Create Custom Filter";
+      title.trim().length > 3 &&
+      title !== "Create Custom Filter" &&
+      !existingNames?.includes(title.trim());
     const isFilterOk = evaluateFilterExpression(definition);
     return [isNameValid, ...isFilterOk];
   }

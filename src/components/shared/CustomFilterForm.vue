@@ -42,6 +42,7 @@ const props = defineProps<{
   activeCustomFilter?: CustomValues;
   canEdit: boolean;
   cancelEdit: boolean;
+  existingNames: string[];
 }>();
 
 const initialSelectedItem = { ...props.selectedItem };
@@ -170,6 +171,9 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       newFilter.value.data[item.index].default = item.item;
       props.selectedItem.data[item.index].value = "";
       newFilter.value.definition = generateSegmentString(newFilter.value.data);
+      props.selectedItem.definition = generateSegmentString(
+        newFilter.value.data
+      );
     }
   }
 
@@ -178,6 +182,9 @@ const onSelected = async (item: SELECTED_ITEMS) => {
     if (newFilter.value.data) {
       newFilter.value.data[item.index].value = item.item;
       newFilter.value.definition = generateSegmentString(newFilter.value.data);
+      props.selectedItem.definition = generateSegmentString(
+        newFilter.value.data
+      );
     }
   }
 
@@ -207,7 +214,7 @@ const removeFilter = (index: number) => {
 };
 
 const addNewFilter = () => {
-  const isValid = validate(props.selectedItem);
+  const isValid = validate(props.selectedItem, props.existingNames);
   const lastIndex = props.selectedItem.data?.length;
   let chunks = chunkArray(isValid, 3);
 
@@ -231,9 +238,15 @@ const addNewFilter = () => {
     if (!props.selectedItem.data) props.selectedItem.data = newCopy.data;
     else props.selectedItem.data?.push(...newCopy.data!);
   } else {
-    errorMsgTitle.value = !isValid[0]
-      ? "Please provide a valid name for your filter"
-      : "";
+    if (props.existingNames.includes(props.selectedItem.title.trim())) {
+      errorMsgTitle.value = !isValid[0]
+        ? `Please provide a valid name; "${props.selectedItem.title.trim()}" is already taken.`
+        : "";
+    } else {
+      errorMsgTitle.value = !isValid[0]
+        ? "Please provide a valid name for your filter"
+        : "";
+    }
     chunks.forEach((chunk, i) => {
       if (!errorMsg.value.has(i)) {
         errorMsg.value.set(i, new Map<number, string>());

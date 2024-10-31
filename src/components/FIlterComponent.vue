@@ -72,6 +72,7 @@ const customData = ref<SessionDataItem>({
   title: "Create Custom Filter",
   data: [{ action: "", default: "", name: "", segment: "", value: "" }],
 });
+const existingNames = ref<string[]>([]);
 
 const accountID = ref<number>();
 
@@ -97,6 +98,7 @@ const runOnCreated = async () => {
     }));
   }
   loading.value = false;
+  existingNames.value = customFilters.value.map((filter) => filter.name);
 };
 
 onMounted(() => {
@@ -158,6 +160,7 @@ const onFilterSelect = (item: { item: SessionDataItem }) => {
 const createCustomFilter = () => {
   const newCopy = JSON.parse(JSON.stringify(customData.value));
   selectedItem.value = newCopy;
+  existingNames.value = customFilters.value.map((filter) => filter.name);
 };
 
 const handleAddToWaitingRoom = (item: { item: CombinedFilter }) => {
@@ -173,6 +176,7 @@ const handleSidebarItemClick = (item: SessionDataItem) => {
 
   selectedItem.value = item;
   if (item.name !== "Create Custom Filter") prevSelectedItem.value = item;
+  existingNames.value = [];
 };
 
 const handleCompareFilters = () => {
@@ -267,9 +271,12 @@ const saveCustomFilter = async () => {
     loading.value = true;
     const res = await saveEditCustomFilter(selectedItem.value);
     const { name, ...others } = selectedItem.value;
-    const existingItemIndex = customFilters.value.findIndex(
-      (filter) => filter.id === selectedItem.value.id
-    );
+    const existingItemIndex = customFilters.value.findIndex((filter) => {
+      if (!filter.id || !selectedItem.value.id) {
+        return filter.name === selectedItem.value.name;
+      }
+      return filter.id === selectedItem.value.id;
+    });
 
     if (res) {
       if (existingItemIndex === -1) {
@@ -286,6 +293,7 @@ const saveCustomFilter = async () => {
           ...others,
         };
       }
+      existingNames.value = customFilters.value.map((filter) => filter.name);
     }
     canEdit.value = false;
     if (nameIs("Create Custom Filter")) {
@@ -477,6 +485,7 @@ watch(selectedItem, () => {
           :error-msg="errorMsg"
           :websites="websites"
           :account-i-d="accountID"
+          :existing-names="existingNames"
           @on-add-to-waiting-room="handleAddToWaitingRoom"
           @on-loading="onLoading"
           @on-selected="onFilterSelect"
