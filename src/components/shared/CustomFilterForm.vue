@@ -19,6 +19,7 @@ import {
   groupDataByCategory,
   initialNewFilter,
   options,
+  removeAndReturnElements,
 } from "../helpers/functions";
 import {
   deleteCustomFilter,
@@ -28,8 +29,9 @@ import { _data } from "../../data";
 import validate from "../helpers/inputsValidator";
 import errorMsgs from "../helpers/errorMsgs";
 
-type DEF = "main" | "value" | "action" | "condition";
+type DEF = "main" | "value" | "action" | "condition" | "secValue";
 type SELECTED_ITEMS = { item: DataItem | string; kind: DEF; index: number };
+type KET_VALUE = { [x: string]: string[] };
 
 const copyOfInitialNewFilter: FilterItem = { ...initialNewFilter };
 
@@ -59,6 +61,10 @@ const customData = ref<FilterItem>();
 const filterName = ref<string>("");
 const errorMsgTitle = ref<string>();
 const errorMsg = ref<Map<number, Map<number, string>>>(new Map());
+const errorMsgTagName = ref<Map<number, string>>(new Map());
+const errorMsgTagValue = ref<Map<number, string>>(new Map());
+
+const sessionTagsData = ref<KET_VALUE>();
 
 const nameIs = (name: string) => name === props.selectedItem.name;
 const isString = (item: any) => typeof item === "string";
@@ -152,13 +158,20 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       const res = await dynamicallyFetchOptions(
         (item.item as DataItem).segment!
       );
-      if (res && res.length) _options = getUniqueArray(res);
-      else _options = undefined;
 
-      setValues(item.index, item.item.conditions, _options);
+      if (res && (res.length || Object.keys(res || {}).length)) {
+        if (Array.isArray(res)) _options = getUniqueArray(res);
+        else _options = res;
+      } else _options = undefined;
+
+      if (item.item.name === "Session Tag") {
+        setValues(item.index, item.item.conditions, _options, true);
+      } else setValues(item.index, item.item.conditions, _options);
       emit("on-loading", false);
     }
     newFilter.value.definition = generateSegmentString(newFilter.value.data);
+    errorMsgTagName.value.delete(item.index);
+    errorMsgTagValue.value.delete(item.index);
   }
 
   if (
@@ -170,6 +183,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
     if (newFilter.value.data) {
       newFilter.value.data[item.index].default = item.item;
       props.selectedItem.data[item.index].value = "";
+      props.selectedItem.data[item.index].secValue = "";
       newFilter.value.definition = generateSegmentString(newFilter.value.data);
       props.selectedItem.definition = generateSegmentString(
         newFilter.value.data
@@ -179,6 +193,19 @@ const onSelected = async (item: SELECTED_ITEMS) => {
 
   if (item.kind === "value" && isString(item.item) && props.selectedItem.data) {
     props.selectedItem.data[item.index].value = item.item;
+    if (
+      props.selectedItem.data[item.index].name === "Session Tag" &&
+      sessionTagsData.value
+    ) {
+      props.selectedItem.data[item.index].secOptions =
+        sessionTagsData.value[item.item] || [];
+      props.selectedItem.data[item.index].secValue = "";
+      errorMsgTagName.value.delete(item.index);
+    } else {
+      errorMsgTagName.value.delete(item.index);
+      errorMsgTagValue.value.delete(item.index);
+    }
+
     if (newFilter.value.data) {
       newFilter.value.data[item.index].value = item.item;
       newFilter.value.definition = generateSegmentString(newFilter.value.data);
@@ -188,22 +215,46 @@ const onSelected = async (item: SELECTED_ITEMS) => {
     }
   }
 
+  if (
+    item.kind === "secValue" &&
+    isString(item.item) &&
+    props.selectedItem.data
+  ) {
+    props.selectedItem.data[item.index].secValue = item.item;
+    if (newFilter.value.data) {
+      newFilter.value.data[item.index].secValue = item.item;
+      newFilter.value.definition = generateSegmentString(newFilter.value.data);
+      props.selectedItem.definition = generateSegmentString(
+        newFilter.value.data
+      );
+      errorMsgTagValue.value.delete(item.index);
+    }
+  }
+  // console.log(newFilter.value);
+
   emit("on-custom-filter-change", { ...newFilter.value });
 };
 
 const setValues = (
   index: number,
   conditions?: string[],
-  options?: string[]
+  options?: string[] | KET_VALUE,
+  forSession?: boolean
 ) => {
   if (typeof index === "number" && props.selectedItem.data) {
     props.selectedItem.data[index].conditions = conditions;
-    props.selectedItem.data[index].options = options;
     props.selectedItem.data[index].default = "";
     props.selectedItem.data[index].value = "";
     props.selectedItem.definition = generateSegmentString(
       props.selectedItem.data
     );
+    if (!forSession) props.selectedItem.data[index].options = options;
+    else {
+      sessionTagsData.value = options as KET_VALUE;
+      props.selectedItem.data[index].options = Object.keys(
+        options as KET_VALUE
+      );
+    }
   }
 };
 
@@ -214,7 +265,36 @@ const removeFilter = (index: number) => {
 };
 
 const addNewFilter = () => {
-  const isValid = validate(props.selectedItem, props.existingNames);
+  let isValid = validate(props.selectedItem, props.existingNames);
+  console.log(props.selectedItem);
+  if (props.selectedItem.data) {
+    props.selectedItem.data.forEach((data, index) => {
+      if (data.name === "Session Tag") {
+        console.log({ index, isValid });
+        const { modifiedArray, removedElements } = removeAndReturnElements(
+          isValid,
+          index
+        );
+        const lastValues = removedElements;
+        isValid = modifiedArray;
+        console.log(modifiedArray, removedElements);
+
+        if (!lastValues[0])
+          errorMsgTagName.value.set(index, "Please select a tag name");
+        else errorMsgTagName.value.delete(index);
+
+        if (!lastValues[3])
+          errorMsgTagValue.value.set(index, "Please select a tag value");
+        else errorMsgTagValue.value.delete(index);
+      }
+    });
+  }
+
+  const err = errorMsgTagValue.value.size > 0 || errorMsgTagName.value.size > 0;
+
+  console.log(errorMsgTagValue.value);
+  console.log(errorMsgTagName.value);
+
   const lastIndex = props.selectedItem.data?.length;
   let chunks = chunkArray(isValid, 3);
 
@@ -232,7 +312,7 @@ const addNewFilter = () => {
     }
   }
 
-  if (areAllTrue(isValid)) {
+  if (areAllTrue(isValid) && !err) {
     const copy = ref({ ...copyOfInitialNewFilter });
     const newCopy = JSON.parse(JSON.stringify(copy.value));
     if (!props.selectedItem.data) props.selectedItem.data = newCopy.data;
@@ -402,7 +482,21 @@ watch(filterName, async (newName) => {
         :clear-fields="clearFields"
         :disabled="!canEdit"
         :filter-index="index"
-        :error-msg="errorMsg.get(index)?.get(2)"
+        :error-msg="errorMsgTagName.get(index) || errorMsg.get(index)?.get(2)"
+        @on-selected="(item) => onSelected({ ...item, index })"
+      />
+      <Dropdown
+        v-if="filter.secOptions"
+        :items="filter.secOptions"
+        :label="'Tag Value'"
+        :position="'up'"
+        :as-input="!canEdit ? !canEdit : !filter.secOptions"
+        :definition="'secValue'"
+        :initial-value="filter?.secValue"
+        :clear-fields="clearFields"
+        :disabled="!canEdit"
+        :filter-index="index"
+        :error-msg="errorMsgTagValue.get(index)"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <div v-if="!canEdit && (selectedItem?.data?.length || 0) !== index + 1" />
@@ -575,7 +669,7 @@ watch(filterName, async (newName) => {
 }
 
 #accordion {
-  display: flex !important;
+  display: flex;
   flex-direction: column !important;
   max-height: 1000px !important;
   /* transition: max-height 0.5s ease-out !important; */

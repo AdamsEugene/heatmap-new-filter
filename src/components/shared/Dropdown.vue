@@ -38,7 +38,7 @@ const props = defineProps<{
   items?: string[];
   actionItems?: GroupedData;
   position?: "up" | "down";
-  definition: "main" | "value" | "action" | "condition";
+  definition: "main" | "value" | "action" | "condition" | "secValue";
   asInput?: boolean;
   inputType?: InputTypeHTMLAttribute;
   forCustom?: boolean;
@@ -780,7 +780,7 @@ input {
 }
 
 #accordion {
-  display: flex !important;
+  display: flex;
   flex-direction: column !important;
   max-height: 1000px !important;
   /* transition: max-height 0.5s ease-out !important; */

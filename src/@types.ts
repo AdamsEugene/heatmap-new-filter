@@ -108,6 +108,7 @@ export interface CustomValues {
   name: string;
   segment: string;
   value: string;
+  secValue?: string;
   options?: string[];
   conditions?: string[];
 }
@@ -195,5 +196,5 @@ export type Site = {
 
 export interface Selected {
   item: string | DataItem;
-  kind: "main" | "value" | "action" | "condition";
+  kind: "main" | "value" | "action" | "condition" | "secValue";
 }

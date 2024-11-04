@@ -1,6 +1,7 @@
 import {
   CustomValues,
   DataItem,
+  Experiment,
   FilterItem,
   GroupedData,
   SessionDataItem,
@@ -218,11 +219,14 @@ export const initialNewFilter: FilterItem = {
 
 export const generateSegmentString = (data: CustomValues[]): string => {
   return data
-    .map(
-      (item) =>
-        `${item.segment}${(conditions as any)[item.default] || ""}${
-          item.value || ""
-        }`
+    .map((item) =>
+      item.name === "Session Tag"
+        ? `sessionTagName==${item.value || ""};sessionTagValue==${
+            item.secValue || ""
+          }`
+        : `${item.segment}${(conditions as any)[item.default] || ""}${
+            item.value || ""
+          }`
     )
     .join(";");
 };
@@ -381,4 +385,52 @@ export function chunkArray<T>(arr: T[], chunkSize: number): T[][] {
     chunks.push(chunk);
   }
   return chunks;
+}
+
+export function removeAndReturnElements(arr: boolean[], index: number) {
+  if (index < 0 || index >= arr.length) {
+    return { modifiedArray: arr, removedElements: [] };
+  }
+
+  const result = [...arr];
+  const removedElements = [];
+
+  const startRemoveIndex = index === 0 ? index + 4 : index + 3;
+
+  if (startRemoveIndex < result.length) {
+    if (startRemoveIndex > 0) {
+      removedElements.push(result[startRemoveIndex - 1]);
+    }
+    removedElements.push(...result.splice(startRemoveIndex, 3));
+  }
+
+  return { modifiedArray: result, removedElements };
+}
+
+const makeValuesUnique = (items: Experiment[]): Experiment[] => {
+  const valueCount: { [key: string]: number } = {};
+  return items.map((item) => {
+    const { value } = item;
+    if (valueCount[value]) {
+      valueCount[value]++;
+      item.value = `${value} (${valueCount[value]})`;
+    } else {
+      valueCount[value] = 1;
+    }
+    return item;
+  });
+};
+
+export const updateValuesForEachKey = (obj: any): Experiment[] => {
+  const updatedObj: any = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      updatedObj[key] = makeValuesUnique(obj[key]);
+    }
+  }
+  return updatedObj;
+};
+
+export function removeVariantSuffix(str: string): string {
+  return str.replace(/(\s*\(\d+\))(?=[;]|$)/g, "");
 }

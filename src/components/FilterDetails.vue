@@ -36,6 +36,8 @@ import {
   replaceAdIdValue,
   areAllTrue,
   getThis,
+  updateValuesForEachKey,
+  removeVariantSuffix,
 } from "./helpers/functions";
 import validate from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
@@ -110,6 +112,7 @@ const fetchSegment = async () => {
     simpleListResponse.value = Object.keys(res || {});
     hasTokens.value = checkForTokens(res);
   } else if (nameIs("A/B Tests")) {
+    updateValuesForEachKey(res.experiments);
     simpleListResponse.value = getPartnerValues(
       res.partners_friendly,
       res.partners
@@ -191,7 +194,10 @@ const onSelected = async (item: Selected) => {
 
     selected = {
       ...selected,
-      definition: replaceAfterEquals(selected.definition, item.item),
+      definition: replaceAfterEquals(
+        removeVariantSuffix(selected.definition),
+        item.item
+      ),
       nameForCompare: selected.name + ": " + formatUrl(item.item),
     };
   } else if (item.kind === "main" && nameIs("Average Order Value")) {
@@ -207,7 +213,11 @@ const onSelected = async (item: Selected) => {
     let definition = "";
     let rest: any = {};
     if (nameIs("A/B Tests"))
-      definition = getABTestingData(item.item, definition, rest);
+      definition = getABTestingData(
+        removeVariantSuffix(item.item),
+        removeVariantSuffix(definition),
+        rest
+      );
     else if (nameIs("Total Pages Visited"))
       definition = replaceAfterEquals(selected.definition, item.item);
     else if (nameIs("Average Order Value")) {
