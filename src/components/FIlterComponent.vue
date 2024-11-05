@@ -759,7 +759,7 @@ watch(selectedItem, () => {
   border-radius: var(--Padding-Corner, 6px) !important;
   background: var(--Grey-100, #f6f6f6) !important;
   box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09) !important;
-  cursor: pointer !important;
+  cursor: pointer;
 }
 
 .btn.border {

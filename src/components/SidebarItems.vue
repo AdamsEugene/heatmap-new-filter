@@ -40,7 +40,7 @@ const isItemSelected = computed(() => {
         :class="{
           active: activeClasses?.includes(item.name),
           disabled,
-          selected: isItemSelected(item),
+          selected_filter: isItemSelected(item),
         }"
       >
         <img class="button_icon" :src="item.iconSrc" :alt="item.name" />
@@ -54,7 +54,7 @@ const isItemSelected = computed(() => {
 </template>
 
 <style>
-.selected {
+.selected_filter {
   background: var(--Grey-50, #f1f2f3) !important;
 }
 
