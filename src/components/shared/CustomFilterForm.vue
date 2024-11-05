@@ -110,8 +110,15 @@ const loadInitialData = async (filter?: CustomValues) => {
     filter.options = getUniqueArray(_options);
   else {
     const res = await dynamicallyFetchOptions(filter?.segment);
-    if (res && res.length) filter.options = getUniqueArray(res);
-    else filter.options = undefined;
+    if ((res && res.length) || Object.keys(res || {}).length) {
+      if (filter.name === "Session Tag") {
+        sessionTagsData.value = res as KET_VALUE;
+        if (res) {
+          filter.options = Object.keys(res);
+          (filter as any).secOptions = res[filter.value];
+        }
+      } else filter.options = getUniqueArray(res);
+    } else filter.options = undefined;
   }
 
   filter.conditions = Object.values((options as any)[option || ""] || {}) || [];
@@ -243,9 +250,10 @@ const setValues = (
     if (!forSession) props.selectedItem.data[index].options = options;
     else {
       sessionTagsData.value = options as KET_VALUE;
-      props.selectedItem.data[index].options = Object.keys(
-        options as KET_VALUE
-      );
+      if (options)
+        props.selectedItem.data[index].options = Object.keys(
+          options as KET_VALUE
+        );
     }
   }
 };
