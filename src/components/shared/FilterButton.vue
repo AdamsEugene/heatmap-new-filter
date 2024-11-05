@@ -6,7 +6,11 @@ defineProps<{ filteredValues?: ReturnData[]; onShowFilterMenu: () => void }>();
 </script>
 
 <template>
-  <div class="main_filter_button" @click="onShowFilterMenu()">
+  <div
+    class="main_filter_button"
+    style="padding: 12px !important"
+    @click="onShowFilterMenu()"
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
