@@ -10,7 +10,6 @@ import { sessionData, eCommerceData } from "../data";
 import {
   AuthorizationRequest,
   CombinedFilter,
-  CustomValues,
   FilterList,
   ReturnData,
   SessionDataItem,
@@ -25,13 +24,8 @@ import {
 } from "./helpers/makeAPIcalls";
 
 import task from "../assets/images/ads_click.svg";
-import {
-  areAllTrue,
-  chunkArray,
-  getThis,
-  getRedirectType,
-} from "./helpers/functions";
-import validate from "./helpers/inputsValidator";
+import { areAllTrue, getThis, getRedirectType } from "./helpers/functions";
+import { validate, validateCustom } from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
 
 const props = defineProps<{
@@ -181,28 +175,38 @@ const handleSidebarItemClick = (item: SessionDataItem) => {
 
 const handleCompareFilters = () => {
   if (waitingRoom.value) {
-    const isValid = validate(waitingRoom.value);
-    if (areAllTrue(isValid)) {
-      pendingList.value.push(waitingRoom.value);
-      errorMsg.value?.clear();
+    if (waitingRoom.value.rawValues) {
+      const isValidCustom = validateCustom(waitingRoom.value);
+      if (isValidCustom) pendingList.value.push(waitingRoom.value);
     } else {
-      isValid.forEach((v, i) => {
-        if (!v) {
-          errorMsg.value?.set(i, errorMsgs(waitingRoom.value!)[i]);
-        }
-      });
+      const isValid = validate(waitingRoom.value);
+      if (areAllTrue(isValid)) {
+        pendingList.value.push(waitingRoom.value);
+        errorMsg.value?.clear();
+      } else {
+        isValid.forEach((v, i) => {
+          if (!v) {
+            errorMsg.value?.set(i, errorMsgs(waitingRoom.value!)[i]);
+          }
+        });
+      }
     }
   } else {
-    const isValid = validate(selectedItem.value);
-    if (areAllTrue(isValid)) {
-      pendingList.value.push(selectedItem.value);
-      errorMsg.value?.clear();
+    if (selectedItem.value.rawValues) {
+      const isValidCustom = validateCustom(selectedItem.value);
+      if (isValidCustom) pendingList.value.push(selectedItem.value);
     } else {
-      isValid.forEach((v, i) => {
-        if (!v) {
-          errorMsg.value?.set(i, errorMsgs(selectedItem.value)[i]);
-        }
-      });
+      const isValid = validate(selectedItem.value);
+      if (areAllTrue(isValid)) {
+        pendingList.value.push(selectedItem.value);
+        errorMsg.value?.clear();
+      } else {
+        isValid.forEach((v, i) => {
+          if (!v) {
+            errorMsg.value?.set(i, errorMsgs(selectedItem.value)[i]);
+          }
+        });
+      }
     }
   }
   waitingRoom.value = undefined;
@@ -248,26 +252,9 @@ const resetFilters = (click?: boolean, enable?: boolean) => {
 };
 
 const saveCustomFilter = async () => {
-  const isValid = validate(selectedItem.value, existingNames.value);
+  const isValid = validateCustom(selectedItem.value, existingNames.value);
 
-  const lastIndex = selectedItem.value.data?.length;
-  let chunks = chunkArray(isValid, 3);
-
-  if (lastIndex && selectedItem.value.data) {
-    if (selectedItem.value.data.length > chunks.length) {
-      const dataToCheck = selectedItem.value.data[
-        lastIndex - 1
-      ] as CustomValues;
-      const isValidAction = String(dataToCheck.action).trim() !== "";
-      const isValidCondition = String(dataToCheck.default).trim() !== "";
-
-      const isValidValue = String(dataToCheck.value).trim() !== "";
-      isValid.push(isValidAction, isValidCondition, isValidValue);
-      chunks = chunkArray(isValid, 3);
-    }
-  }
-
-  if (areAllTrue(isValid)) {
+  if (isValid) {
     loading.value = true;
     const res = await saveEditCustomFilter(selectedItem.value);
     const { name, ...others } = selectedItem.value;
@@ -326,19 +313,35 @@ const resetErrors = (err?: number) => {
 const applyFilters = (fromCustom?: boolean) => {
   let returnData: ReturnData[] = [];
   if (!pendingList.value.length && (waitingRoom.value || selectedItem.value)) {
-    const isValid = validate(waitingRoom.value || selectedItem.value);
-    if (areAllTrue(isValid)) {
-      const { definition, name, nameForCompare, rest, title } =
-        waitingRoom.value || selectedItem.value;
-      const newName = fromCustom ? title : name;
-      returnData = [{ definition, name: nameForCompare || newName, rest }];
-      emit("filter-values", returnData);
-      props.onToggleShowFilterMenu();
-    } else {
-      errorMsg.value?.set(
-        10,
-        "Please make sure you have a filter selected first"
+    if (waitingRoom.value?.rawValues || selectedItem.value.data) {
+      const isValidCustom = validateCustom(
+        waitingRoom.value || selectedItem.value,
+        existingNames.value
       );
+
+      if (isValidCustom) {
+        const { definition, name, nameForCompare, rest, title } =
+          waitingRoom.value || selectedItem.value;
+        const newName = fromCustom ? title : name;
+        returnData = [{ definition, name: nameForCompare || newName, rest }];
+        emit("filter-values", returnData);
+        props.onToggleShowFilterMenu();
+      }
+    } else {
+      const isValid = validate(waitingRoom.value || selectedItem.value);
+      if (areAllTrue(isValid)) {
+        const { definition, name, nameForCompare, rest, title } =
+          waitingRoom.value || selectedItem.value;
+        const newName = fromCustom ? title : name;
+        returnData = [{ definition, name: nameForCompare || newName, rest }];
+        emit("filter-values", returnData);
+        props.onToggleShowFilterMenu();
+      } else {
+        errorMsg.value?.set(
+          10,
+          "Please make sure you have a filter selected first"
+        );
+      }
     }
   } else {
     const data = pendingList.value.map((filter) => ({

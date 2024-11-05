@@ -11,23 +11,19 @@ import {
 } from "../../@types";
 import {
   addOptionsToData,
-  areAllTrue,
-  chunkArray,
   convertOptionToArray,
   generateSegmentString,
   getUniqueArray,
   groupDataByCategory,
   initialNewFilter,
   options,
-  removeAndReturnElements,
 } from "../helpers/functions";
 import {
   deleteCustomFilter,
   dynamicallyFetchOptions,
 } from "../helpers/makeAPIcalls";
 import { _data } from "../../data";
-import validate from "../helpers/inputsValidator";
-import errorMsgs from "../helpers/errorMsgs";
+import { validateCustom } from "../helpers/inputsValidator";
 
 type DEF = "main" | "value" | "action" | "condition" | "secValue";
 type SELECTED_ITEMS = { item: DataItem | string; kind: DEF; index: number };
@@ -59,10 +55,7 @@ const emit = defineEmits([
 
 const customData = ref<FilterItem>();
 const filterName = ref<string>("");
-const errorMsgTitle = ref<string>();
-const errorMsg = ref<Map<number, Map<number, string>>>(new Map());
-const errorMsgTagName = ref<Map<number, string>>(new Map());
-const errorMsgTagValue = ref<Map<number, string>>(new Map());
+const isSessionTag = ref<Map<number, boolean>>(new Map());
 
 const sessionTagsData = ref<KET_VALUE>();
 
@@ -126,10 +119,16 @@ const loadInitialData = async (filter?: CustomValues) => {
 };
 
 const onSelected = async (item: SELECTED_ITEMS) => {
-  const position =
-    item.kind === "action" ? 0 : item.kind === "condition" ? 1 : 2;
-  errorMsg.value.get(item.index)?.delete(position);
+  if (props.selectedItem.data) {
+    const kind = item.kind === "condition" ? "default" : item.kind;
+    props.selectedItem.data[item.index][`error_${kind}`] = "";
+  }
   if (item.kind === "action" && typeof item.item !== "string") {
+    if (item.item.name === "Session Tag") {
+      isSessionTag.value.set(item.index, true);
+    } else {
+      isSessionTag.value.set(item.index, false);
+    }
     let _options: string[] | undefined = undefined;
 
     if (!newFilter.value.data) {
@@ -170,8 +169,6 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       emit("on-loading", false);
     }
     newFilter.value.definition = generateSegmentString(newFilter.value.data);
-    errorMsgTagName.value.delete(item.index);
-    errorMsgTagValue.value.delete(item.index);
   }
 
   if (
@@ -200,10 +197,6 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       props.selectedItem.data[item.index].secOptions =
         sessionTagsData.value[item.item] || [];
       props.selectedItem.data[item.index].secValue = "";
-      errorMsgTagName.value.delete(item.index);
-    } else {
-      errorMsgTagName.value.delete(item.index);
-      errorMsgTagValue.value.delete(item.index);
     }
 
     if (newFilter.value.data) {
@@ -227,7 +220,6 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       props.selectedItem.definition = generateSegmentString(
         newFilter.value.data
       );
-      errorMsgTagValue.value.delete(item.index);
     }
   }
   // console.log(newFilter.value);
@@ -265,80 +257,12 @@ const removeFilter = (index: number) => {
 };
 
 const addNewFilter = () => {
-  let isValid = validate(props.selectedItem, props.existingNames);
-  console.log(props.selectedItem);
-  if (props.selectedItem.data) {
-    props.selectedItem.data.forEach((data, index) => {
-      if (data.name === "Session Tag") {
-        console.log({ index, isValid });
-        const { modifiedArray, removedElements } = removeAndReturnElements(
-          isValid,
-          index
-        );
-        const lastValues = removedElements;
-        isValid = modifiedArray;
-        console.log(modifiedArray, removedElements);
-
-        if (!lastValues[0])
-          errorMsgTagName.value.set(index, "Please select a tag name");
-        else errorMsgTagName.value.delete(index);
-
-        if (!lastValues[3])
-          errorMsgTagValue.value.set(index, "Please select a tag value");
-        else errorMsgTagValue.value.delete(index);
-      }
-    });
-  }
-
-  const err = errorMsgTagValue.value.size > 0 || errorMsgTagName.value.size > 0;
-
-  console.log(errorMsgTagValue.value);
-  console.log(errorMsgTagName.value);
-
-  const lastIndex = props.selectedItem.data?.length;
-  let chunks = chunkArray(isValid, 3);
-
-  if (lastIndex && props.selectedItem.data) {
-    if (props.selectedItem.data.length > chunks.length) {
-      const dataToCheck = props.selectedItem.data[
-        lastIndex - 1
-      ] as CustomValues;
-      const isValidAction = String(dataToCheck.action).trim() !== "";
-      const isValidCondition = String(dataToCheck.default).trim() !== "";
-
-      const isValidValue = String(dataToCheck.value).trim() !== "";
-      isValid.push(isValidAction, isValidCondition, isValidValue);
-      chunks = chunkArray(isValid, 3);
-    }
-  }
-
-  if (areAllTrue(isValid) && !err) {
+  const isValid = validateCustom(props.selectedItem, props.existingNames);
+  if (isValid) {
     const copy = ref({ ...copyOfInitialNewFilter });
     const newCopy = JSON.parse(JSON.stringify(copy.value));
     if (!props.selectedItem.data) props.selectedItem.data = newCopy.data;
     else props.selectedItem.data?.push(...newCopy.data!);
-  } else {
-    if (props.existingNames.includes(props.selectedItem.title.trim())) {
-      errorMsgTitle.value = !isValid[0]
-        ? `Please provide a valid name; "${props.selectedItem.title.trim()}" is already taken.`
-        : "";
-    } else {
-      errorMsgTitle.value = !isValid[0]
-        ? "Please provide a valid name for your filter"
-        : "";
-    }
-    chunks.forEach((chunk, i) => {
-      if (!errorMsg.value.has(i)) {
-        errorMsg.value.set(i, new Map<number, string>());
-      }
-      const er = errorMsg.value.get(i);
-
-      chunk.forEach((c, j) => {
-        if (!c) {
-          er?.set(j, errorMsgs(props.selectedItem)[j]);
-        }
-      });
-    });
   }
 };
 
@@ -393,7 +317,6 @@ watch(
 watch(
   () => props.cancelEdit,
   (newValue) => {
-    errorMsg.value.clear();
     if (newValue) {
       props.selectedItem.data = selectedItemCopy.data;
       props.selectedItem.title = selectedItemCopy.title;
@@ -425,15 +348,20 @@ watch(filterName, async (newName) => {
         type="text"
         :placeholder="'Enter filter name'"
         class="dropdown-input"
-        :class="{ input_error: errorMsgTitle }"
+        :class="{ input_error: (selectedItem as any)['error_title'] }"
         v-model="filterName"
         autocomplete="off"
         :disabled="!canEdit"
-        @focus="errorMsgTitle = ''"
+        @focus="(selectedItem as any)['error_title'] = ''"
       />
       <transition name="fade">
-        <div v-show="errorMsgTitle" class="flex_sb error_sb">
-          <p class="input_selection_error medium_text">{{ errorMsgTitle }}</p>
+        <div
+          v-show="(selectedItem as any)['error_title']"
+          class="flex_sb error_sb"
+        >
+          <p class="input_selection_error medium_text">
+            {{ (selectedItem as any)["error_title"] }}
+          </p>
         </div>
       </transition>
     </div>
@@ -455,7 +383,7 @@ watch(filterName, async (newName) => {
         :disabled="!canEdit"
         :all-action-items="allActionItems"
         :filter-index="index"
-        :error-msg="errorMsg.get(index)?.get(0)"
+        :error-msg="filter?.error_action"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -469,12 +397,12 @@ watch(filterName, async (newName) => {
         :clear-fields="clearFields"
         :disabled="!canEdit"
         :filter-index="index"
-        :error-msg="errorMsg.get(index)?.get(1)"
+        :error-msg="filter?.error_default"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
         :items="filter?.options"
-        :label="'Value'"
+        :label="isSessionTag.get(index) ? 'Session Tag Name' : 'Value'"
         :position="'up'"
         :as-input="!canEdit ? !canEdit : !filter?.options"
         :definition="'value'"
@@ -482,7 +410,7 @@ watch(filterName, async (newName) => {
         :clear-fields="clearFields"
         :disabled="!canEdit"
         :filter-index="index"
-        :error-msg="errorMsgTagName.get(index) || errorMsg.get(index)?.get(2)"
+        :error-msg="filter?.error_value"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
@@ -490,13 +418,13 @@ watch(filterName, async (newName) => {
         :items="filter.secOptions"
         :label="'Tag Value'"
         :position="'up'"
-        :as-input="!canEdit ? !canEdit : !filter.secOptions"
+        :as-input="!canEdit ? !canEdit : !filter?.secOptions"
         :definition="'secValue'"
         :initial-value="filter?.secValue"
         :clear-fields="clearFields"
         :disabled="!canEdit"
         :filter-index="index"
-        :error-msg="errorMsgTagValue.get(index)"
+        :error-msg="filter?.error_secValue"
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <div v-if="!canEdit && (selectedItem?.data?.length || 0) !== index + 1" />

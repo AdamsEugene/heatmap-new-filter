@@ -39,7 +39,7 @@ import {
   updateValuesForEachKey,
   removeVariantSuffix,
 } from "./helpers/functions";
-import validate from "./helpers/inputsValidator";
+import { validate } from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
 
 const props = defineProps<{

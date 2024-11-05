@@ -9,7 +9,7 @@ import {
   evaluateFilterExpression,
 } from "./functions";
 
-const validate = (_data: SessionDataItem, existingNames?: string[]) => {
+export const validate = (_data: SessionDataItem, existingNames?: string[]) => {
   const { name, definition, data, title } = _data;
   if (noValidation.includes(name)) return [true];
 
@@ -59,4 +59,70 @@ const noValidation = [
   "Non Purchasers",
 ];
 
-export default validate;
+export const validateCustom = (
+  filters: SessionDataItem,
+  titles?: string[]
+): boolean => {
+  let isValid = true;
+
+  if (filters.title.trim() === "Create Custom Filter") {
+    isValid = false;
+    (filters as any)[
+      `error_title`
+    ] = `Error: title can not be "Create Custom Filter".`;
+  } else if (filters.title.trim() === "") {
+    isValid = false;
+    (filters as any)[`error_title`] = `Error: title is required".`;
+  } else if (titles?.includes(filters.title.trim())) {
+    isValid = false;
+    (filters as any)[
+      `error_title`
+    ] = `Error: title is already taken, chose a different title".`;
+  } else {
+    (filters as any)[`error_title`] = ``;
+  }
+
+  filters.data?.forEach((filter) => {
+    if (filter.action === "Session Tag") {
+      const requiredKeys = ["default", "secValue", "value", "action"];
+      requiredKeys.forEach((key) => {
+        if (!filter[key]) {
+          isValid = false;
+          filter[`error_${key}`] = `Error: ${keyMapSes(
+            key
+          )} is required for Session Tag.`;
+        } else filter[`error_${key}`] = "";
+      });
+    } else {
+      const requiredKeys = ["default", "value", "action"];
+      requiredKeys.forEach((key) => {
+        if (!filter[key]) {
+          isValid = false;
+          filter[`error_${key}`] = `Error: ${keyMap(key)} is required for${
+            filter.action
+          }.`;
+        } else filter[`error_${key}`] = "";
+      });
+    }
+  });
+
+  return isValid;
+};
+
+const keyMap = (key: string) => {
+  const obj = {
+    default: "condition",
+  };
+
+  return (obj as any)[key] || key;
+};
+
+const keyMapSes = (key: string) => {
+  const obj = {
+    default: "condition",
+    secValue: "tag Value",
+    value: "session tag name",
+  };
+
+  return (obj as any)[key] || key;
+};
