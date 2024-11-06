@@ -19,7 +19,7 @@ import {
 import { DataItem, GroupedData, Selected } from "../../@types";
 
 import fb from "../../assets/images/facebook.svg";
-import x from "../../assets/images/twitter.svg";
+import x from "../../assets/images/twitter.webp";
 import go from "../../assets/images/google.svg";
 import ti from "../../assets/images/tiktok.svg";
 import ji from "../../assets/images/ji.svg";
@@ -149,11 +149,10 @@ const handleItemSelection = (item: string | DataItem) => {
 
 const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
   if (typeof item === "string" && item === "google") {
-    emit("on-selection-error", "Coming soon", true);
     return;
   }
   if (typeof item === "string" && !props.hasTokens?.includes(item)) {
-    emit("on-selection-error", "Please ensure that you are connected first.");
+    manageConnection(item);
     return;
   }
 
