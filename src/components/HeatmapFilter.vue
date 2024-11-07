@@ -46,7 +46,11 @@ onMounted(() => {
   document.addEventListener("click", handleClickOutside);
   if (isRageClick.value)
     filteredValues.value = [
-      { definition: "heatmapType==rage", name: "Rage Clicks" },
+      {
+        definition: "heatmapType==rage",
+        name: "Rage Clicks",
+        actualName: "Rage Clicks",
+      },
     ];
 });
 

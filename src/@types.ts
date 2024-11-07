@@ -138,7 +138,12 @@ export type AuthorizationRequest = {
   redirectType?: "dashboard" | "locala" | "deves" | "dever";
 };
 
-export type ReturnData = { definition: string; name: string; rest?: any };
+export type ReturnData = {
+  definition: string;
+  name: string;
+  rest?: any;
+  actualName: string;
+};
 
 export type AdSet = {
   id: string;

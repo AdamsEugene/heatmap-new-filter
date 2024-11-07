@@ -69,6 +69,7 @@ const customData = ref<SessionDataItem>({
 const existingNames = ref<string[]>([]);
 
 const accountID = ref<number>();
+const isComparingTo = ref<boolean>(false);
 
 const readyToCompare = computed(() => pendingList.value.length);
 
@@ -177,10 +178,14 @@ const handleCompareFilters = () => {
   if (waitingRoom.value) {
     if (waitingRoom.value.rawValues) {
       const isValidCustom = validateCustom(waitingRoom.value);
-      if (isValidCustom) pendingList.value.push(waitingRoom.value);
+      if (isValidCustom) {
+        pendingList.value.push(waitingRoom.value);
+        isComparingTo.value = true;
+      }
     } else {
       const isValid = validate(waitingRoom.value);
       if (areAllTrue(isValid)) {
+        isComparingTo.value = true;
         pendingList.value.push(waitingRoom.value);
         errorMsg.value?.clear();
       } else {
@@ -194,10 +199,14 @@ const handleCompareFilters = () => {
   } else {
     if (selectedItem.value.rawValues) {
       const isValidCustom = validateCustom(selectedItem.value);
-      if (isValidCustom) pendingList.value.push(selectedItem.value);
+      if (isValidCustom) {
+        pendingList.value.push(selectedItem.value);
+        isComparingTo.value = true;
+      }
     } else {
       const isValid = validate(selectedItem.value);
       if (areAllTrue(isValid)) {
+        isComparingTo.value = true;
         pendingList.value.push(selectedItem.value);
         errorMsg.value?.clear();
       } else {
@@ -323,7 +332,24 @@ const applyFilters = (fromCustom?: boolean) => {
         const { definition, name, nameForCompare, rest, title } =
           waitingRoom.value || selectedItem.value;
         const newName = fromCustom ? title : name;
-        returnData = [{ definition, name: nameForCompare || newName, rest }];
+        returnData = [
+          {
+            definition,
+            name: nameForCompare || newName,
+            rest,
+            actualName: newName,
+          },
+        ];
+        console.log(isComparingTo.value && returnData.length !== 2);
+
+        if (isComparingTo.value && returnData.length !== 2) {
+          errorMsg.value?.set(
+            10,
+            "Ensure that you have added a second filter."
+          );
+          return;
+        }
+
         emit("filter-values", returnData);
         props.onToggleShowFilterMenu();
       }
@@ -333,7 +359,23 @@ const applyFilters = (fromCustom?: boolean) => {
         const { definition, name, nameForCompare, rest, title } =
           waitingRoom.value || selectedItem.value;
         const newName = fromCustom ? title : name;
-        returnData = [{ definition, name: nameForCompare || newName, rest }];
+        returnData = [
+          {
+            definition,
+            name: nameForCompare || newName,
+            rest,
+            actualName: newName,
+          },
+        ];
+        console.log(isComparingTo.value && returnData.length !== 2);
+
+        if (isComparingTo.value && returnData.length !== 2) {
+          errorMsg.value?.set(
+            10,
+            "Ensure that you have added a second filter."
+          );
+          return;
+        }
         emit("filter-values", returnData);
         props.onToggleShowFilterMenu();
       } else {
@@ -348,9 +390,14 @@ const applyFilters = (fromCustom?: boolean) => {
       name: filter.nameForCompare || filter.name,
       definition: filter.definition,
       rest: filter.rest,
+      actualName: filter.name,
     }));
 
     returnData = data;
+    if (isComparingTo.value && returnData.length !== 2) {
+      errorMsg.value?.set(10, "Ensure that you have added a second filter.");
+      return;
+    }
     if (returnData.length) {
       emit("filter-values", returnData);
       props.onToggleShowFilterMenu();
@@ -384,17 +431,13 @@ watch(
   () => props.defaultValues,
   (newVal) => {
     if (newVal) {
-      const names = newVal.map((item) => ({
-        name: item.name.split(":")[0],
-        definition: item.definition,
-      }));
       const data = [...sessionData, ...eCommerceData, ...customFilters.value];
 
       const affectedData = data
-        .filter((d) => names.some((nameObj) => nameObj.name === d.name))
+        .filter((d) => newVal.some((nameObj) => nameObj.actualName === d.name))
         .map((d) => {
-          const matchingNameObj = names.find(
-            (nameObj) => nameObj.name === d.name
+          const matchingNameObj = newVal.find(
+            (nameObj) => nameObj.actualName === d.name
           );
           return matchingNameObj
             ? { ...d, definition: matchingNameObj.definition }
@@ -489,6 +532,7 @@ watch(selectedItem, () => {
           :websites="websites"
           :account-i-d="accountID"
           :existing-names="existingNames"
+          :selected-items="[...new Set(pendingList?.map((item) => item.name))]"
           @on-add-to-waiting-room="handleAddToWaitingRoom"
           @on-loading="onLoading"
           @on-selected="onFilterSelect"

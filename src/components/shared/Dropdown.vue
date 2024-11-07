@@ -141,6 +141,12 @@ const onArrowClick = () => {
 const nameIs = (name: string) => name === props.label;
 
 const handleItemSelection = (item: string | DataItem) => {
+  if (typeof item === "string" && _disabled(item)) {
+    isDropdownOpen.value = true;
+    emit("on-selection-error");
+    return;
+  }
+
   if (typeof item === "string") searchQuery.value = item;
   else searchQuery.value = item.name;
   emit("on-selected", { item, kind: props.definition });

@@ -69,10 +69,26 @@ export const formatUrl = (url?: string): string => {
 export const insertItemBeforeSemicolon = (input: string, item: string) =>
   input.replace(/;/g, `${item};`);
 
-export const alreadyHaveDisplayName = (data: SessionDataItem, item: string) =>
-  data.nameForCompare && !hasNoDropdown(data.name)
-    ? data.nameForCompare + "->" + formatUrl(item)
-    : data.name + ": " + formatUrl(item);
+export const alreadyHaveDisplayName = (data: SessionDataItem, item: string) => {
+  const formattedItem = formatUrl(item);
+
+  if (data.nameForCompare && !hasNoDropdown(data.name)) {
+    let displayName = data.nameForCompare;
+    if (displayName.includes("->")) {
+      displayName = displayName.replace(/->.*/, `-> ${formattedItem}`);
+    } else {
+      displayName += `-> ${formattedItem}`;
+    }
+    return displayName;
+  } else {
+    let displayName = data.name + ": " + formattedItem;
+    if (data.name.includes(": ")) {
+      displayName = displayName.replace(/: .*/, `: ${formattedItem}`);
+    }
+
+    return displayName;
+  }
+};
 
 export const hasNoDropdown = (name: string) =>
   ["Total Pages Visited"].includes(name);
@@ -110,6 +126,8 @@ export function replaceAfterRevenueOrder(
   value: string,
   operator = null
 ): string {
+  console.log({ str, value, operator });
+
   const pattern = /^revenueOrder([=><]{1,2})?(.*)$/;
   const match = str.match(pattern);
   if (match) {
@@ -325,6 +343,8 @@ export function isConvertibleToNumber(value: any): boolean {
 }
 
 export function isValidRevenueOrderString(str: string): [boolean, boolean] {
+  console.log(str);
+
   const pattern = /^revenueOrder([=><]{1,2})?(\d+)?$/;
   const match = str.match(pattern);
 

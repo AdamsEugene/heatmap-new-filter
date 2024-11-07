@@ -49,6 +49,7 @@ const props = defineProps<{
   canEdit: boolean;
   canAdd: boolean;
   cancelEdit: boolean;
+  selectedItems: string[];
   existingNames: string[];
   errorMsg: Map<number, string>;
   accountID?: number;
@@ -76,8 +77,7 @@ const clearFields = ref(false);
 const selectionError = ref(false);
 
 const listForValues = ref<string[]>();
-const listOfSelectedItems = ref<string[]>([]);
-const mapOfSelectedItems = ref<Map<string, string>>(new Map());
+const mapOfSelectedItems = ref<Map<string, string[]>>(new Map());
 const hasTokens = ref<string[]>();
 const _errorMsg = ref(props.errorMsg);
 const currentAd = ref<Ad[]>();
@@ -129,8 +129,7 @@ const freeUpSpace = () => {
   keyValueResponse.value = undefined;
   simpleListResponse.value = [];
   initiallySavedCustomFilters.value = undefined;
-  listOfSelectedItems.value = [];
-  mapOfSelectedItems.value?.clear();
+  // mapOfSelectedItems.value?.clear();
 };
 
 const onProceed = () => {
@@ -158,33 +157,39 @@ const saveCustomFilter = (filter: CustomValues & { title: string }) => {
 };
 
 const onSelected = async (item: Selected) => {
-  if (typeof item.item !== "string") return;
   const KV = keyValueResponse.value as any;
   if (item.kind === "main") _errorMsg.value.delete(0);
   else _errorMsg.value.delete(1);
   const seOrAd = nameIs("Session Tag") || nameIs("Ads Platform");
   shouldEncode.value = true;
   clearFields.value = false;
+
   if (item.kind === "main" && seOrAd) {
     emit("on-loading", true);
-    const res = await loadPartnerFilers(item.item);
+    const res = await loadPartnerFilers(String(item.item));
     if (!res) {
       emit("on-loading", false);
       return;
     }
 
-    currentAd.value = res[item.item] || undefined;
+    currentAd.value = res[String(item.item)] || undefined;
     if (currentAd.value && currentAd.value.length > 0)
       listForValues.value = currentAd.value?.map((ad) => ad.ad_name || ad.name);
 
     selected = {
       ...selected,
-      definition: insertItemBeforeSemicolon(selected.definition, item.item),
-      nameForCompare: selected.name + ": " + formatUrl(item.item),
+      definition: insertItemBeforeSemicolon(
+        selected.definition,
+        String(item.item)
+      ),
+      nameForCompare: selected.name + ": " + formatUrl(String(item.item)),
     };
     emit("on-loading", false);
   } else if (item.kind === "main" && nameIs("A/B Tests")) {
-    const partnersFriendly = getKeyByValue(KV.partners_friendly, item.item);
+    const partnersFriendly = getKeyByValue(
+      KV.partners_friendly,
+      String(item.item)
+    );
     if (partnersFriendly) {
       experiments.value = KV["experiments"][partnersFriendly];
       listForValues.value = KV["experiments"][partnersFriendly]?.map(
@@ -196,32 +201,36 @@ const onSelected = async (item: Selected) => {
       ...selected,
       definition: replaceAfterEquals(
         removeVariantSuffix(selected.definition),
-        item.item
+        String(item.item)
       ),
-      nameForCompare: selected.name + ": " + formatUrl(item.item),
+      nameForCompare: selected.name + ": " + formatUrl(String(item.item)),
     };
   } else if (item.kind === "main" && nameIs("Average Order Value")) {
     selected = {
       ...selected,
       definition: insertValueInRevenueOrder(
         selected.definition,
-        (conditions as any)[item.item]
+        (conditions as any)[String(item.item)]
       ),
-      nameForCompare: selected.name + ": " + formatUrl(item.item),
+      nameForCompare: selected.name + ": " + formatUrl(String(item.item)),
     };
   } else {
     let definition = "";
+
     let rest: any = {};
     if (nameIs("A/B Tests"))
       definition = getABTestingData(
-        removeVariantSuffix(item.item),
+        removeVariantSuffix(String(item.item)),
         removeVariantSuffix(definition),
         rest
       );
     else if (nameIs("Total Pages Visited"))
-      definition = replaceAfterEquals(selected.definition, item.item);
+      definition = replaceAfterEquals(selected.definition, String(item.item));
     else if (nameIs("Average Order Value")) {
-      definition = replaceAfterRevenueOrder(selected.definition, item.item);
+      definition = replaceAfterRevenueOrder(
+        selected.definition,
+        String(item.item)
+      );
       shouldEncode.value = false;
     } else if (seOrAd) {
       if (currentAd.value) {
@@ -232,16 +241,39 @@ const onSelected = async (item: Selected) => {
 
         definition = replaceAdIdValue(selected.definition, adId);
       }
-    } else definition = replaceAfterEquals(selected.definition, item.item);
+    } else
+      definition = replaceAfterEquals(selected.definition, String(item.item));
+
+    const nameForCompare =
+      nameIs("Entry Page") || nameIs("Traffic Source") || nameIs("Viewed Page")
+        ? replaceAfterEquals(selected.definition, String(item.item))
+        : alreadyHaveDisplayName(selected, String(item.item));
 
     selected = {
       ...selected,
       definition: shouldEncode.value ? encodeURI(definition) : definition,
-      nameForCompare: alreadyHaveDisplayName(selected, item.item),
+      nameForCompare: nameForCompare,
       rest: rest,
     };
-    listOfSelectedItems.value = [...listOfSelectedItems.value, item.item];
-    mapOfSelectedItems.value.set("name", "adams");
+
+    if (typeof item.item === "string") {
+      if (
+        mapOfSelectedItems.value.has(props.selectedItem.name) &&
+        props.itemsInPending > 0 &&
+        props.selectedItems.includes(props.selectedItem.name)
+      ) {
+        const existingValues =
+          mapOfSelectedItems.value.get(props.selectedItem.name) || [];
+        if (existingValues.length === 2) {
+          existingValues[1] = item.item; // Replace the last item
+        } else {
+          existingValues.push(item.item); // Add new item
+        }
+        mapOfSelectedItems.value.set(props.selectedItem.name, existingValues);
+      } else {
+        mapOfSelectedItems.value.set(props.selectedItem.name, [item.item]);
+      }
+    }
 
     emit("on-save", true);
   }
@@ -320,7 +352,7 @@ watch(
   () => props.reset,
   () => {
     if (props.reset) {
-      listOfSelectedItems.value = [];
+      mapOfSelectedItems.value?.clear();
     }
   }
 );
@@ -418,7 +450,7 @@ watch(
         :definition="'main'"
         :input-type="numberInput(props.selectedItem.name) ? 'number' : 'text'"
         :as-input="hasNoDropdown(props.selectedItem.name)"
-        :disabled-item="listOfSelectedItems"
+        :disabled-item="mapOfSelectedItems.get(selectedItem.name)"
         :clear-fields="clearFields"
         :has-tokens="hasTokens"
         :error-msg="_errorMsg.get(0)"
@@ -437,7 +469,7 @@ watch(
           "
           :definition="'value'"
           :as-input="!listForValues"
-          :disabled-item="listOfSelectedItems"
+          :disabled-item="mapOfSelectedItems.get(selectedItem.name)"
           :clear-fields="clearFields"
           :error-msg="_errorMsg.get(1)"
           :account-id="accountID"
