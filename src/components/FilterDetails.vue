@@ -53,6 +53,7 @@ const props = defineProps<{
   existingNames: string[];
   errorMsg: Map<number, string>;
   accountID?: number;
+  removeThis?: { [key: string]: string };
 }>();
 
 const emit = defineEmits<{
@@ -63,6 +64,7 @@ const emit = defineEmits<{
   (e: "on-save", saved: boolean): void;
   (e: "on-delete-custom-filter"): void;
   (e: "reset-errors", err?: number): void;
+  (e: "on-clear-remove"): void;
 }>();
 
 const nameIs = (name: string) => name === props.selectedItem.name;
@@ -376,6 +378,43 @@ watch(
     if (!newValue) {
       selected = { ...props.selectedItem };
       clearFields.value = true;
+    }
+  }
+);
+
+watch(
+  () => props.selectedItems,
+  (newItems) => {
+    for (const key of mapOfSelectedItems.value.keys()) {
+      if (newItems.length && !newItems.includes(key)) {
+        mapOfSelectedItems.value.delete(key);
+      }
+    }
+  }
+);
+
+watch(
+  () => props.removeThis,
+  (newItems) => {
+    if (newItems && Object.keys(newItems).length) {
+      const allKeys = Object.keys(newItems);
+      for (const key of allKeys) {
+        if (mapOfSelectedItems.value.has(key)) {
+          const currentValues = mapOfSelectedItems.value.get(key);
+          const updatedValues = currentValues?.filter(
+            (value) => value !== newItems[key]
+          );
+          if (updatedValues && updatedValues.length) {
+            mapOfSelectedItems.value.set(key, updatedValues);
+          } else {
+            mapOfSelectedItems.value.delete(key);
+          }
+          emit("on-clear-remove");
+        } else {
+          mapOfSelectedItems.value.delete(key);
+          emit("on-clear-remove");
+        }
+      }
     }
   }
 );

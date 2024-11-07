@@ -699,7 +699,6 @@ watch(filterName, async (newName) => {
   font-style: normal !important;
   font-weight: 500 !important;
   line-height: 20px !important; /* 142.857% */
-  text-transform: capitalize !important;
 
   &.no_padding {
     padding-right: 12px !important;

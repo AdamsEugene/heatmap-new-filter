@@ -51,6 +51,7 @@ const canEdit = ref(nameIs("Create Custom Filter"));
 const canAdd = ref(false);
 const cancelEdit = ref(false);
 const disabledComparison = ref(false);
+const removeThis = ref<{ [key: string]: string }>();
 
 const errorMsg = ref<Map<number, string>>(new Map());
 
@@ -223,9 +224,19 @@ const handleCompareFilters = () => {
 };
 
 const removeItemFromPendingList = (filter: CombinedFilter) => {
+  let _selectedValue = "";
+  const selectedValue = filter.definition?.split("==")?.slice(-1);
+  if (selectedValue?.length) _selectedValue = encodeURI(selectedValue[0]);
+
+  removeThis.value = { [filter.name]: _selectedValue };
   pendingList.value = pendingList.value.filter(
-    (item) => item.name !== filter.name
+    (item) => item.definition !== filter.definition
   );
+  isComparingTo.value = false;
+};
+
+const onClearRemove = () => {
+  removeThis.value = undefined;
 };
 
 const onEditingMode = () => {
@@ -248,6 +259,7 @@ const resetFilters = (click?: boolean, enable?: boolean) => {
   pendingList.value = [];
   reset.value = true;
   errorMsg.value?.clear();
+  isComparingTo.value = false;
 
   if (enable) {
     emit("filter-values", []);
@@ -340,7 +352,6 @@ const applyFilters = (fromCustom?: boolean) => {
             actualName: newName,
           },
         ];
-        console.log(isComparingTo.value && returnData.length !== 2);
 
         if (isComparingTo.value && returnData.length !== 2) {
           errorMsg.value?.set(
@@ -367,7 +378,6 @@ const applyFilters = (fromCustom?: boolean) => {
             actualName: newName,
           },
         ];
-        console.log(isComparingTo.value && returnData.length !== 2);
 
         if (isComparingTo.value && returnData.length !== 2) {
           errorMsg.value?.set(
@@ -445,6 +455,7 @@ watch(
         });
 
       pendingList.value = affectedData;
+      if (pendingList.value.length === 1) isComparingTo.value = true;
     }
   },
   { immediate: true }
@@ -532,6 +543,7 @@ watch(selectedItem, () => {
           :websites="websites"
           :account-i-d="accountID"
           :existing-names="existingNames"
+          :remove-this="removeThis"
           :selected-items="[...new Set(pendingList?.map((item) => item.name))]"
           @on-add-to-waiting-room="handleAddToWaitingRoom"
           @on-loading="onLoading"
@@ -540,6 +552,7 @@ watch(selectedItem, () => {
           @on-save="onSave"
           @on-delete-custom-filter="onDeleteCustomFilter"
           @reset-errors="resetErrors"
+          @on-clear-remove="onClearRemove"
         />
       </div>
       <div class="filter-footer">

@@ -532,7 +532,6 @@ watch(searchQuery, (newQuery) => {
   font-style: normal !important;
   font-weight: 500 !important;
   line-height: 20px !important; /* 142.857% */
-  text-transform: capitalize !important;
   margin: 0 !important;
 
   &.no_padding {
