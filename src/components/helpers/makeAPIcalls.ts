@@ -37,14 +37,17 @@ export async function fetchSegmentData(segmentName: string) {
   )}&idSiteHsr=${getThis(
     "subcategory"
   )}&method=API.getSuggestedValuesForSegment&module=API&segmentName=${segmentName}`;
+  try {
+    const response = await fetch(url);
 
-  const response = await fetch(url);
-
-  if (response.ok) {
-    const result = await response.json();
-    if (result.result === "error") return false;
-    return result;
-  } else return false;
+    if (response.ok) {
+      const result = await response.json();
+      if (result.result === "error") return false;
+      return result;
+    } else return false;
+  } catch (error) {
+    return false;
+  }
 }
 
 export const dynamicallyFetchOptions = async (segment?: string) => {

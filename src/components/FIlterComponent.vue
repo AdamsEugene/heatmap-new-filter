@@ -356,7 +356,7 @@ const applyFilters = (fromCustom?: boolean) => {
         if (isComparingTo.value && returnData.length !== 2) {
           errorMsg.value?.set(
             10,
-            "Ensure that you have added a second filter."
+            "Ensure that you have added a second filter or remove the existing one."
           );
           return;
         }
@@ -382,7 +382,7 @@ const applyFilters = (fromCustom?: boolean) => {
         if (isComparingTo.value && returnData.length !== 2) {
           errorMsg.value?.set(
             10,
-            "Ensure that you have added a second filter."
+            "Ensure that you have added a second filter or remove the existing one."
           );
           return;
         }
@@ -405,7 +405,10 @@ const applyFilters = (fromCustom?: boolean) => {
 
     returnData = data;
     if (isComparingTo.value && returnData.length !== 2) {
-      errorMsg.value?.set(10, "Ensure that you have added a second filter.");
+      errorMsg.value?.set(
+        10,
+        "Ensure that you have added a second filter or remove the existing one."
+      );
       return;
     }
     if (returnData.length) {

@@ -98,7 +98,7 @@ export const validateCustom = (
       requiredKeys.forEach((key) => {
         if (!filter[key]) {
           isValid = false;
-          filter[`error_${key}`] = `Error: ${keyMap(key)} is required for${
+          filter[`error_${key}`] = `Error: ${keyMap(key)} is required for ${
             filter.action
           }.`;
         } else filter[`error_${key}`] = "";

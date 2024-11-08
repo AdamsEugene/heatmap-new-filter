@@ -78,6 +78,7 @@ const dropdownListSecondRef = ref<HTMLElement | null>(null);
 const loading = ref<string>("");
 const showModal = ref(false);
 const modalUrl = ref("");
+const placeholder = ref<string>();
 
 const inputLabel = computed(() => {
   if (props.position === "up") {
@@ -129,6 +130,7 @@ const closeDropdown = () => {
 };
 
 const onfocus = () => {
+  if (searchQuery.value) placeholder.value = searchQuery.value;
   searchQuery.value = "";
   isDropdownOpen.value = true;
 };
@@ -221,6 +223,7 @@ watch(
   () => props.items,
   () => {
     searchQuery.value = props.initialValue || "";
+    placeholder.value = props.initialValue || "";
   }
 );
 
@@ -270,7 +273,7 @@ watch(searchQuery, (newQuery) => {
         autocomplete="off"
         v-model="searchQuery"
         :type="inputType"
-        :placeholder="inputPlaceholder || 'Select items...'"
+        :placeholder="placeholder || inputPlaceholder || 'Select items...'"
         :class="{
           no_padding: inputType === 'number',
           align_me_right: nameIs('Average Order Value') && !position,
