@@ -373,7 +373,7 @@ const applyFilters = (fromCustom?: boolean) => {
           );
           return;
         }
-
+        resetOnApply();
         emit("filter-values", returnData);
         props.onToggleShowFilterMenu();
       }
@@ -407,7 +407,7 @@ const applyFilters = (fromCustom?: boolean) => {
           );
           return;
         }
-
+        resetOnApply();
         emit("filter-values", returnData);
         props.onToggleShowFilterMenu();
       } else {
@@ -437,6 +437,7 @@ const applyFilters = (fromCustom?: boolean) => {
       return;
     }
     if (returnData.length) {
+      resetOnApply();
       emit("filter-values", returnData);
       props.onToggleShowFilterMenu();
     } else {
@@ -446,6 +447,14 @@ const applyFilters = (fromCustom?: boolean) => {
       );
     }
   }
+};
+
+const resetOnApply = () => {
+  reset.value = true;
+
+  setTimeout(() => {
+    reset.value = false;
+  }, 10);
 };
 
 const saveApplyFilters = async () => {
