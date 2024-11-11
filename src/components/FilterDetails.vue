@@ -97,6 +97,14 @@ const fetchSegment = async () => {
       userId: props.accountID || +accountId,
       websiteIds: [+getThis("idSite")],
     });
+
+    const isValidObject =
+      res && typeof res === "object" && Object.keys(res).length > 0;
+
+    if (!res || (typeof res === "object" && !isValidObject)) {
+      emit("on-loading", false);
+      return;
+    }
   } else {
     res = await fetchSegmentData(segmentName);
     const isValidArray = Array.isArray(res) && res.length > 0;
