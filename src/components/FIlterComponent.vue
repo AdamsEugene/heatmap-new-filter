@@ -71,6 +71,7 @@ const existingNames = ref<string[]>([]);
 
 const accountID = ref<number>();
 const isComparingTo = ref<boolean>(false);
+const replaceMe = ref<boolean>(false);
 
 const readyToCompare = computed(() => pendingList.value.length);
 
@@ -332,6 +333,10 @@ const resetErrors = (err?: number) => {
 };
 
 const applyFilters = (fromCustom?: boolean) => {
+  if (replaceMe.value && pendingList.value?.length === 1) {
+    pendingList.value = [];
+  }
+
   let returnData: ReturnData[] = [];
   if (!pendingList.value.length && (waitingRoom.value || selectedItem.value)) {
     if (waitingRoom.value?.rawValues || selectedItem.value.data) {
@@ -353,7 +358,15 @@ const applyFilters = (fromCustom?: boolean) => {
           },
         ];
 
-        if (isComparingTo.value && returnData.length !== 2) {
+        if (replaceMe.value && returnData.length === 1) {
+          pendingList.value = (waitingRoom.value as any) || selectedItem.value;
+        }
+
+        if (
+          isComparingTo.value &&
+          returnData.length !== 2 &&
+          !replaceMe.value
+        ) {
           errorMsg.value?.set(
             10,
             "Ensure that you have added a second filter or remove the existing one."
@@ -379,13 +392,22 @@ const applyFilters = (fromCustom?: boolean) => {
           },
         ];
 
-        if (isComparingTo.value && returnData.length !== 2) {
+        if (replaceMe.value && returnData.length === 1) {
+          pendingList.value = (waitingRoom.value as any) || selectedItem.value;
+        }
+
+        if (
+          isComparingTo.value &&
+          returnData.length !== 2 &&
+          !replaceMe.value
+        ) {
           errorMsg.value?.set(
             10,
             "Ensure that you have added a second filter or remove the existing one."
           );
           return;
         }
+
         emit("filter-values", returnData);
         props.onToggleShowFilterMenu();
       } else {
@@ -404,7 +426,10 @@ const applyFilters = (fromCustom?: boolean) => {
     }));
 
     returnData = data;
-    if (isComparingTo.value && returnData.length !== 2) {
+    if (replaceMe.value && returnData.length === 1) replaceMe.value = true;
+    else replaceMe.value = false;
+
+    if (isComparingTo.value && returnData.length !== 2 && !replaceMe.value) {
       errorMsg.value?.set(
         10,
         "Ensure that you have added a second filter or remove the existing one."
@@ -458,7 +483,7 @@ watch(
         });
 
       pendingList.value = affectedData;
-      if (pendingList.value.length === 1) isComparingTo.value = true;
+      if (pendingList.value.length === 1) replaceMe.value = true;
     }
   },
   { immediate: true }
