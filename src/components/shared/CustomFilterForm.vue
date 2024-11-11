@@ -116,6 +116,7 @@ const loadInitialData = async (filter?: CustomValues) => {
         if (res) {
           filter.options = Object.keys(res);
           (filter as any).secOptions = res[filter.value];
+          (filter as any).secValue = filter?.segment || "";
         }
       } else filter.options = getUniqueArray(res);
     } else filter.options = undefined;
@@ -133,8 +134,10 @@ const onSelected = async (item: SELECTED_ITEMS) => {
   if (item.kind === "action" && typeof item.item !== "string") {
     if (item.item.name === "Session Tag") {
       isSessionTag.value.set(item.index, true);
+      props.selectedItem.data![item.index].secOptions = [];
     } else {
       isSessionTag.value.set(item.index, false);
+      props.selectedItem.data![item.index].secOptions = undefined;
     }
     let _options: string[] | undefined = undefined;
 
@@ -142,13 +145,14 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       newFilter.value.data = [];
     }
 
-    if (!newFilter.value.data[item.index] && item.index) {
+    if (!newFilter.value.data[item.index] && item?.index >= 0) {
       newFilter.value.data[item.index] = {
         action: "",
         segment: "",
         name: "",
         default: "",
         value: "",
+        secValue: "",
       };
     }
 
@@ -156,6 +160,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
     newFilter.value.data[item.index].action = item.item.name;
     newFilter.value.data[item.index].segment = item.item.segment || "";
     newFilter.value.data[item.index].name = item.item.name;
+    props.selectedItem.data![item.index].action = item.item.name;
 
     setValues(item.index, item.item.conditions, item.item.options);
 
@@ -197,10 +202,15 @@ const onSelected = async (item: SELECTED_ITEMS) => {
 
   if (item.kind === "value" && isString(item.item) && props.selectedItem.data) {
     props.selectedItem.data[item.index].value = item.item;
+
     if (
-      props.selectedItem.data[item.index].name === "Session Tag" &&
+      props.selectedItem.data[item.index].action === "Session Tag" &&
       sessionTagsData.value
     ) {
+      if (!props.selectedItem.data[item.index].secOptions) {
+        props.selectedItem.data[item.index].secOptions = [];
+      }
+      console.log(props.selectedItem.data[item.index].secOptions);
       props.selectedItem.data[item.index].secOptions =
         sessionTagsData.value[item.item] || [];
       props.selectedItem.data[item.index].secValue = "";
@@ -229,7 +239,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       );
     }
   }
-  // console.log(newFilter.value);
+  // console.log(props.selectedItem.data![item.index]);
 
   emit("on-custom-filter-change", { ...newFilter.value });
 };
@@ -310,7 +320,8 @@ watch(
     newSelectedItem.data?.forEach((data) => {
       loadInitialData(data);
     });
-  }
+  },
+  { immediate: true }
 );
 
 watch(
@@ -410,7 +421,13 @@ watch(filterName, async (newName) => {
       />
       <Dropdown
         :items="filter?.options"
-        :label="isSessionTag.get(index) ? 'Session Tag Name' : 'Value'"
+        :label="
+          isSessionTag.get(index)
+            ? 'Session Tag Name'
+            : filter?.action === 'Session Tag'
+            ? 'Session Tag Name'
+            : 'Value'
+        "
         :position="'up'"
         :as-input="!canEdit ? !canEdit : !filter?.options"
         :definition="'value'"

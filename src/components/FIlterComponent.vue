@@ -52,6 +52,7 @@ const canAdd = ref(false);
 const cancelEdit = ref(false);
 const disabledComparison = ref(false);
 const removeThis = ref<{ [key: string]: string }>();
+const editing = ref(false);
 
 const errorMsg = ref<Map<number, string>>(new Map());
 
@@ -243,6 +244,7 @@ const onClearRemove = () => {
 const onEditingMode = () => {
   canEdit.value = true;
   cancelEdit.value = false;
+  editing.value = true;
 };
 
 const onExitEditMode = () => {
@@ -341,8 +343,7 @@ const applyFilters = (fromCustom?: boolean) => {
   if (!pendingList.value.length && (waitingRoom.value || selectedItem.value)) {
     if (waitingRoom.value?.rawValues || selectedItem.value.data) {
       const isValidCustom = validateCustom(
-        waitingRoom.value || selectedItem.value,
-        existingNames.value
+        waitingRoom.value || selectedItem.value
       );
 
       if (isValidCustom) {

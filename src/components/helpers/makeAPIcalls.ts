@@ -147,6 +147,7 @@ export const saveEditCustomFilter = async (filterData: SessionDataItem) => {
     name: data.name,
     segment: data.segment,
     value: data.value,
+    secValue: data.secValue,
   }));
 
   const dataToDb = JSON.stringify({
