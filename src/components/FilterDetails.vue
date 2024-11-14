@@ -38,6 +38,7 @@ import {
   getThis,
   // updateValuesForEachKey,
   removeVariantSuffix,
+  replaceAfterLastEquals,
 } from "./helpers/functions";
 import { validate } from "./helpers/inputsValidator";
 import errorMsgs from "./helpers/errorMsgs";
@@ -175,26 +176,41 @@ const onSelected = async (item: Selected) => {
   clearFields.value = false;
 
   if (item.kind === "main" && seOrAd) {
-    emit("on-loading", true);
-    const res = await loadPartnerFilers(String(item.item));
-    if (!res) {
+    if (nameIs("Ads Platform")) {
+      emit("on-loading", true);
+      const res = await loadPartnerFilers(String(item.item));
+      if (!res) {
+        emit("on-loading", false);
+        return;
+      }
+
+      currentAd.value = res[String(item.item)] || undefined;
+      if (currentAd.value && currentAd.value.length > 0)
+        listForValues.value = currentAd.value?.map(
+          (ad) => ad.ad_name || ad.name
+        );
+
+      selected = {
+        ...selected,
+        definition: insertItemBeforeSemicolon(
+          selected.definition,
+          String(item.item)
+        ),
+        nameForCompare: selected.name + ": " + formatUrl(String(item.item)),
+      };
       emit("on-loading", false);
-      return;
+    } else {
+      listForValues.value = KV[item.item as string];
+
+      selected = {
+        ...selected,
+        definition: insertItemBeforeSemicolon(
+          selected.definition,
+          String(item.item)
+        ),
+        nameForCompare: selected.name + ": " + formatUrl(String(item.item)),
+      };
     }
-
-    currentAd.value = res[String(item.item)] || undefined;
-    if (currentAd.value && currentAd.value.length > 0)
-      listForValues.value = currentAd.value?.map((ad) => ad.ad_name || ad.name);
-
-    selected = {
-      ...selected,
-      definition: insertItemBeforeSemicolon(
-        selected.definition,
-        String(item.item)
-      ),
-      nameForCompare: selected.name + ": " + formatUrl(String(item.item)),
-    };
-    emit("on-loading", false);
   } else if (item.kind === "main" && nameIs("A/B Tests")) {
     const partnersFriendly = getKeyByValue(
       KV.partners_friendly,
@@ -245,13 +261,18 @@ const onSelected = async (item: Selected) => {
       );
       shouldEncode.value = false;
     } else if (seOrAd) {
-      if (currentAd.value) {
+      if (currentAd.value && nameIs("Ads Platform")) {
         const cur = currentAd.value.find(
           (ad) => (ad.ad_name || ad.name) === item.item
         );
         const adId = cur?.ad_id || cur?.id || "";
 
         definition = replaceAdIdValue(selected.definition, adId);
+      } else if (nameIs("Session Tag")) {
+        definition = replaceAfterLastEquals(
+          selected.definition,
+          String(item.item)
+        );
       }
     } else
       definition = replaceAfterEquals(selected.definition, String(item.item));
@@ -288,7 +309,6 @@ const onSelected = async (item: Selected) => {
       mapOfSelectedItems.value.set(props.selectedItem.name, [item.item]);
     }
   }
-  // console.log(mapOfSelectedItems.value);
 
   emit("on-add-to-waiting-room", { item: selected });
 };

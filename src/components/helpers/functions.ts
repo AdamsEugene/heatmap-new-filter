@@ -69,7 +69,6 @@ export const formatUrl = (url?: string): string => {
 export const insertItemBeforeSemicolon = (input: string, item: string) =>
   input.replace(/(==)[^;]*(;)/g, `$1${item}$2`);
 
-
 export const alreadyHaveDisplayName = (data: SessionDataItem, item: string) => {
   const formattedItem = formatUrl(item);
 
@@ -455,3 +454,18 @@ export const updateValuesForEachKey = (obj: any): Experiment[] => {
 export function removeVariantSuffix(str: string): string {
   return str.replace(/(\s*\(\d+\))(?=[;]|$)/g, "");
 }
+
+export const replaceAfterLastEquals = (
+  input: string,
+  newValue: string
+): string => {
+  return input.replace(/(==)[^;]*$/, `$1${newValue}`);
+};
+
+export const checkSessionTags = (input: string): boolean[] => {
+  // Check if sessionTagName and sessionTagValue have valid values
+  const sessionTagNameValid = /sessionTagName==[^;]+/.test(input);
+  const sessionTagValueValid = /sessionTagValue==[^;]+/.test(input);
+
+  return [sessionTagNameValid, sessionTagValueValid];
+};

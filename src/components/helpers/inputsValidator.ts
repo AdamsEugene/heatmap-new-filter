@@ -7,6 +7,7 @@ import {
   isConvertibleToNumber,
   isValidRevenueOrderString,
   evaluateFilterExpression,
+  checkSessionTags,
 } from "./functions";
 
 export const validate = (_data: SessionDataItem, existingNames?: string[]) => {
@@ -37,6 +38,10 @@ export const validate = (_data: SessionDataItem, existingNames?: string[]) => {
 
   if (name === "Ads Platform") {
     return checkAdPartnerAndAdId(definition);
+  }
+
+  if (name === "Session Tag") {
+    return checkSessionTags(definition);
   }
 
   if (name === "Create Custom Filter" || data?.length) {

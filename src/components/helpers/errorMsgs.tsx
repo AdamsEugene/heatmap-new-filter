@@ -24,6 +24,10 @@ const errorMsgs = (_data: SessionDataItem): string[] => {
       "Please select an Condition",
       "Value is required",
     ],
+    "Session Tag": [
+      "Please select a Session Tag Name",
+      "Please select a Tag Value",
+    ],
   };
 
   return (

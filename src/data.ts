@@ -8,7 +8,7 @@ import addShoppingCart from "./assets/images/add_shopping_cart.svg";
 import payments from "./assets/images/payments.svg";
 import task from "./assets/images/task.svg";
 import partner from "./assets/images/timeline.svg";
-// import session from "./assets/images/sessiontag.svg";
+import session from "./assets/images/sessiontag.svg";
 import nonPur from "./assets/images/Non-purchasers.svg";
 import adsPlatform from "./assets/images/addPlatform.svg";
 import { DataItem, ECommerceDataItem, SessionDataItem } from "./@types";
@@ -38,14 +38,14 @@ export const sessionData: SessionDataItem[] = [
     title: "QuickFilter-TrafficSource",
     notDone: true,
   },
-  // {
-  //   definition: "sessionTagName==;sessionTagValue==",
-  //   iconSrc: session,
-  //   idsegment: 0,
-  //   name: "Session Tag",
-  //   title: "QuickFilter-SessionTag",
-  //   showSign: true,
-  // },
+  {
+    definition: "sessionTagName==;sessionTagValue==",
+    iconSrc: session,
+    idsegment: 0,
+    name: "Session Tag",
+    title: "QuickFilter-SessionTag",
+    showSign: true,
+  },
   {
     definition: "visitCount==",
     iconSrc: numbers,
