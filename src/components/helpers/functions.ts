@@ -67,7 +67,8 @@ export const formatUrl = (url?: string): string => {
 };
 
 export const insertItemBeforeSemicolon = (input: string, item: string) =>
-  input.replace(/;/g, `${item};`);
+  input.replace(/(==)[^;]*(;)/g, `$1${item}$2`);
+
 
 export const alreadyHaveDisplayName = (data: SessionDataItem, item: string) => {
   const formattedItem = formatUrl(item);

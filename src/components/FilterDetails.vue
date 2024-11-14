@@ -36,7 +36,7 @@ import {
   replaceAdIdValue,
   areAllTrue,
   getThis,
-  updateValuesForEachKey,
+  // updateValuesForEachKey,
   removeVariantSuffix,
 } from "./helpers/functions";
 import { validate } from "./helpers/inputsValidator";
@@ -94,7 +94,7 @@ const fetchSegment = async () => {
   if (nameIs("Ads Platform")) {
     res = await manageAdsConnection({
       action: "status",
-      userId: props.accountID || +accountId,
+      userId: props.accountID || 6 || +accountId,
       websiteIds: [+getThis("idSite")],
     });
 
@@ -122,7 +122,7 @@ const fetchSegment = async () => {
     simpleListResponse.value = Object.keys(res || {});
     hasTokens.value = checkForTokens(res);
   } else if (nameIs("A/B Tests")) {
-    updateValuesForEachKey(res.experiments);
+    // updateValuesForEachKey(res.experiments);
     simpleListResponse.value = getPartnerValues(
       res.partners_friendly,
       res.partners
@@ -202,9 +202,11 @@ const onSelected = async (item: Selected) => {
     );
     if (partnersFriendly) {
       experiments.value = KV["experiments"][partnersFriendly];
+      // console.log(experiments.value);
       listForValues.value = KV["experiments"][partnersFriendly]?.map(
         (partner: Experiment) => partner.value
       );
+      // listForValues.value = KV["experiments"][partnersFriendly];
     }
 
     selected = {
@@ -266,27 +268,27 @@ const onSelected = async (item: Selected) => {
       rest: rest,
     };
 
-    if (typeof item.item === "string") {
-      if (
-        mapOfSelectedItems.value.has(props.selectedItem.name) &&
-        props.itemsInPending > 0 &&
-        props.selectedItems.includes(props.selectedItem.name)
-      ) {
-        const existingValues =
-          mapOfSelectedItems.value.get(props.selectedItem.name) || [];
-        if (existingValues.length === 2) {
-          existingValues[1] = item.item; // Replace the last item
-        } else {
-          existingValues.push(item.item); // Add new item
-        }
-        mapOfSelectedItems.value.set(props.selectedItem.name, existingValues);
-      } else {
-        mapOfSelectedItems.value.set(props.selectedItem.name, [item.item]);
-      }
-    }
-
     emit("on-save", true);
   }
+  if (typeof item.item === "string") {
+    if (
+      mapOfSelectedItems.value.has(props.selectedItem.name) &&
+      props.itemsInPending > 0 &&
+      props.selectedItems.includes(props.selectedItem.name)
+    ) {
+      const existingValues =
+        mapOfSelectedItems.value.get(props.selectedItem.name) || [];
+      if (existingValues.length === 2) {
+        existingValues[1] = item.item; // Replace the last item
+      } else {
+        existingValues.push(item.item); // Add new item
+      }
+      mapOfSelectedItems.value.set(props.selectedItem.name, existingValues);
+    } else {
+      mapOfSelectedItems.value.set(props.selectedItem.name, [item.item]);
+    }
+  }
+  // console.log(mapOfSelectedItems.value);
 
   emit("on-add-to-waiting-room", { item: selected });
 };
@@ -303,11 +305,11 @@ const getABTestingData = (item: string, definition: string, rest: any) => {
     );
     if (experiment?.variant_id) {
       rest["variant_id"] = experiment.variant_id;
-      // definition += `;variantId==${experiment.variant_id}`;
+      definition += `;variantId==${experiment.variant_id}`;
     }
     if (experiment?.experiment_id) {
       rest["experiment_id"] = experiment.experiment_id;
-      // definition += `;experienceId==${experiment.experiment_id}`;
+      definition += `;experienceId==${experiment.experiment_id}`;
     }
     if (experiment?.url) rest["url"] = experiment.url;
   }

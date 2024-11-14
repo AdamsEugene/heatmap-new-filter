@@ -79,6 +79,7 @@ const loading = ref<string>("");
 const showModal = ref(false);
 const modalUrl = ref("");
 const placeholder = ref<string>();
+const selectedIndex = ref<number>();
 
 const inputLabel = computed(() => {
   if (props.position === "up") {
@@ -142,8 +143,9 @@ const onArrowClick = () => {
 
 const nameIs = (name: string) => name === props.label;
 
-const handleItemSelection = (item: string | DataItem) => {
-  if (typeof item === "string" && _disabled(item)) {
+const handleItemSelection = (item: string | DataItem, index?: number) => {
+  selectedIndex.value = index;
+  if (typeof item === "string" && _disabled(item) && !nameIs("A/B Tests")) {
     isDropdownOpen.value = true;
     emit("on-selection-error");
     return;
@@ -164,7 +166,7 @@ const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
     return;
   }
 
-  if (!_disabled(check)) handleItemSelection(item);
+  if (!_disabled(check) || nameIs("A/B Tests")) handleItemSelection(item);
   else emit("on-selection-error");
 };
 
@@ -224,6 +226,7 @@ watch(
   () => {
     searchQuery.value = props.initialValue || "";
     placeholder.value = props.initialValue || "";
+    selectedIndex.value = undefined;
   }
 );
 
@@ -231,6 +234,7 @@ watch(
   () => props.initialValue,
   () => {
     searchQuery.value = props.initialValue || "";
+    selectedIndex.value = undefined;
   }
 );
 
@@ -238,6 +242,7 @@ watch(
   () => props.clearFields,
   (newValue) => {
     if (newValue) searchQuery.value = "";
+    selectedIndex.value = undefined;
   }
 );
 
@@ -317,10 +322,12 @@ watch(searchQuery, (newQuery) => {
         :key="index"
         class="dropdown-item"
         :class="{
-          selected: searchQuery === item || disabledItem?.includes(item),
-          disabled_item: disabledItems(item),
+          selected:
+            (searchQuery === item || disabledItem?.includes(item)) &&
+            index === selectedIndex,
+          disabled_item: disabledItems(item) && !nameIs('A/B Tests'),
         }"
-        @click.stop="handleItemSelection(item)"
+        @click.stop="handleItemSelection(item, index)"
       >
         <p class="medium_text">{{ item }}</p>
       </div>

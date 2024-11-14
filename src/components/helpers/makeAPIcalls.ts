@@ -7,7 +7,7 @@ let BASE_URL_2 = "";
 
 if (getRedirectType() === "locala") {
   BASE_URL = "https://stage9.heatmapcore.com/";
-  BASE_URL_2 = "https://stage1.heatmapcore.com";
+  BASE_URL_2 = "https://stage9.heatmapcore.com";
 }
 
 export async function loadCustomFilters<T>(): Promise<T | false> {
@@ -209,10 +209,10 @@ export const loadPartnerFilers = async (partner: string) => {
     redirect: "follow",
   };
   const token = localStorage.getItem("heatUserId");
-  const accountId = localStorage.getItem("filter-account-id");
+  const accountId = localStorage.getItem("filter-account-id") || 6;
   try {
     const url = `${BASE_URL_2}/index.php?module=API&method=AdsIntegration.ads&token=${
-      token || "7b3f2fb80935a197d641f73ce98c35d5"
+      token || "9eecb8e8e31f3e5fb6d8bcf0ce343050"
     }&idSite=${getThis(
       "idSite"
     )}&userId=${accountId}&partner=${partner}&live=1`;
@@ -228,7 +228,7 @@ export const loadPartnerFilers = async (partner: string) => {
     return false;
   }
 };
-// https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=7b3f2fb80935a197d641f73ce98c35d5&idSite=1562&userId=6&partner=x&live=1
+// https://stage1.heatmapcore.com/index.php?module=API&method=AdsIntegration.ads&token=9eecb8e8e31f3e5fb6d8bcf0ce343050&idSite=1562&userId=6&partner=x&live=1
 export const justMakeThis = async (partner: string) => {
   const requestOptions = {
     method: "GET",

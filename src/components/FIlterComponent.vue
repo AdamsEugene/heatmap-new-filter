@@ -118,7 +118,7 @@ onMounted(() => {
       const accountId = localStorage.getItem("filter-account-id") || 0;
       let payload: AuthorizationRequest = {
         action: "exchange" as const,
-        userId: accountID.value || +accountId,
+        userId: accountID.value || 6 || +accountId,
         partner,
         websiteIds: [+getThis("idSite")],
         code: getThis("code") || getThis("oauth_verifier"),
