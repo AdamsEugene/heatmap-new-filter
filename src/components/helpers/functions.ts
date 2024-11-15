@@ -126,8 +126,6 @@ export function replaceAfterRevenueOrder(
   value: string,
   operator = null
 ): string {
-  console.log({ str, value, operator });
-
   const pattern = /^revenueOrder([=><]{1,2})?(.*)$/;
   const match = str.match(pattern);
   if (match) {
@@ -343,8 +341,6 @@ export function isConvertibleToNumber(value: any): boolean {
 }
 
 export function isValidRevenueOrderString(str: string): [boolean, boolean] {
-  console.log(str);
-
   const pattern = /^revenueOrder([=><]{1,2})?(\d+)?$/;
   const match = str.match(pattern);
 

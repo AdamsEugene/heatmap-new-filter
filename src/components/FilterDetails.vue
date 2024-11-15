@@ -554,11 +554,12 @@ watch(
     </template>
     <template v-else>
       <save-button
+        v-if="itemsInPending >= 1"
         :items-in-pending="itemsInPending !== 2"
         :on-proceed="onProceed"
       />
       <div class="center_me">
-        <p class="new_text">Select “Apply” or “Compare To” to continue</p>
+        <!-- <p class="new_text">Select “Apply” or “Compare To” to continue</p> -->
       </div>
     </template>
     <transition name="fade">
