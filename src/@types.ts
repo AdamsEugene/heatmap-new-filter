@@ -135,7 +135,7 @@ export type AuthorizationRequest = {
   partner?: string;
   code?: string;
   twitterCodeVerifier?: string;
-  redirectType?: "dashboard" | "locala" | "deves" | "dever";
+  redirectType?: "dashboard" | "locala" | "deves" | "dever" | "locald";
 };
 
 export type ReturnData = {

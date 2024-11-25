@@ -16,14 +16,21 @@ export const getThis = (item: string) => {
   return searchParams.get(item) || hashParams.get(item) || "";
 };
 
-export function getRedirectType(): "dashboard" | "locala" | "deves" | "dever" {
+export function getRedirectType():
+  | "dashboard"
+  | "locala"
+  | "deves"
+  | "dever"
+  | "locald" {
   const url = new URL(window.location.href);
   const hostname = url.hostname;
   if (hostname.includes("localhost")) return "locala";
   if (hostname.includes("dashboard")) return "dashboard";
+  if (hostname.includes("portal")) return "dashboard";
   if (hostname.includes("early-release")) return "dever";
   if (hostname.includes("earlystage")) return "deves";
-  return "dashboard";
+  if (hostname.includes("stage")) return "locald";
+  return "locald";
 }
 
 export const makeRequestFor = (name?: string): boolean => {

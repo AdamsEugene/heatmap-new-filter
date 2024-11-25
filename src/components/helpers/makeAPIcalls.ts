@@ -209,7 +209,7 @@ export const loadPartnerFilers = async (partner: string) => {
     redirect: "follow",
   };
   const token = localStorage.getItem("heatUserId");
-  const accountId = localStorage.getItem("filter-account-id") || 6;
+  const accountId = localStorage.getItem("filter-account-id") || 0;
   try {
     const url = `${BASE_URL_2}/index.php?module=API&method=AdsIntegration.ads&token=${
       token || "9eecb8e8e31f3e5fb6d8bcf0ce343050"

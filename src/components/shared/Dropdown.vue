@@ -158,7 +158,11 @@ const handleItemSelection = (item: string | DataItem, index?: number) => {
 };
 
 const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
-  if (typeof item === "string" && item === "google") {
+  if (
+    typeof item === "string" &&
+    item === "google" &&
+    getRedirectType() === "locald"
+  ) {
     return;
   }
   if (typeof item === "string" && !props.hasTokens?.includes(item)) {
@@ -171,7 +175,7 @@ const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
 };
 
 const manageConnection = async (partner: string) => {
-  if (partner === "google") return;
+  if (partner === "google" && getRedirectType() === "locald") return;
   const accountId = localStorage.getItem("filter-account-id") || 0;
   loading.value = partner;
   const res = await manageAdsConnection({
@@ -361,9 +365,14 @@ watch(searchQuery, (newQuery) => {
           <p class="medium_text">{{ item }}</p>
         </div>
         <div
-          v-show="item === 'google' || !hasTokens?.includes(item)"
+          v-show="
+            (item === 'google' && getRedirectType() === 'locald') ||
+            !hasTokens?.includes(item)
+          "
           class="new_ads_right"
-          :class="{ no_background: item === 'google' }"
+          :class="{
+            no_background: item === 'google' && getRedirectType() === 'locald',
+          }"
           @click.stop="manageConnection(item)"
         >
           <p
@@ -374,7 +383,7 @@ watch(searchQuery, (newQuery) => {
             }"
           >
             {{
-              item === "google"
+              item === "google" && getRedirectType() === "locald"
                 ? "Coming soon"
                 : loading === item
                 ? "Connecting..."
@@ -382,7 +391,7 @@ watch(searchQuery, (newQuery) => {
             }}
           </p>
           <img
-            v-if="item !== 'google'"
+            v-if="getRedirectType() !== 'locald'"
             class="button_icon"
             src="../../assets/images/link.svg"
             alt="add icon"

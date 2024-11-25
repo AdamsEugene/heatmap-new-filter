@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { SessionDataItem } from "../@types";
+import { getRedirectType } from "./helpers/functions";
 
 const props = defineProps<{
   data: SessionDataItem[];
@@ -15,7 +16,7 @@ const props = defineProps<{
 const filteredItems = computed(() => {
   return props.data.filter((item) => {
     if (item.name === "Ads Platform") {
-      return props.adsPlatform;
+      return getRedirectType() === "locald" || props.adsPlatform;
     }
     return true;
   });

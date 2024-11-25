@@ -95,7 +95,7 @@ const fetchSegment = async () => {
   if (nameIs("Ads Platform")) {
     res = await manageAdsConnection({
       action: "status",
-      userId: props.accountID || 6 || +accountId,
+      userId: props.accountID || +accountId,
       websiteIds: [+getThis("idSite")],
     });
 
