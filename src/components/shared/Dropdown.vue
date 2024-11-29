@@ -24,6 +24,7 @@ import go from "../../assets/images/google.svg";
 import ti from "../../assets/images/tiktok.svg";
 import ji from "../../assets/images/ji.svg";
 import ig from "../../assets/images/ig.svg";
+import kv from "../../assets/images/klaviyo.png";
 import { manageAdsConnection } from "../helpers/makeAPIcalls";
 import {
   actionItemsSearch,
@@ -61,6 +62,7 @@ const returnImg = (name: string) => {
     tiktok: ti,
     instagram: ig,
     jira: ji,
+    klaviyo: kv,
   };
   return (obj as any)[name] || go;
 };
@@ -161,7 +163,7 @@ const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
   if (
     typeof item === "string" &&
     item === "google" &&
-    getRedirectType() === "locald"
+    getRedirectType() !== "locald"
   ) {
     return;
   }
@@ -175,7 +177,7 @@ const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
 };
 
 const manageConnection = async (partner: string) => {
-  if (partner === "google" && getRedirectType() === "locald") return;
+  if (partner === "google" && getRedirectType() !== "locald") return;
   const accountId = localStorage.getItem("filter-account-id") || 0;
   loading.value = partner;
   const res = await manageAdsConnection({
@@ -366,12 +368,12 @@ watch(searchQuery, (newQuery) => {
         </div>
         <div
           v-show="
-            (item === 'google' && getRedirectType() === 'locald') ||
+            (item === 'google' && getRedirectType() !== 'locald') ||
             !hasTokens?.includes(item)
           "
           class="new_ads_right"
           :class="{
-            no_background: item === 'google' && getRedirectType() === 'locald',
+            no_background: item === 'google' && getRedirectType() !== 'locald',
           }"
           @click.stop="manageConnection(item)"
         >
@@ -383,7 +385,7 @@ watch(searchQuery, (newQuery) => {
             }"
           >
             {{
-              item === "google" && getRedirectType() === "locald"
+              item === "google" && getRedirectType() !== "locald"
                 ? "Coming soon"
                 : loading === item
                 ? "Connecting..."
@@ -391,11 +393,18 @@ watch(searchQuery, (newQuery) => {
             }}
           </p>
           <img
-            v-if="getRedirectType() !== 'locald'"
+            v-if="item === 'google' && getRedirectType() === 'locald'"
             class="button_icon"
             src="../../assets/images/link.svg"
             alt="add icon"
           />
+          <img
+            v-else-if="item !== 'google'"
+            class="button_icon"
+            src="../../assets/images/link.svg"
+            alt="add icon"
+          />
+          <div v-else></div>
         </div>
       </div>
     </div>

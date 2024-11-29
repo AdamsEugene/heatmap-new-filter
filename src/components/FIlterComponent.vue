@@ -125,7 +125,10 @@ onMounted(() => {
         redirectType: getRedirectType(),
       };
 
-      if (partner.toLowerCase() === "x") {
+      if (
+        partner.toLowerCase() === "x" ||
+        partner.toLowerCase() === "klaviyo"
+      ) {
         const url = JSON.parse(
           localStorage.getItem("twitterCodeVerifier") || "{}"
         );
