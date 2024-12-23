@@ -246,7 +246,7 @@ const onSelected = async (item: Selected) => {
         (partner: Experiment) => ({
           id: partner.variant_id || partner.experiment_id || partner.value,
           item: partner.value,
-          clickable: partner.clickable,
+          clickable: partner.clickable ?? true,
         })
       );
       // listForValues.value = KV["experiments"][partnersFriendly];
