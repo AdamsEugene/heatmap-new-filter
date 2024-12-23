@@ -36,7 +36,7 @@ import {
 const props = defineProps<{
   label?: string;
   placeholder?: string;
-  items?: string[];
+  items?: { item: string; id: string; clickable?: boolean }[];
   actionItems?: GroupedData;
   position?: "up" | "down";
   definition: "main" | "value" | "action" | "condition" | "secValue";
@@ -82,6 +82,7 @@ const showModal = ref(false);
 const modalUrl = ref("");
 const placeholder = ref<string>();
 const selectedIndex = ref<number>();
+const selectedId = ref<string>();
 
 const inputLabel = computed(() => {
   if (props.position === "up") {
@@ -100,7 +101,7 @@ const inputPlaceholder = computed(() => {
 const filteredItems = computed(() => {
   return Array.isArray(props?.items)
     ? props.items.filter((item) =>
-        item.toLowerCase().includes(searchQuery.value.toLowerCase())
+        item.item?.toLowerCase().includes(searchQuery.value.toLowerCase())
       )
     : props.items;
 });
@@ -145,7 +146,14 @@ const onArrowClick = () => {
 
 const nameIs = (name: string) => name === props.label;
 
-const handleItemSelection = (item: string | DataItem, index?: number) => {
+const handleItemSelection = (
+  item: string | DataItem,
+  index?: number,
+  id?: string,
+  clickable?: boolean
+) => {
+  if (!clickable) return;
+  selectedId.value = id;
   selectedIndex.value = index;
   if (typeof item === "string" && _disabled(item) && !nameIs("A/B Tests")) {
     isDropdownOpen.value = true;
@@ -155,11 +163,19 @@ const handleItemSelection = (item: string | DataItem, index?: number) => {
 
   if (typeof item === "string") searchQuery.value = item;
   else searchQuery.value = item.name;
-  emit("on-selected", { item, kind: props.definition });
+  emit("on-selected", { item, kind: props.definition, id });
   isDropdownOpen.value = false;
 };
 
-const itemSelectWithDisabled = (item: string | DataItem, check: string) => {
+const itemSelectWithDisabled = (
+  item: string | DataItem,
+  check: string,
+  id?: string,
+  clickable?: boolean
+) => {
+  if (!clickable) return;
+  selectedId.value = id;
+
   if (
     typeof item === "string" &&
     item === "google" &&
@@ -252,6 +268,13 @@ watch(
   }
 );
 
+// watch(
+//   () => props.items,
+//   () => {
+//     console.log(props.items);
+//   }
+// );
+
 watch(searchQuery, (newQuery) => {
   const isAOV = nameIs("Average Order Value") || props.asInput;
   const isSec = props.definition === "value";
@@ -324,16 +347,17 @@ watch(searchQuery, (newQuery) => {
       ref="mainDropdownListRef"
     >
       <div
-        v-for="(item, index) in filteredItems"
+        v-for="({ item, id, clickable }, index) in filteredItems"
         :key="index"
         class="dropdown-item"
         :class="{
           selected:
             (searchQuery === item || disabledItem?.includes(item)) &&
             index === selectedIndex,
-          disabled_item: disabledItems(item) && !nameIs('A/B Tests'),
+          disabled_item:
+            !clickable || (disabledItems(item) && !nameIs('A/B Tests')),
         }"
-        @click.stop="handleItemSelection(item, index)"
+        @click.stop="handleItemSelection(item, index, id, clickable)"
       >
         <p class="medium_text">{{ item }}</p>
       </div>
@@ -353,14 +377,14 @@ watch(searchQuery, (newQuery) => {
         <p class="medium_text">AD PLATFORM</p>
       </div>
       <div
-        v-for="(item, index) in filteredItems"
+        v-for="({ item, id, clickable }, index) in filteredItems"
         :key="index"
         class="dropdown-item_ads"
         :class="{
           selected: searchQuery === item || disabledItem?.includes(item),
-          disabled_item: disabledItems(item),
+          disabled_item: !clickable || disabledItems(item),
         }"
-        @click.stop="itemSelectWithDisabled(item, item)"
+        @click.stop="itemSelectWithDisabled(item, item, id, clickable)"
       >
         <div class="new_ads_left">
           <img class="button_icon" :src="returnImg(item)" alt="add icon" />
@@ -703,6 +727,10 @@ watch(searchQuery, (newQuery) => {
 
 .disabled_item {
   cursor: not-allowed !important;
+  background-color: #c2c2c2 !important;
+  &:hover {
+    background-color: #c2c2c2 !important;
+  }
 }
 
 input:disabled {

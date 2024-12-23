@@ -72,14 +72,17 @@ const nameIs = (name: string) => name === props.selectedItem.name;
 
 const initiallySavedCustomFilters = ref<CustomValues>();
 
-const simpleListResponse = ref<string[]>([]);
+const simpleListResponse = ref<
+  { item: string; id: string; clickable?: boolean }[]
+>([]);
 const keyValueResponse = ref<Map<string, unknown>>();
 const experiments = ref<Experiment[]>();
 const shouldEncode = ref(true);
 const clearFields = ref(false);
 const selectionError = ref(false);
 
-const listForValues = ref<string[]>();
+const listForValues =
+  ref<{ item: string; id: string; clickable?: boolean }[]>();
 const mapOfSelectedItems = ref<Map<string, string[]>>(new Map());
 const hasTokens = ref<string[]>();
 const _errorMsg = ref(props.errorMsg);
@@ -120,17 +123,29 @@ const fetchSegment = async () => {
 
   keyValueResponse.value = res;
   if (nameIs("Session Tag") || nameIs("Ads Platform")) {
-    simpleListResponse.value = Object.keys(res || {});
+    simpleListResponse.value = Object.keys(res || {}).map((key) => ({
+      id: key,
+      item: key,
+      clickable: true,
+    }));
     hasTokens.value = checkForTokens(res);
   } else if (nameIs("A/B Tests")) {
     // updateValuesForEachKey(res.experiments);
     simpleListResponse.value = getPartnerValues(
       res.partners_friendly,
       res.partners
-    );
+    ).map((key) => ({
+      id: key,
+      item: key,
+      clickable: true,
+    }));
     hasTokens.value = undefined;
   } else {
-    simpleListResponse.value = res;
+    simpleListResponse.value = res?.map((key: any) => ({
+      id: key,
+      item: key,
+      clickable: true,
+    }));
     hasTokens.value = undefined;
   }
   emit("on-loading", false);
@@ -186,9 +201,13 @@ const onSelected = async (item: Selected) => {
 
       currentAd.value = res[String(item.item)] || undefined;
       if (currentAd.value && currentAd.value.length > 0)
-        listForValues.value = currentAd.value?.map(
-          (ad) => ad.ad_name || ad.name
-        );
+        listForValues.value = currentAd.value
+          ?.map((ad) => ad.ad_name || ad.name)
+          ?.map((key) => ({
+            id: key,
+            item: key,
+            clickable: true,
+          }));
 
       selected = {
         ...selected,
@@ -200,7 +219,11 @@ const onSelected = async (item: Selected) => {
       };
       emit("on-loading", false);
     } else {
-      listForValues.value = KV[item.item as string];
+      listForValues.value = KV[item.item as string]?.map((key: any) => ({
+        id: key,
+        item: key,
+        clickable: true,
+      }));
 
       selected = {
         ...selected,
@@ -220,7 +243,11 @@ const onSelected = async (item: Selected) => {
       experiments.value = KV["experiments"][partnersFriendly];
       // console.log(experiments.value);
       listForValues.value = KV["experiments"][partnersFriendly]?.map(
-        (partner: Experiment) => partner.value
+        (partner: Experiment) => ({
+          id: partner.variant_id || partner.experiment_id || partner.value,
+          item: partner.value,
+          clickable: partner.clickable,
+        })
       );
       // listForValues.value = KV["experiments"][partnersFriendly];
     }
@@ -250,7 +277,8 @@ const onSelected = async (item: Selected) => {
       definition = getABTestingData(
         removeVariantSuffix(String(item.item)),
         removeVariantSuffix(definition),
-        rest
+        rest,
+        item.id
       );
     else if (nameIs("Total Pages Visited"))
       definition = replaceAfterEquals(selected.definition, String(item.item));
@@ -313,16 +341,44 @@ const onSelected = async (item: Selected) => {
   emit("on-add-to-waiting-room", { item: selected });
 };
 
-const getABTestingData = (item: string, definition: string, rest: any) => {
+const getABTestingData = (
+  item: string,
+  definition: string,
+  rest: any,
+  id?: string
+) => {
   definition = replaceAfterItem(
     `${selected.definition};friendlyName==`,
     ";friendlyName",
     `==${item}`
   );
+
   if (experiments.value) {
-    const experiment = experiments.value.find(
-      (experiment) => experiment.value === item
-    );
+    const experiment = experiments.value.find((experiment) => {
+      // First, check if variant_id exists and matches
+      if (experiment.variant_id && experiment.variant_id === id) {
+        return true;
+      }
+
+      // If no match with variant_id, check if any item has variant_id
+      const hasVariantId = experiments.value?.some(
+        (exp) => exp.variant_id === id
+      );
+      if (!hasVariantId) {
+        // Only check experiment_id if no variant_id match was found
+        if (experiment.experiment_id === id) {
+          return true;
+        }
+
+        // Finally, check value if no variant_id or experiment_id matches
+        if (experiment.value === item) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+
     if (experiment?.variant_id) {
       rest["variant_id"] = experiment.variant_id;
       definition += `;variantId==${experiment.variant_id}`;
@@ -451,13 +507,19 @@ watch(
 
 watch(
   () => props.selectedItem,
-  () => {
+  (item) => {
+    // console.log(item);
+
     freeUpSpace();
     _errorMsg.value.clear();
-    makeRequestFor(props.selectedItem.name) && fetchSegment();
-    selected = { ...props.selectedItem };
+    makeRequestFor(item.name) && fetchSegment();
+    selected = { ...item };
     if (nameIs("Average Order Value"))
-      simpleListResponse.value = ["Equal To", "Less Than", "Greater Than"];
+      simpleListResponse.value = [
+        { id: "Equal To", item: "Equal To", clickable: true },
+        { id: "Less Than", item: "Less Than", clickable: true },
+        { id: "Greater Than", item: "Greater Than", clickable: true },
+      ];
     listForValues.value = undefined;
   }
 );

@@ -89,6 +89,7 @@ export interface Experiment {
   variant_id: string;
   experiment_id: string | null;
   url?: string;
+  clickable?: boolean;
 }
 
 export interface Experiments {
@@ -202,4 +203,5 @@ export type Site = {
 export interface Selected {
   item: string | DataItem;
   kind: "main" | "value" | "action" | "condition" | "secValue";
+  id?: string;
 }

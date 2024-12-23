@@ -13,6 +13,7 @@ import {
   addOptionsToData,
   convertOptionToArray,
   generateSegmentString,
+  getKeyByValue,
   getUniqueArray,
   groupDataByCategory,
   initialNewFilter,
@@ -22,7 +23,7 @@ import {
   deleteCustomFilter,
   dynamicallyFetchOptions,
 } from "../helpers/makeAPIcalls";
-import { _data } from "../../data";
+import { _data, segmentValues } from "../../data";
 import { validateCustom } from "../helpers/inputsValidator";
 
 type DEF = "main" | "value" | "action" | "condition" | "secValue";
@@ -90,6 +91,15 @@ const currentData = computed(
   () => (action?: string) => _data.find((item) => item.name === action)
 );
 
+const createMap = computed(
+  () => (item?: string[]) =>
+    item?.map((key) => ({
+      id: key,
+      item: key,
+      clickable: true,
+    }))
+);
+
 // Computed property to find the options for the current category and name
 const availableOptions = computed(() => (action?: string) => {
   const category = currentData.value(action)?.category || "";
@@ -102,6 +112,8 @@ const loadInitialData = async (filter?: CustomValues) => {
   if (!filter) return;
   emit("on-loading", true);
   const _currentData = currentData.value(filter?.action);
+
+  filter.segment = filter.segment || _currentData?.segment || "";
 
   const option = _currentData?.option;
   const _options = availableOptions.value(filter?.action);
@@ -123,6 +135,10 @@ const loadInitialData = async (filter?: CustomValues) => {
   }
 
   filter.conditions = Object.values((options as any)[option || ""] || {}) || [];
+  if (props.selectedItem.data)
+    props.selectedItem.definition = generateSegmentString(
+      props.selectedItem.data
+    );
   emit("on-loading", false);
 };
 
@@ -199,6 +215,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       );
     }
   }
+  // console.log(getKeyByValue(segmentValues.countryName, item.item as string));
 
   if (item.kind === "value" && isString(item.item) && props.selectedItem.data) {
     props.selectedItem.data[item.index].value = item.item;
@@ -210,7 +227,7 @@ const onSelected = async (item: SELECTED_ITEMS) => {
       if (!props.selectedItem.data[item.index].secOptions) {
         props.selectedItem.data[item.index].secOptions = [];
       }
-      console.log(props.selectedItem.data[item.index].secOptions);
+      // console.log(props.selectedItem.data[item.index].secOptions);
       props.selectedItem.data[item.index].secOptions =
         sessionTagsData.value[item.item] || [];
       props.selectedItem.data[item.index].secValue = "";
@@ -218,6 +235,10 @@ const onSelected = async (item: SELECTED_ITEMS) => {
 
     if (newFilter.value.data) {
       newFilter.value.data[item.index].value = item.item;
+      if (props.selectedItem.data[item.index].action === "Country") {
+        newFilter.value.data[item.index].value =
+          getKeyByValue(segmentValues.countryName, item.item as string) || "";
+      }
       newFilter.value.definition = generateSegmentString(newFilter.value.data);
       props.selectedItem.definition = generateSegmentString(
         newFilter.value.data
@@ -242,6 +263,10 @@ const onSelected = async (item: SELECTED_ITEMS) => {
   // console.log(props.selectedItem.data![item.index]);
 
   emit("on-custom-filter-change", { ...newFilter.value });
+};
+
+const getActualName = (key: string) => {
+  return (segmentValues.countryName as any)?.[key] || key;
 };
 
 const setValues = (
@@ -316,7 +341,7 @@ watch(
       ? ""
       : customData.value?.title || "";
     newFilter.value = copyOfInitialNewFilter;
-    // newFilter.value = props.selectedItem;
+    newFilter.value = props.selectedItem;
     newSelectedItem.data?.forEach((data) => {
       loadInitialData(data);
     });
@@ -406,7 +431,7 @@ watch(filterName, async (newName) => {
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
-        :items="filter?.conditions"
+        :items="createMap(filter?.conditions)"
         :label="'Condition'"
         :position="'up'"
         :as-input="!canEdit"
@@ -420,7 +445,7 @@ watch(filterName, async (newName) => {
         @on-selected="(item) => onSelected({ ...item, index })"
       />
       <Dropdown
-        :items="filter?.options"
+        :items="createMap(filter?.options)"
         :label="
           isSessionTag.get(index)
             ? 'Session Tag Name'
@@ -431,7 +456,7 @@ watch(filterName, async (newName) => {
         :position="'up'"
         :as-input="!canEdit ? !canEdit : !filter?.options"
         :definition="'value'"
-        :initial-value="filter?.value"
+        :initial-value="getActualName(filter?.value)"
         :clear-fields="clearFields"
         :disabled="!canEdit"
         :filter-index="index"
@@ -440,7 +465,7 @@ watch(filterName, async (newName) => {
       />
       <Dropdown
         v-if="filter.secOptions"
-        :items="filter.secOptions"
+        :items="createMap(filter.secOptions)"
         :label="'Tag Value'"
         :position="'up'"
         :as-input="!canEdit ? !canEdit : !filter?.secOptions"

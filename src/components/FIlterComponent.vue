@@ -135,7 +135,8 @@ onMounted(() => {
         if (url && url.url) {
           const newUrl = new URL(url.url);
           const searchParams = new URLSearchParams(newUrl.search);
-          payload.twitterCodeVerifier = searchParams.get("oauth_token") || "";
+          payload.twitterCodeVerifier =
+            searchParams.get("oauth_token") || url?.codeVerifier || "";
         }
       }
 
@@ -169,6 +170,9 @@ const handleAddToWaitingRoom = (item: { item: CombinedFilter }) => {
 };
 
 const handleSidebarItemClick = (item: SessionDataItem) => {
+  // console.log("selectedItem: ", item.definition);
+  // console.log(customFilters.value);
+
   errorMsg.value?.clear();
   if (selectedItem.value.name !== item.name) {
     waitingRoom.value = undefined;

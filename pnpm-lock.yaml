@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      heatmap-filter-new:
-        specifier: ^1.0.3
-        version: 1.0.3(rollup@4.22.4)(typescript@5.6.2)(vite@5.4.7)(vue@3.5.8(typescript@5.6.2))
       vite-plugin-css-injected-by-js:
         specifier: ^3.5.2
         version: 3.5.2(vite@5.4.7)
@@ -487,11 +484,6 @@ packages:
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
-
-  heatmap-filter-new@1.0.3:
-    resolution: {integrity: sha512-cNawMQilex3UovyCqojx8qMSlsz/Nhxz29m8YV6T7Z2F8oqEXSzJ3UzEkmgRf4VlLRFJetELzxrWcQQjYrrU1Q==}
-    peerDependencies:
-      vue: ^3.0.0
 
   import-lazy@4.0.0:
     resolution: {integrity: sha512-rKtvo6a868b5Hu3heneU+L4yEQ4jYKLtjpnPeUdK7h0yzXGmyBTypknlkCvHFBqfX9YlorEiMM6Dnq/5atfHkw==}
@@ -1123,18 +1115,6 @@ snapshots:
       function-bind: 1.1.2
 
   he@1.2.0: {}
-
-  heatmap-filter-new@1.0.3(rollup@4.22.4)(typescript@5.6.2)(vite@5.4.7)(vue@3.5.8(typescript@5.6.2)):
-    dependencies:
-      vite-plugin-css-injected-by-js: 3.5.2(vite@5.4.7)
-      vite-plugin-dts: 4.2.4(rollup@4.22.4)(typescript@5.6.2)(vite@5.4.7)
-      vue: 3.5.8(typescript@5.6.2)
-    transitivePeerDependencies:
-      - '@types/node'
-      - rollup
-      - supports-color
-      - typescript
-      - vite
 
   import-lazy@4.0.0: {}
 
